@@ -4,19 +4,44 @@ A collection of custom commands for [Claude Code](https://claude.ai/code) to enh
 
 ## Installation
 
-1. Clone this repository to your home directory:
+### Quick Setup (Recommended)
+
+To add these commands to your existing `.claude` directory:
+
 ```bash
-cd ~
-git clone https://github.com/yourusername/claude-commands.git .claude
+# Navigate to your .claude directory (create it if it doesn't exist)
+mkdir -p ~/.claude
+cd ~/.claude
+
+# Download just the commands folder
+curl -L https://github.com/jynfairchild/.claude/archive/main.tar.gz | tar xz --strip=1 jynfairchild-.claude-main/commands
 ```
 
-2. If you already have a `.claude` directory, back it up first:
+### Alternative: Clone Method
+
+If you prefer using git:
+
 ```bash
-mv ~/.claude ~/.claude.backup
-git clone https://github.com/yourusername/claude-commands.git .claude
-# Copy any personal files back
-cp ~/.claude.backup/CLAUDE.md ~/.claude/ 2>/dev/null || true
+# Clone to a temporary directory
+cd ~
+git clone --depth=1 https://github.com/jynfairchild/.claude.git temp-claude
+
+# Copy just the commands folder to your .claude directory
+mkdir -p ~/.claude
+cp -r temp-claude/commands ~/.claude/
+
+# Clean up
+rm -rf temp-claude
 ```
+
+### Full Clone (If you don't have a .claude directory yet)
+
+```bash
+cd ~
+git clone https://github.com/jynfairchild/.claude.git .claude
+```
+
+**Note:** If you already have a `.claude` directory with personal files (CLAUDE.md, diary.md, etc.), use the Quick Setup or Alternative method to preserve your data.
 
 ## Available Commands
 
