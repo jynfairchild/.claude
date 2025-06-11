@@ -1,0 +1,30 @@
+# Private data - do not commit
+__store.db
+CLAUDE.md
+diary.md
+settings.json
+
+# Project-specific conversation logs
+projects/
+
+# Analytics and telemetry
+statsig/
+
+# Todo lists from sessions
+todos/
+
+# SSH configurations (if any)
+.ssh/
+
+# Any backup files
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep commands directory
+!commands/
+!commands/**
