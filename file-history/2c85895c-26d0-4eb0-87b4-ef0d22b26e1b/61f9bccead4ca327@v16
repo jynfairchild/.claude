@@ -1,0 +1,312 @@
+"use client";
+
+import React, { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "../../contexts/AuthContext";
+import { authApi, type InvitationValidation } from "../../services/authApi";
+import "./signup.css";
+
+const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
+
+function SignupForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { signup } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [agreedError, setAgreedError] = useState(false);
+
+  // Invitation state
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
+  const [invitation, setInvitation] = useState<InvitationValidation | null>(null);
+  const [inviteChecking, setInviteChecking] = useState(false);
+
+  // Check for invite token on mount
+  useEffect(() => {
+    const token = searchParams.get("invite");
+    if (token) {
+      setInviteToken(token);
+      setInviteChecking(true);
+      authApi.validateInvitation(token)
+        .then((inv) => {
+          setInvitation(inv);
+          setEmail(inv.email);
+        })
+        .catch((err) => {
+          setError(err.message || "Invalid or expired invitation");
+        })
+        .finally(() => {
+          setInviteChecking(false);
+        });
+    }
+  }, [searchParams]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    const nBlank = name.trim().length === 0;
+    const eBlank = email.trim().length === 0;
+    const pBlank = password.trim().length === 0;
+    const notAgreed = !agreed;
+    setNameError(nBlank);
+    setEmailError(eBlank);
+    setPasswordError(pBlank);
+    setAgreedError(notAgreed);
+    if (nBlank || eBlank || pBlank || notAgreed) return;
+
+    setLoading(true);
+    try {
+      await signup({ name, email, password, invite_token: inviteToken ?? undefined });
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Signup failed";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Show loading while checking invite
+  if (inviteChecking) {
+    return (
+      <div className="signup-page">
+        <div className="signup-layout">
+          <div className="signup-card">
+            <div className="signup-brand">
+              <div className="brand-top">
+                <Link href="/" className="brand-link" aria-label="Astrotask home">
+                  <span className="brand-wordmark">
+                    <span className="brand-wordmark-base">ASTRO</span>
+                    <span className="brand-wordmark-accent">TASK</span>
+                  </span>
+                </Link>
+                <span className="brand-version">{appVersion}</span>
+              </div>
+              <span className="brand-welcome">Welcome to the Alpha</span>
+            </div>
+            <h1 className="signup-title">Validating invitation...</h1>
+          </div>
+          <div className="signup-info-column">
+            <div className="signup-info">
+              <h2 className="signup-info-title">Alpha</h2>
+              <p className="signup-info-text">
+                The site is currently in alpha, be wary that things will change, things will break. I&apos;m going to try hard to keep database backups and do migrations, but I imagine one major database reset will happen, I&apos;m sorry ahead of time.
+                <br /><br />
+                If there is a pro tier with extra features, I will try to give you that for free, for life. I would love your feedback!
+              </p>
+            </div>
+            <div className="signup-info-grey">
+              <h2 className="signup-info-title">Zero Knowledge Encryption</h2>
+              <p className="signup-info-text">
+                Your password is used to encrypt your data. The backend will never see your:
+              </p>
+              <ul className="signup-info-list">
+                <li>column titles</li>
+                <li>task titles</li>
+                <li>task projects</li>
+                <li>task tags</li>
+              </ul>
+              <p className="signup-info-text">
+                If you forget your password, you will lose that information permanently. There&apos;s nothing I can do.
+                <br /><br />
+              </p>
+              <p className="signup-info-text signup-info-text--italic">
+                Generic duration information is <strong>not</strong> currently encrypted. The backend can also see aggregated data, like the total number of tasks created site wide (which is just a cool stat to see).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="signup-page">
+      <div className="signup-layout">
+        <form onSubmit={onSubmit} className={`signup-card ${loading ? 'signup-loading' : ''}`}>
+          <div className="signup-brand">
+            <div className="brand-top">
+              <Link href="/" className="brand-link" aria-label="Astrotask home">
+                <span className="brand-wordmark">
+                  <span className="brand-wordmark-base">ASTRO</span>
+                  <span className="brand-wordmark-accent">TASK</span>
+                </span>
+              </Link>
+              <span className="brand-version">{appVersion}</span>
+            </div>
+            <span className="brand-welcome">Welcome to the Alpha</span>
+          </div>
+          <h1 className="signup-title">Sign up</h1>
+
+          {invitation && (
+            <p className="signup-invite-notice">
+              You&apos;ve been invited to join. Please complete your registration.
+            </p>
+          )}
+
+          <div className={`signup-field${nameError ? ' error' : ''}`}>
+            <input
+              className="signup-input"
+              type="text"
+              value={name}
+              onChange={(e) => { setName(e.target.value); if (nameError && e.target.value.trim()) setNameError(false); }}
+              placeholder="Nickname"
+              autoComplete="name"
+            />
+          </div>
+
+          <div className={`signup-field${emailError ? ' error' : ''}`}>
+            <input
+              className="signup-input"
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); if (emailError && e.target.value.trim()) setEmailError(false); }}
+              placeholder="Email"
+              autoComplete="email"
+              readOnly={!!invitation}
+            />
+          </div>
+
+          <div className={`signup-field${passwordError ? ' error' : ''}`}>
+            <input
+              className="signup-input"
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); if (passwordError && e.target.value.trim()) setPasswordError(false); }}
+              placeholder="Password"
+              autoComplete="new-password"
+            />
+          </div>
+
+          <label className={`signup-agree${agreedError ? ' error' : ''}`}>
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => { setAgreed(e.target.checked); if (agreedError && e.target.checked) setAgreedError(false); }}
+              className="signup-checkbox-input"
+            />
+            <span className="signup-checkbox-icon">
+              <img
+                src={agreed ? "/icons/check_box_fill1_24px.svg" : "/icons/check_box_outline_blank_24px.svg"}
+                alt=""
+                aria-hidden="true"
+              />
+            </span>
+            <span className="signup-agree-text">
+              I agree to the <Link href="/terms" target="_blank" className="signup-agree-link">Terms of Service</Link> and <Link href="/privacy" target="_blank" className="signup-agree-link">Privacy Policy</Link>
+            </span>
+          </label>
+
+          {error && <p className="signup-error">{error}</p>}
+
+          <button
+            type="submit"
+            className="signup-cta"
+            disabled={loading || !name.trim() || !email.trim() || !password.trim() || !agreed}
+          >
+            <span className="signup-cta-text">{loading ? "Creating account..." : "Sign up"}</span>
+          </button>
+
+          <div className="signup-subrow">
+            <span className="signup-subtext">Already a member?</span>
+            <Link href="/login" className="signup-link">Log in</Link>
+          </div>
+        </form>
+        <div className="signup-info-column">
+          <div className="signup-info">
+            <h2 className="signup-info-title">Alpha</h2>
+            <p className="signup-info-text">
+              The site is currently in alpha, be wary that things will change, things will break. I&apos;m going to try hard to keep database backups and do migrations, but I imagine one major database reset will happen, I&apos;m sorry ahead of time.
+              <br /><br />
+              If there is a pro tier with extra features, I will try to give you that for free, for life. I would love your feedback!
+            </p>
+          </div>
+          <div className="signup-info-grey">
+            <h2 className="signup-info-title">Zero Knowledge Encryption</h2>
+            <p className="signup-info-text">
+              Your password is used to encrypt your data. The backend will never see your:
+            </p>
+            <ul className="signup-info-list">
+              <li>column titles</li>
+              <li>task titles</li>
+              <li>task projects</li>
+              <li>task tags</li>
+            </ul>
+            <p className="signup-info-text">
+              If you forget your password, you will lose that information permanently. There&apos;s nothing I can do.
+              <br /><br />
+            </p>
+            <p className="signup-info-text signup-info-text--italic">
+              Generic duration information is <strong>not</strong> currently encrypted. The backend can also see aggregated data, like the total number of tasks created site wide (which is just a cool stat to see).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="signup-page">
+        <div className="signup-layout">
+          <div className="signup-card">
+            <div className="signup-brand">
+              <div className="brand-top">
+                <Link href="/" className="brand-link" aria-label="Astrotask home">
+                  <span className="brand-wordmark">
+                    <span className="brand-wordmark-base">ASTRO</span>
+                    <span className="brand-wordmark-accent">TASK</span>
+                  </span>
+                </Link>
+                <span className="brand-version">{appVersion}</span>
+              </div>
+              <span className="brand-welcome">Welcome to the Alpha</span>
+            </div>
+            <h1 className="signup-title">Loading...</h1>
+          </div>
+          <div className="signup-info-column">
+            <div className="signup-info">
+              <h2 className="signup-info-title">Alpha</h2>
+              <p className="signup-info-text">
+                The site is currently in alpha, be wary that things will change, things will break. I&apos;m going to try hard to keep database backups and do migrations, but I imagine one major database reset will happen, I&apos;m sorry ahead of time.
+                <br /><br />
+                If there is a pro tier with extra features, I will try to give you that for free, for life. I would love your feedback!
+              </p>
+            </div>
+            <div className="signup-info-grey">
+              <h2 className="signup-info-title">Zero Knowledge Encryption</h2>
+              <p className="signup-info-text">
+                Your password is used to encrypt your data. The backend will never see your:
+              </p>
+              <ul className="signup-info-list">
+                <li>column titles</li>
+                <li>task titles</li>
+                <li>task projects</li>
+                <li>task tags</li>
+              </ul>
+              <p className="signup-info-text">
+                If you forget your password, you will lose that information permanently. There&apos;s nothing I can do.
+                <br /><br />
+              </p>
+              <p className="signup-info-text signup-info-text--italic">
+                Generic duration information is <strong>not</strong> currently encrypted. The backend can also see aggregated data, like the total number of tasks created site wide (which is just a cool stat to see).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
+  );
+}

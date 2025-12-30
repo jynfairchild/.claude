@@ -1,0 +1,39 @@
+## [v0.7.3 – Settings Page Redesign & Data Deletion UX]
+**Date:** 2025-12-23
+
+### Changes Made:
+- Restructured account page with left sidebar navigation (General, Password, Privacy & Data tabs)
+- Added header with ASTROTASK wordmark linking back to /dashboard
+- Centered nav and content layout with 120px top padding for better visual balance
+- Renamed /account route to /settings throughout the app (folder, CSS, component, header link)
+- Created secondary danger button style (white background, red stroke/text) for "Delete all my data"
+- Added hard page refresh after data deletion to clear cached frontend state and prevent "ghost" data
+- Fixed Firefox autofill brown highlight on password inputs in delete modals
+
+### Files Created:
+- None
+
+### Files Modified:
+- `frontend/src/app/account/` → `frontend/src/app/settings/` - Renamed folder
+- `frontend/src/app/settings/page.tsx` - Restructured with sidebar nav, tabs, renamed component
+- `frontend/src/app/settings/settings.css` - New layout styles (header, nav, content), autofill fixes
+- `frontend/src/components/header/Header.tsx` - Changed "Account" to "Settings" with /settings link
+- `frontend/src/components/modal/DeleteDataModal.css` - Added autofill normalization for Firefox
+- `frontend/src/components/modal/DeleteAccountModal.css` - Added autofill normalization for Firefox
+
+### Current Status:
+All features working. Settings page has clean sidebar navigation with three sections. Data deletion triggers hard refresh to clear stale cached data. Firefox autofill styling fixed across modal password inputs.
+
+### Unresolved Issues:
+- None
+
+### Commit Message:
+Redesign settings page with sidebar navigation and improve data deletion UX
+
+- Restructure account page with left sidebar nav (General, Password, Privacy & Data tabs)
+- Add ASTROTASK wordmark header linking to /dashboard
+- Center layout with 120px top padding for better visual balance
+- Rename /account route to /settings throughout the app
+- Add secondary danger button style for "Delete all my data" (white bg, red stroke)
+- Hard refresh page after data deletion to clear cached frontend state
+- Fix Firefox autofill brown highlight on modal password inputs

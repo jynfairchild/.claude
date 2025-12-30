@@ -1,0 +1,76 @@
+'use client';
+
+import React, { useState } from 'react';
+import Modal from '@/components/modal/Modal';
+import './DeleteDataModal.css';
+
+interface DeleteDataModalProps {
+  isOpen: boolean;
+  onCancel: () => void;
+  onConfirm: (password: string) => Promise<void>;
+}
+
+export function DeleteDataModal({ isOpen, onCancel, onConfirm }: DeleteDataModalProps) {
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password.trim()) {
+      setError('Password is required');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      await onConfirm(password);
+      setPassword('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setPassword('');
+    setError('');
+    onCancel();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleCancel}>
+      <form className="delete-data-modal" onSubmit={handleSubmit}>
+        <h3 className="delete-data-title">Delete all your data?</h3>
+        <p className="delete-data-message">
+          This will permanently delete all your tasks, projects, columns, and time entries.
+          Your account will remain active so you can log in again.
+        </p>
+        <p className="delete-data-warning">
+          This action cannot be undone.
+        </p>
+        <div className={`delete-data-field${error ? ' error' : ''}`}>
+          <input
+            type="password"
+            className="delete-data-input"
+            placeholder="Enter your password to confirm"
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); if (error) setError(''); }}
+            disabled={loading}
+            autoFocus
+          />
+        </div>
+        {error && <p className="delete-data-error">{error}</p>}
+        <div className="delete-data-actions">
+          <button type="button" className="btn-cancel" onClick={handleCancel} disabled={loading}>
+            Cancel
+          </button>
+          <button type="submit" className="btn-danger" disabled={loading || !password.trim()}>
+            {loading ? 'Deleting...' : 'Delete all data'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}

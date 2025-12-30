@@ -1,0 +1,21 @@
+'use client';
+
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import './LegalHeader.css';
+
+export function LegalHeader() {
+  const { user } = useAuth();
+  const destination = user ? '/dashboard' : '/login';
+
+  return (
+    <header className="legal-header">
+      <Link href={destination} className="legal-brand" aria-label="Go back">
+        <span className="legal-brand-wordmark">
+          <span className="legal-brand-base">ASTRO</span>
+          <span className="legal-brand-accent">TASK</span>
+        </span>
+      </Link>
+    </header>
+  );
+}

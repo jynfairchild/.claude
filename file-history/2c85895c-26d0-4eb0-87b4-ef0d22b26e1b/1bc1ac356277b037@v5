@@ -1,0 +1,47 @@
+# Add Ephemeral Timer to Login Page Display Card
+
+## Summary
+Add a working timer to the display-card-expanded on the login page. The timer is purely cosmetic - it starts at 0 on page load, counts up, and is forgotten when the user navigates away. No data is persisted or sent anywhere.
+
+## Requirements
+- Timer starts at 0 seconds on page load
+- Session 2 displays the current timer value
+- Total displays Session 1 (2:00) + current timer
+- Main timer display shows the total time
+- Timer is ephemeral (no persistence, no backend calls)
+
+## File to Modify
+- `frontend/src/app/login/page.tsx`
+
+## Implementation
+
+### 1. Add timer state
+```tsx
+const [sessionSeconds, setSessionSeconds] = useState(0);
+```
+
+### 2. Add useEffect for interval
+```tsx
+useEffect(() => {
+  const interval = setInterval(() => {
+    setSessionSeconds(prev => prev + 1);
+  }, 1000);
+  return () => clearInterval(interval);
+}, []);
+```
+
+### 3. Add format helper function
+```tsx
+const formatTime = (seconds: number) => {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+```
+
+### 4. Update display values
+- Session 1: `00:02:00` (static, already set)
+- Session 2: `{formatTime(sessionSeconds)}`
+- Total: `{formatTime(120 + sessionSeconds)}` (120 = 2 minutes in seconds)
+- Main timer: `{formatTime(120 + sessionSeconds)}`

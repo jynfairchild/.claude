@@ -1,0 +1,228 @@
+# Plan: GDPR Data Deletion (Keep Account)
+
+## Feature Overview
+Allow users to delete all their data while keeping their account active for future login.
+
+## User Requirements
+- Password confirmation required
+- Stay logged in after deletion (show success message)
+- Reset actionbar preferences to empty
+
+## Data to Delete
+
+| Table | Field | Cascade? |
+|-------|-------|----------|
+| tasks | user_id | Sessions auto-cascade |
+| sessions | (via tasks) | Auto |
+| projects | user_id | Yes |
+| user_columns | user_id | Yes |
+| refresh_tokens | user_id | Manual |
+| password_reset_tokens | user_id | Manual |
+| email_verification_tokens | user_id | Manual |
+| invitations | invited_by_id | Manual |
+
+**User record updates:** Reset `actionbar` to empty array, `last_login_at` to null
+
+---
+
+## Backend Implementation
+
+### 1. New Handler Method
+**File:** `backend/internal/handlers/auth.go`
+
+Add `DeleteUserData` method to AuthHandler:
+
+```go
+// DELETE /auth/data - Delete all user data but keep account
+func (h *AuthHandler) DeleteUserData(c *gin.Context) {
+    userID := c.GetUint("userID")
+    if userID == 0 {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+
+    var req struct {
+        Password string `json:"password" binding:"required"`
+    }
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Password required"})
+        return
+    }
+
+    // Verify password
+    var user models.User
+    if err := h.db.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+        return
+    }
+    if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
+        return
+    }
+
+    // Transaction: delete all user data
+    if err := h.db.Transaction(func(tx *gorm.DB) error {
+        // 1. Delete tokens (no cascade)
+        if err := tx.Where("user_id = ?", userID).Delete(&models.RefreshToken{}).Error; err != nil {
+            return err
+        }
+        if err := tx.Where("user_id = ?", userID).Delete(&models.PasswordResetToken{}).Error; err != nil {
+            return err
+        }
+        if err := tx.Where("user_id = ?", userID).Delete(&models.EmailVerificationToken{}).Error; err != nil {
+            return err
+        }
+
+        // 2. Delete invitations created by user
+        if err := tx.Where("invited_by_id = ?", userID).Delete(&models.Invitation{}).Error; err != nil {
+            return err
+        }
+
+        // 3. Delete tasks (sessions cascade automatically)
+        if err := tx.Unscoped().Where("user_id = ?", userID).Delete(&models.Task{}).Error; err != nil {
+            return err
+        }
+
+        // 4. Delete projects
+        if err := tx.Unscoped().Where("user_id = ?", userID).Delete(&models.Project{}).Error; err != nil {
+            return err
+        }
+
+        // 5. Delete user columns
+        if err := tx.Where("user_id = ?", userID).Delete(&models.UserColumn{}).Error; err != nil {
+            return err
+        }
+
+        // 6. Reset user preferences
+        if err := tx.Model(&models.User{}).Where("id = ?", userID).
+            Updates(map[string]interface{}{
+                "actionbar":     pq.StringArray{},
+                "last_login_at": nil,
+            }).Error; err != nil {
+            return err
+        }
+
+        return nil
+    }); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user data"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "All user data deleted successfully"})
+}
+```
+
+### 2. Register Route
+**File:** `backend/cmd/server/main.go`
+
+Add route in protected group:
+```go
+protected.DELETE("/auth/data", authHandler.DeleteUserData)
+```
+
+---
+
+## Frontend Implementation
+
+### 1. API Method
+**File:** `frontend/src/services/authApi.ts`
+
+Add method:
+```typescript
+async deleteUserData(password: string): Promise<{ message: string }> {
+  const res = await fetch(`${BASE_URL}/auth/data`, {
+    method: 'DELETE',
+    headers: mutationHeaders(),
+    credentials: 'include',
+    body: JSON.stringify({ password }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete user data');
+  }
+  return res.json();
+}
+```
+
+### 2. Confirmation Modal
+**File:** `frontend/src/components/modal/DeleteDataModal.tsx` (NEW)
+
+Create modal similar to DeleteColumnModal but with password input:
+- Title: "Delete all your data?"
+- Warning message about what will be deleted
+- Password input field
+- Cancel and Delete buttons
+- Error state for invalid password
+
+### 3. Account Page Update
+**File:** `frontend/src/app/account/page.tsx`
+
+Add new section below "Change Password":
+
+```tsx
+{/* Delete Data Section */}
+<section className="account-section">
+  <h2 className="account-section-title">Delete your data</h2>
+  <p className="account-section-desc">
+    This will delete all your tasks, columns, and projects but keep your account
+    so you can log in again. To delete everything including your account, see below.
+  </p>
+  <button
+    className="account-danger"
+    onClick={() => setShowDeleteDataModal(true)}
+  >
+    Delete all my data
+  </button>
+</section>
+```
+
+Add state and modal integration:
+```tsx
+const [showDeleteDataModal, setShowDeleteDataModal] = useState(false);
+const [deleteDataSuccess, setDeleteDataSuccess] = useState(false);
+
+const handleDeleteData = async (password: string) => {
+  await authApi.deleteUserData(password);
+  setDeleteDataSuccess(true);
+  setShowDeleteDataModal(false);
+};
+```
+
+### 4. Styling Updates
+**File:** `frontend/src/app/account/account.css`
+
+Add description text styling:
+```css
+.account-section-desc {
+  font-size: 14px;
+  color: var(--kkan-grey-500);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+```
+
+---
+
+## Files to Create
+- `frontend/src/components/modal/DeleteDataModal.tsx`
+- `frontend/src/components/modal/DeleteDataModal.css`
+
+## Files to Modify
+- `backend/internal/handlers/auth.go` - Add DeleteUserData handler
+- `backend/cmd/server/main.go` - Add DELETE /auth/data route
+- `frontend/src/services/authApi.ts` - Add deleteUserData method
+- `frontend/src/app/account/page.tsx` - Add delete data section and modal
+- `frontend/src/app/account/account.css` - Add description styling
+
+---
+
+## Testing Checklist
+- [ ] Password validation rejects incorrect password
+- [ ] All user tasks/sessions deleted
+- [ ] All user projects deleted
+- [ ] All user columns deleted
+- [ ] Refresh tokens deleted
+- [ ] Actionbar reset to empty
+- [ ] User stays logged in after deletion
+- [ ] Success message displayed
+- [ ] User can create new tasks after deletion

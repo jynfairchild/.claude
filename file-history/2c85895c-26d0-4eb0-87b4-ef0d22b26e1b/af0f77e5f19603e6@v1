@@ -1,0 +1,38 @@
+.dashboard-container {
+  min-height: 100vh;
+  background-color: transparent; /* use page background */
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.dashboard-container--centered {
+  justify-content: center;
+}
+
+.dashboard-kanban-wrapper {
+  /* Allow content to define height while ensuring at least viewport height */
+  position: static;
+  width: 100%;
+  min-height: 100vh;
+  background-color: transparent; /* use page background */
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-kanban-body {
+  flex: 1;
+  display: flex;
+  min-height: 0; /* allow children to manage overflow */
+  padding-bottom: 16px; /* breathing room at bottom of viewport */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,221 @@
+import React from 'react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, act, fireEvent } from '@testing-library/react';
+import { useTaskTimer } from './useTaskTimer';
+import { TimerWorkerContext } from '@/contexts/TimerWorkerContext';
+import type { Task } from '@/services/api';
+
+function ProviderProbe({ activeTask, updateTaskTimer }: { activeTask: Task; updateTaskTimer: (d: number, s: number) => Promise<void> }) {
+  const [sec, setSec] = React.useState(0);
+  const value = React.useMemo(() => ({
+    seconds: sec,
+    isRunning: true,
+    start: () => {},
+    stop: () => {},
+    reset: () => {},
+    startTime: Date.now() - sec * 1000,
+    workerRef: { current: null } as any,
+  }), [sec]);
+
+  const Inner = () => {
+    const { liveSeconds, sessionSeconds } = useTaskTimer({ activeTask, updateTaskTimer });
+    return (
+      <div>
+        <div data-testid="live">{liveSeconds}</div>
+        <div data-testid="session">{sessionSeconds}</div>
+        <button onClick={() => setSec((s) => s + 1)}>tick</button>
+      </div>
+    );
+  };
+
+  return (
+    <TimerWorkerContext.Provider value={value}>
+      <Inner />
+    </TimerWorkerContext.Provider>
+  );
+}
+
+describe('useTaskTimer periodic syncs and lifecycle', () => {
+  const origNow = Date.now;
+  beforeEach(() => {
+    vi.spyOn(Date, 'now').mockReturnValue(1_000_000_000_000); // fixed time
+  });
+  afterEach(() => {
+    (Date.now as any) = origNow;
+    vi.restoreAllMocks();
+  });
+
+  it('fires 5s periodic sync via updateTaskTimer with derived totals', async () => {
+    const updateTaskTimer = vi.fn().mockResolvedValue(undefined);
+    const activeTask: Task = {
+      id: 10,
+      user_id: 1,
+      title: 'A',
+      project: '',
+      start_time: new Date().toISOString(),
+      end_time: null,
+      duration: 120, // base from completed
+      session_duration: 0,
+      session_count: 1,
+      tags: [],
+      column_index: 1,
+      status: 'uncompleted',
+      position: 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    render(<ProviderProbe activeTask={activeTask} updateTaskTimer={updateTaskTimer} />);
+
+    // advance seconds to 30 to hit our 30s sync boundary (base 120 + 30 = 150)
+    const tick = () => screen.getByRole('button', { name: /tick/i }).click();
+    for (let i = 0; i < 30; i++) {
+      await act(async () => { tick(); });
+    }
+
+    // Ensure we observed a sync for the 5s boundary with derived totals
+    const calls = updateTaskTimer.mock.calls as Array<[number, number]>;
+    expect(calls.length).toBeGreaterThan(0);
+    const hit = calls.some(([total, session]) => total === 150 && session === 30);
+    expect(hit).toBe(true);
+  });
+
+  it('on visibility hidden, triggers a sync using derived totals', async () => {
+    const updateTaskTimer = vi.fn().mockResolvedValue(undefined);
+    // NOTE: duration now INCLUDES session_duration (duration = completed + session)
+    const activeTask: Task = {
+      id: 11,
+      user_id: 1,
+      title: 'B',
+      project: '',
+      start_time: new Date().toISOString(),
+      end_time: null,
+      duration: 13, // total (10 completed + 3 current session)
+      session_duration: 3, // current session portion of the 13
+      session_count: 1,
+      tags: [],
+      column_index: 1,
+      status: 'uncompleted',
+      position: 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Provide a no-op timer context to avoid worker creation
+    const Ctx: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <TimerWorkerContext.Provider value={{ seconds: 0, isRunning: false, start: () => {}, stop: () => {}, reset: () => {}, startTime: null, workerRef: { current: null } as any }}>
+        {children}
+      </TimerWorkerContext.Provider>
+    );
+
+    const Wrapper = () => {
+      const _ = useTaskTimer({ activeTask, updateTaskTimer });
+      return <div />;
+    };
+
+    render(<Ctx><Wrapper /></Ctx>);
+
+    // Mock document.hidden to true and dispatch event
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    // cleanup override
+    // @ts-ignore
+    delete document.hidden;
+
+    expect(updateTaskTimer).toHaveBeenCalledTimes(1);
+    const [total, session] = updateTaskTimer.mock.calls[0];
+    expect(session).toBe(3);
+    expect(total).toBe(13); // base (10) + elapsed (3) = 13
+  });
+
+  it('on beforeunload, sends a fetch keepalive with Authorization if token exists', async () => {
+    // Arrange fetch spy
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValue({ ok: true, json: async () => ({}), statusText: 'OK' } as any);
+    localStorage.setItem('kk_access_token', 'tok');
+
+    const activeTask: Task = {
+      id: 77,
+      user_id: 1,
+      title: 'C',
+      project: '',
+      start_time: new Date().toISOString(),
+      end_time: null,
+      duration: 40,
+      session_duration: 2,
+      session_count: 1,
+      tags: [],
+      column_index: 1,
+      status: 'uncompleted',
+      position: 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const updateTaskTimer = vi.fn().mockResolvedValue(undefined);
+
+    const Ctx: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <TimerWorkerContext.Provider value={{ seconds: 0, isRunning: false, start: () => {}, stop: () => {}, reset: () => {}, startTime: null, workerRef: { current: null } as any }}>
+        {children}
+      </TimerWorkerContext.Provider>
+    );
+
+    const Wrapper = () => {
+      useTaskTimer({ activeTask, updateTaskTimer });
+      return <div />;
+    };
+
+    render(<Ctx><Wrapper /></Ctx>);
+
+    await act(async () => { window.dispatchEvent(new Event('beforeunload')); });
+
+    expect(fetchSpy).toHaveBeenCalled();
+    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    expect(url).toMatch(/\/tasks\/77$/);
+    const headers = (init?.headers ?? {}) as Record<string, string>;
+    expect(headers['Authorization']).toBe('Bearer tok');
+    expect((init as any).keepalive).toBe(true);
+  });
+
+  it('on beforeunload while inactive, does not attempt fetch', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValue({ ok: true, json: async () => ({}), statusText: 'OK' } as any);
+
+    const inactiveTask: Task = {
+      id: 88,
+      user_id: 1,
+      title: 'Z',
+      project: '',
+      start_time: new Date().toISOString(),
+      end_time: null,
+      duration: 99,
+      session_duration: 0,
+      session_count: 1,
+      tags: [],
+      column_index: 0,
+      status: 'uncompleted',
+      position: 0,
+      is_active: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const updateTaskTimer = vi.fn().mockResolvedValue(undefined);
+
+    const Ctx: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <TimerWorkerContext.Provider value={{ seconds: 0, isRunning: false, start: () => {}, stop: () => {}, reset: () => {}, startTime: null, workerRef: { current: null } as any }}>
+        {children}
+      </TimerWorkerContext.Provider>
+    );
+
+    const Wrapper = () => {
+      useTaskTimer({ activeTask: inactiveTask, updateTaskTimer });
+      return <div />;
+    };
+
+    render(<Ctx><Wrapper /></Ctx>);
+    await act(async () => { window.dispatchEvent(new Event('beforeunload')); });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+});

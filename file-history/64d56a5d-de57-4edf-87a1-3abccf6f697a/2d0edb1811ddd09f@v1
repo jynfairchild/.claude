@@ -1,0 +1,83 @@
+import React from 'react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, act } from '@testing-library/react';
+import { useTaskTimer } from './useTaskTimer';
+import { TimerWorkerContext } from '@/contexts/TimerWorkerContext';
+import type { Task } from '@/services/api';
+
+describe('useTaskTimer worker failure -> fallback timer', () => {
+  const realNow = Date.now;
+  const realWorker: any = (global as any).Worker;
+  beforeEach(() => {
+    vi.useFakeTimers();
+    let now = 1_000_000_000_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+    // Make Date.now adjustable by tests
+    (global as any).__advanceNow = (ms: number) => { now += ms; };
+    // Remove Worker to force the fallback path
+    (global as any).Worker = undefined;
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    (Date.now as any) = realNow;
+    (global as any).Worker = realWorker;
+    // cleanup helper
+    delete (global as any).__advanceNow;
+  });
+
+  function Wrapper({ activeTask }: { activeTask: Task }) {
+    const _ = useTaskTimer({ activeTask, updateTaskTimer: async () => {} });
+    return (
+      <div>
+        <div data-testid="live">{_.liveSeconds}</div>
+        <div data-testid="session">{_.sessionSeconds}</div>
+      </div>
+    );
+  }
+
+  it('increments via setInterval when Worker is unavailable', async () => {
+    const now = 1_000_000_000_000; // matches the mocked Date.now
+    const activeTask: Task = {
+      id: 5,
+      user_id: 1,
+      title: 'Fallback',
+      project: '',
+      start_time: new Date().toISOString(),
+      end_time: null,
+      duration: 10, // ignored - calculated from sessions
+      session_duration: 0,
+      session_count: 2,
+      tags: [],
+      column_index: 1,
+      status: 'uncompleted',
+      position: 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      sessions: [
+        // Completed session: 10 seconds
+        { id: 1, task_id: 5, start_time: new Date(now - 15000).toISOString(), end_time: new Date(now - 5000).toISOString(), duration: 10, session_num: 1, created_at: '', updated_at: '' },
+        // Active session: just started
+        { id: 2, task_id: 5, start_time: new Date(now).toISOString(), end_time: null, duration: 0, session_num: 2, created_at: '', updated_at: '' },
+      ],
+    };
+
+    // Provide a non-running context so hook attempts to create a worker (which fails) and uses fallback
+    const Ctx: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <TimerWorkerContext.Provider value={{ seconds: 0, isRunning: false, start: () => {}, stop: () => {}, reset: () => {}, startTime: null, workerRef: { current: null } as any }}>
+        {children}
+      </TimerWorkerContext.Provider>
+    );
+
+    render(<Ctx><Wrapper activeTask={activeTask} /></Ctx>);
+
+    // Advance time by 3 seconds
+    (global as any).__advanceNow(3000);
+    await act(async () => { vi.advanceTimersByTime(3000); });
+
+    // Expect session to be 3 and total to be completed (10) + 3
+    expect(screen.getByTestId('session').textContent).toBe('3');
+    expect(screen.getByTestId('live').textContent).toBe('13');
+  });
+});
+

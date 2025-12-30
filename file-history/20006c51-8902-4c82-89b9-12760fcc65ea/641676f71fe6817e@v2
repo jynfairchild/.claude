@@ -1,0 +1,207 @@
+"use client";
+
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import {
+  deriveKey,
+  encrypt as cryptoEncrypt,
+  decrypt as cryptoDecrypt,
+  encryptArray as cryptoEncryptArray,
+  decryptArray as cryptoDecryptArray,
+  base64ToBytes,
+  bytesToBase64,
+  generateSalt,
+  isCryptoAvailable,
+} from "../utils/crypto";
+
+const SESSION_KEY_STORAGE = "encryption_key_data";
+
+type EncryptionState = {
+  // Whether encryption key is available (user is logged in with key derived)
+  isReady: boolean;
+
+  // Encrypt a string (returns base64 ciphertext)
+  encrypt: (plaintext: string) => Promise<string>;
+
+  // Decrypt a string (returns plaintext)
+  decrypt: (ciphertext: string) => Promise<string>;
+
+  // Encrypt array of strings (for tags)
+  encryptArray: (items: string[]) => Promise<string>;
+
+  // Decrypt array of strings
+  decryptArray: (ciphertext: string) => Promise<string[]>;
+
+  // Initialize encryption with password and salt (called on login)
+  initializeKey: (password: string, saltBase64: string) => Promise<void>;
+
+  // Generate a new salt (called on signup)
+  generateNewSalt: () => string;
+
+  // Clear the key (called on logout)
+  clearKey: () => void;
+
+  // Re-derive key with new password (for password change)
+  rederiveKey: (newPassword: string, newSaltBase64: string) => Promise<void>;
+};
+
+const EncryptionContext = createContext<EncryptionState | undefined>(undefined);
+
+// Export a CryptoKey to raw bytes, return as base64
+async function exportKey(key: CryptoKey): Promise<string> {
+  const raw = await crypto.subtle.exportKey("raw", key);
+  return bytesToBase64(new Uint8Array(raw));
+}
+
+// Import raw bytes back to a CryptoKey
+async function importKey(keyBase64: string): Promise<CryptoKey> {
+  const raw = base64ToBytes(keyBase64);
+  return crypto.subtle.importKey(
+    "raw",
+    raw,
+    { name: "AES-GCM", length: 256 },
+    true, // extractable (needed to re-export on password change)
+    ["encrypt", "decrypt"]
+  );
+}
+
+export function EncryptionProvider({ children }: { children: React.ReactNode }) {
+  // Store the derived key in state (memory only, never persisted)
+  const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Check if key is ready
+  const isReady = useMemo(() => encryptionKey !== null, [encryptionKey]);
+
+  // Restore key from sessionStorage on mount
+  useEffect(() => {
+    const restoreKey = async () => {
+      if (typeof window === "undefined") return;
+
+      try {
+        const stored = sessionStorage.getItem(SESSION_KEY_STORAGE);
+        if (stored && isCryptoAvailable()) {
+          const key = await importKey(stored);
+          setEncryptionKey(key);
+        }
+      } catch (err) {
+        // Failed to restore - user will need to re-login
+        console.warn("Failed to restore encryption key:", err);
+        sessionStorage.removeItem(SESSION_KEY_STORAGE);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    restoreKey();
+  }, []);
+
+  // Initialize the encryption key from password + salt
+  const initializeKey = useCallback(async (password: string, saltBase64: string) => {
+    if (!isCryptoAvailable()) {
+      throw new Error("Web Crypto API not available");
+    }
+
+    const salt = base64ToBytes(saltBase64);
+    const key = await deriveKey(password, salt);
+    setEncryptionKey(key);
+
+    // Persist key to sessionStorage for page refresh survival
+    try {
+      const exported = await exportKey(key);
+      sessionStorage.setItem(SESSION_KEY_STORAGE, exported);
+    } catch (err) {
+      console.warn("Failed to persist encryption key:", err);
+    }
+  }, []);
+
+  // Generate new salt (for signup)
+  const generateNewSalt = useCallback((): string => {
+    return bytesToBase64(generateSalt());
+  }, []);
+
+  // Clear the key (logout)
+  const clearKey = useCallback(() => {
+    setEncryptionKey(null);
+    sessionStorage.removeItem(SESSION_KEY_STORAGE);
+  }, []);
+
+  // Re-derive with new password (password change)
+  const rederiveKey = useCallback(async (newPassword: string, newSaltBase64: string) => {
+    if (!isCryptoAvailable()) {
+      throw new Error("Web Crypto API not available");
+    }
+
+    const salt = base64ToBytes(newSaltBase64);
+    const key = await deriveKey(newPassword, salt);
+    setEncryptionKey(key);
+
+    // Persist new key to sessionStorage
+    try {
+      const exported = await exportKey(key);
+      sessionStorage.setItem(SESSION_KEY_STORAGE, exported);
+    } catch (err) {
+      console.warn("Failed to persist new encryption key:", err);
+    }
+  }, []);
+
+  // Encrypt function
+  const encrypt = useCallback(async (plaintext: string): Promise<string> => {
+    if (!encryptionKey) {
+      throw new Error("Encryption key not initialized");
+    }
+    return cryptoEncrypt(plaintext, encryptionKey);
+  }, [encryptionKey]);
+
+  // Decrypt function
+  const decrypt = useCallback(async (ciphertext: string): Promise<string> => {
+    if (!encryptionKey) {
+      throw new Error("Encryption key not initialized");
+    }
+    return cryptoDecrypt(ciphertext, encryptionKey);
+  }, [encryptionKey]);
+
+  // Encrypt array
+  const encryptArray = useCallback(async (items: string[]): Promise<string> => {
+    if (!encryptionKey) {
+      throw new Error("Encryption key not initialized");
+    }
+    return cryptoEncryptArray(items, encryptionKey);
+  }, [encryptionKey]);
+
+  // Decrypt array
+  const decryptArray = useCallback(async (ciphertext: string): Promise<string[]> => {
+    if (!encryptionKey) {
+      throw new Error("Encryption key not initialized");
+    }
+    return cryptoDecryptArray(ciphertext, encryptionKey);
+  }, [encryptionKey]);
+
+  const value = useMemo(
+    () => ({
+      isReady,
+      encrypt,
+      decrypt,
+      encryptArray,
+      decryptArray,
+      initializeKey,
+      generateNewSalt,
+      clearKey,
+      rederiveKey,
+    }),
+    [isReady, encrypt, decrypt, encryptArray, decryptArray, initializeKey, generateNewSalt, clearKey, rederiveKey]
+  );
+
+  return (
+    <EncryptionContext.Provider value={value}>
+      {children}
+    </EncryptionContext.Provider>
+  );
+}
+
+export function useEncryption() {
+  const ctx = useContext(EncryptionContext);
+  if (!ctx) {
+    throw new Error("useEncryption must be used within EncryptionProvider");
+  }
+  return ctx;
+}

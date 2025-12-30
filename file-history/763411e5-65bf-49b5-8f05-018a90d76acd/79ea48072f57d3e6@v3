@@ -1,0 +1,62 @@
+## v0.6.8 – Private Alpha Deployment Preparation
+
+**Date:** 2025-12-20 22:30 PST
+
+### Changes Made:
+- Migrated authentication from localStorage tokens to HttpOnly cookie-based auth
+- Added CSRF protection with X-CSRF-Token header validation for state-changing requests
+- Created CSRF middleware at backend/internal/middleware/csrf.go
+- Updated auth middleware to read tokens from cookies first, fallback to Bearer header
+- Enforced JWT_SECRET requirement in production (server fails fast if not set)
+- Removed all localStorage token storage from frontend AuthContext
+- Added `credentials: 'include'` to all frontend API calls for cookie transmission
+- Created Invitation model for magic link invite system
+- Added invitation token functions (create, validate, consume) in auth/tokens.go
+- Created invitation handlers with admin-only routes for creating/managing invites
+- Added public invitation validation endpoint GET /auth/invitation/:token
+- Updated signup to accept optional invite_token parameter
+- Invited users get auto-verified email (skip email verification flow)
+- Added REQUIRE_INVITE env var for invite-only signup mode
+- Created admin middleware for role-based access control
+- Updated frontend signup page to handle ?invite=xxx query parameter
+- Pre-fill and lock email field when signing up via invitation
+- Created backend Dockerfile (multi-stage Alpine build)
+- Created frontend Dockerfile (multi-stage with standalone output)
+- Added output: 'standalone' to next.config.ts for Docker deployment
+- Created docker-compose.yml for local testing with PostgreSQL
+- Created .dockerignore files for both frontend and backend
+- Fixed TypeScript errors from auth migration (accessToken -> isAuthenticated)
+- Excluded test files from production TypeScript build
+- Fixed backend auth tests to use DEV_RETURN_TOKENS=true for token verification
+- Fixed http.ts to use globalRefresh() for single-flight refresh deduplication
+- Updated frontend tests to verify credentials: 'include' instead of Authorization headers
+- Removed proactive token refresh tests (not applicable with HttpOnly cookies)
+- Rewrote AuthContext refresh tests for cookie-based auth behavior
+
+### Current Status:
+- Backend builds and all existing tests pass
+- Frontend builds successfully with standalone output
+- Cookie-based auth fully implemented (replaces localStorage)
+- Magic link invitation system complete (backend + frontend)
+- Docker configuration ready for local testing and AWS deployment
+- CSRF protection active for all POST/PATCH/DELETE requests
+
+### Unresolved Issues:
+- Full auth flow not yet tested end-to-end with Docker
+- AWS infrastructure not yet provisioned
+- No admin user seeding script (first admin must be manually promoted in DB)
+
+### Commit Message:
+Add cookie-based auth, magic link invites, and Docker deployment configuration
+
+- Migrate from localStorage tokens to HttpOnly cookie-based authentication
+- Add CSRF middleware with X-CSRF-Token header validation
+- Create Invitation model and handlers for magic link invite system
+- Add admin middleware and routes for invitation management
+- Update signup to accept invite_token with auto-email-verification
+- Add REQUIRE_INVITE env var for invite-only signup mode
+- Create multi-stage Dockerfiles for backend (Go/Alpine) and frontend (Node/standalone)
+- Add docker-compose.yml with PostgreSQL for local testing
+- Enforce JWT_SECRET in production environment
+- Fix frontend TypeScript errors from auth state migration
+- Fix backend and frontend tests for cookie-based auth

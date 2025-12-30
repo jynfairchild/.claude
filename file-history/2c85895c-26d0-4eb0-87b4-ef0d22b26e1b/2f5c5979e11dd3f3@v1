@@ -1,0 +1,233 @@
+# Astrotask
+
+A personal productivity tracking application with time tracking, kanban boards, and task management. Built with a Go backend and Next.js frontend.
+
+## Quick Start (Local Development)
+
+### Prerequisites
+
+- Docker & Docker Compose
+- Go 1.23+ (for running backend directly)
+- Node.js 18+ (for running frontend directly)
+
+### Option 1: Docker (Recommended)
+
+The fastest way to get everything running:
+
+```bash
+# Clone the repo
+git clone https://github.com/yourusername/astrotask.git
+cd astrotask
+
+# Copy environment file
+cp .env.local .env
+
+# Start all services (postgres, backend, frontend)
+docker-compose up --build
+
+# Or run in background
+docker-compose up --build -d
+```
+
+The app will be available at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api/v1
+- **PostgreSQL**: localhost:5432
+
+### Option 2: Hybrid (Postgres in Docker, services locally)
+
+Better for development - no rebuild needed when you change code:
+
+```bash
+# Start only postgres
+docker-compose up postgres -d
+
+# Terminal 1: Run backend
+cd backend
+go run cmd/server/main.go
+
+# Terminal 2: Run frontend
+cd frontend
+npm install
+npm run dev
+```
+
+## Environment Setup
+
+### Root `.env` (for Docker Compose)
+
+```bash
+# Database
+POSTGRES_PASSWORD=localdev
+
+# Auth
+JWT_SECRET=local-dev-secret-key-not-for-production
+
+# Email (limited test key - only works with specific test emails)
+RESEND_API_KEY=re_gL1cV4zC_CCaV8aMM2ENvuKJcyXBJ17Vk
+EMAIL_FROM=noreply@astrotask.io
+
+# Admin bootstrap (first user with this email becomes admin)
+ADMIN_EMAIL=jyn@astrotask.io
+```
+
+### Backend `.env` (for running Go directly)
+
+Located at `backend/.env`:
+
+```bash
+DATABASE_URL=postgresql://postgres:localdev@localhost:5432/astrotask_db?sslmode=disable
+JWT_SECRET=local-dev-secret-key-not-for-production
+POSTGRES_PASSWORD=localdev
+
+RESEND_API_KEY=re_gL1cV4zC_CCaV8aMM2ENvuKJcyXBJ17Vk
+EMAIL_FROM=noreply@astrotask.io
+
+ADMIN_EMAIL=jyn@astrotask.io
+REQUIRE_INVITE=true
+```
+
+### Default Credentials
+
+| Service    | Value                                    |
+|------------|------------------------------------------|
+| Postgres Password | `localdev`                        |
+| JWT Secret | `local-dev-secret-key-not-for-production` |
+| Admin Email | `jyn@astrotask.io`                      |
+
+## Authentication System
+
+Astrotask uses an **invite-only** signup system:
+
+1. The first user to sign up with the `ADMIN_EMAIL` becomes an admin
+2. Admins can create invite links for new users
+3. New users need an invite link to sign up
+
+### Getting Your First Invite
+
+When the backend starts, it creates an admin invite and prints it to the console:
+
+```
+═══════════════════════════════════════════════════════
+  ADMIN INVITE CREATED
+  Email: jyn@astrotask.io
+  URL: http://localhost:3000/signup?invite=abc123...
+═══════════════════════════════════════════════════════
+```
+
+Use this URL to create your admin account.
+
+## Project Structure
+
+```
+astrotask/
+├── backend/              # Go API server
+│   ├── cmd/server/       # Application entrypoint
+│   ├── internal/
+│   │   ├── database/     # DB connection, migrations
+│   │   ├── handlers/     # HTTP request handlers
+│   │   ├── middleware/   # Auth, CORS middleware
+│   │   ├── models/       # Data models
+│   │   └── utils/        # Helpers, cookies
+│   └── .env              # Backend environment config
+├── frontend/             # Next.js web application
+│   ├── src/
+│   │   ├── app/          # Next.js app router pages
+│   │   ├── components/   # React components
+│   │   ├── contexts/     # React contexts (Auth, Task, Encryption)
+│   │   ├── services/     # API client services
+│   │   └── utils/        # Frontend utilities
+│   └── Dockerfile
+├── docker-compose.yml    # Local dev orchestration
+├── .env                  # Root env for docker-compose
+└── .env.local            # Template for local development
+```
+
+## Tech Stack
+
+- **Backend**: Go 1.23, Gin framework, GORM ORM
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Database**: PostgreSQL 16
+- **Auth**: JWT tokens with HTTP-only cookies
+- **Email**: Resend API
+- **Encryption**: Client-side AES-256-GCM for user data
+
+## API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/signup` | Register with invite token |
+| POST | `/api/v1/auth/login` | Login |
+| POST | `/api/v1/auth/logout` | Logout |
+| POST | `/api/v1/auth/refresh` | Refresh JWT token |
+| GET | `/api/v1/auth/profile` | Get current user profile |
+| PATCH | `/api/v1/auth/profile` | Update profile |
+| GET | `/api/v1/auth/invitation/:token` | Validate invite token |
+| POST | `/api/v1/auth/request-invite` | Request an invite |
+
+### Tasks
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/tasks` | List all tasks |
+| POST | `/api/v1/tasks` | Create task |
+| PATCH | `/api/v1/tasks/:id` | Update task |
+| DELETE | `/api/v1/tasks/:id` | Delete task |
+| GET | `/api/v1/active` | Get currently active task |
+
+### Sessions (Time Tracking)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/tasks/:id/sessions/start` | Start timer |
+| POST | `/api/v1/tasks/:id/sessions/stop` | Stop timer |
+| GET | `/api/v1/tasks/:id/sessions` | Get task sessions |
+| GET | `/api/v1/tasks/:id/sessions/active` | Get active session |
+
+### Columns (Kanban)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/columns` | List columns |
+| POST | `/api/v1/columns` | Create column |
+| PATCH | `/api/v1/columns/:id` | Update column |
+| DELETE | `/api/v1/columns/:id` | Delete column |
+
+### Admin
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/admin/invitations` | Create invite |
+| GET | `/api/v1/admin/invitations` | List invites |
+| DELETE | `/api/v1/admin/invitations/:id` | Revoke invite |
+
+## Common Issues
+
+### Database connection refused
+```bash
+# Make sure postgres is running
+docker-compose up postgres -d
+
+# If password mismatch, reset the volume
+docker-compose down -v
+docker-compose up postgres -d
+```
+
+### Port already in use
+```bash
+# Find what's using the port
+lsof -i :8080  # or :3000, :5432
+
+# Kill it
+kill -9 <PID>
+```
+
+### Frontend can't reach backend
+- Check that backend is running on port 8080
+- Verify CORS is configured for `http://localhost:3000`
+- Check browser console for specific errors
+
+## Production Deployment
+
+See `.claude/AWS_DEPLOYMENT.md` for AWS ECS deployment instructions.
+
+## License
+
+Private - All rights reserved

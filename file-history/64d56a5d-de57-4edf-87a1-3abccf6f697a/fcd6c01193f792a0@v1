@@ -1,0 +1,9 @@
+export const ACTION_BUTTONS = [
+  { id: 'pomodoro', label: 'Pomodoro', icon: '/icons/timer_24px.svg' },
+  { id: 'break', label: 'Break', icon: '/icons/self_improvement_24px.svg' },
+  { id: 'meeting', label: 'Meeting', icon: '/icons/people_24px.svg' },
+  { id: 'add', label: 'Add new', icon: '/icons/add_24px.svg', iconOnly: true },
+  // { id: 'filter', label: 'Filter options', icon: '/icons/filter_list_24px.svg', iconOnly: true },
+] as const;
+
+export type ActionButton = typeof ACTION_BUTTONS[number];

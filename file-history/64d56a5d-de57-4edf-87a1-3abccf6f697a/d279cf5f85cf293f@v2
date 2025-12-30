@@ -1,0 +1,59 @@
+# Plan: Default ActionBar Toggle Options to Off
+
+## Problem
+In `ActionBar.tsx`, the 3-dot menu contains toggle options for upcoming features (Pomodoro Timer, Break Timer, Meeting Timer). Currently these default to **ON** (visible) because `hiddenButtons` initializes as an empty object.
+
+## Goal
+Make these toggle options default to **OFF** (hidden) so the buttons don't appear in the ActionBar until users explicitly enable them.
+
+## Solution
+Set default values for the toggle targets in the initial state.
+
+## File to Modify
+- `frontend/src/components/actionbar/ActionBar.tsx`
+
+## Changes
+
+### 1. Create default hidden state constant
+Add a constant that sets all TOGGLE_TARGETS to hidden by default:
+
+```tsx
+const DEFAULT_HIDDEN: HiddenButtons = {
+  pomodoro: true,
+  break: true,
+  meeting: true,
+};
+```
+
+### 2. Update initial useState
+Change from:
+```tsx
+const [hiddenButtons, setHiddenButtons] = useState<HiddenButtons>({});
+```
+To:
+```tsx
+const [hiddenButtons, setHiddenButtons] = useState<HiddenButtons>(DEFAULT_HIDDEN);
+```
+
+### 3. Merge localStorage with defaults in useEffect
+Update the useEffect to merge stored preferences over defaults:
+```tsx
+useEffect(() => {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      setHiddenButtons({ ...DEFAULT_HIDDEN, ...parsed });
+    }
+  } catch {
+    // ignore malformed storage
+  }
+}, []);
+```
+
+This ensures:
+- Fresh users see buttons hidden by default
+- Existing users' explicit preferences are preserved
+- Any new toggle targets added later will also default to hidden

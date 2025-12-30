@@ -1,0 +1,134 @@
+// Session API service for timer sessions
+import { fetchWithAuth } from './http';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+
+export interface StartSessionResponse {
+  id: number;
+  title: string;
+  is_active: boolean;
+  duration: number;
+  session_count: number;
+  sessions: Array<{
+    id: number;
+    start_time: string;
+    end_time: string | null;
+    duration: number;
+  }>;
+}
+
+export interface SessionUpdateResponse {
+  message: string;
+  session_duration: number;
+  task_duration: number;
+}
+
+export interface SessionsListResponse {
+  sessions: Array<{
+    id: number;
+    task_id: number;
+    start_time: string;
+    end_time: string | null;
+    duration: number;
+    session_num: number;
+  }>;
+  total_duration: number;
+  session_count: number;
+  has_active_session: boolean;
+  active_session?: {
+    id: number;
+    task_id: number;
+    start_time: string;
+    end_time: string | null;
+    duration: number;
+    session_num: number;
+  };
+}
+
+export const sessionApi = {
+  // Start a new session for a task
+  async startSession(taskId: number): Promise<StartSessionResponse> {
+    const response = await fetchWithAuth(`${API_BASE_URL}/tasks/${taskId}/sessions/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || `Failed to start session: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  // Stop the current session
+  async stopSession(taskId: number, duration: number, sessionDuration: number): Promise<StartSessionResponse> {
+    const response = await fetchWithAuth(`${API_BASE_URL}/tasks/${taskId}/sessions/stop`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        duration,
+        session_duration: sessionDuration,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || `Failed to stop session: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  // Update the current session (for periodic syncs)
+  async updateCurrentSession(taskId: number, duration: number, sessionDuration: number): Promise<SessionUpdateResponse> {
+    const response = await fetchWithAuth(`${API_BASE_URL}/tasks/${taskId}/sessions/current`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        duration,
+        session_duration: sessionDuration,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || `Failed to update session: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  // Get all sessions for a task
+  async getTaskSessions(taskId: number): Promise<SessionsListResponse> {
+    const response = await fetchWithAuth(`${API_BASE_URL}/tasks/${taskId}/sessions`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sessions: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  // Get the active session for a task
+  async getActiveSession(taskId: number): Promise<{
+    id: number;
+    task_id: number;
+    start_time: string;
+    end_time: string | null;
+    duration: number;
+    session_num: number;
+  } | null> {
+    const response = await fetchWithAuth(`${API_BASE_URL}/tasks/${taskId}/sessions/active`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        // No active session
+        return null;
+      }
+      throw new Error(`Failed to fetch active session: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+};

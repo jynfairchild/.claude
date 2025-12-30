@@ -1,0 +1,127 @@
+# Testing Cookie-Based Auth in Local Dev
+
+## Summary
+
+Cookie auth is already implemented (v0.6.8). No code changes needed - just run the servers and test.
+
+---
+
+## Environment Variables (Optional)
+
+**No .env file is required for local dev.** The backend auto-defaults:
+
+| Variable | Default (local) | Source |
+|----------|----------------|--------|
+| `JWT_SECRET` | `local-dev-secret` | main.go:33 |
+| `CORS_ORIGINS` | `http://localhost:3000` | main.go:54 |
+| `DATABASE_URL` | SQLite (in-memory) | database/init.go |
+
+If you want a `.env` file anyway (create in `backend/`):
+```bash
+JWT_SECRET=my-local-secret
+CORS_ORIGINS=http://localhost:3000
+# DATABASE_URL=postgresql://user:pass@localhost:5432/astrotask_db
+```
+
+---
+
+## Option A: Run Without Docker (Recommended for Dev)
+
+### 1. Start Backend
+```bash
+cd backend
+go run cmd/server/main.go
+```
+- Runs on http://localhost:8080
+- Uses SQLite in-memory (no Postgres needed)
+- Auto-sets JWT_SECRET to "local-dev-secret"
+
+### 2. Start Frontend
+```bash
+cd frontend
+npm run dev
+```
+- Runs on http://localhost:3000
+- Already configured to call http://localhost:8080/api/v1
+
+---
+
+## Option B: Run With Docker (Closer to Production)
+
+```bash
+docker-compose up --build
+```
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8080
+- PostgreSQL on port 5432
+
+---
+
+## Testing Cookie Auth
+
+### What to Verify
+
+1. **Signup/Login** - Go to http://localhost:3000/signup or /login
+2. **Check Browser Cookies** (DevTools → Application → Cookies):
+   - `access_token` (HttpOnly - won't be readable by JS)
+   - `refresh_token` (HttpOnly)
+   - `csrf_token` (readable by JS - for X-CSRF-Token header)
+
+3. **Protected Routes** - After login, visit /dashboard
+   - Should load without redirect
+   - API calls use cookies automatically (`credentials: 'include'`)
+
+4. **Token Refresh** - Access token expires in 45min (configurable via ACCESS_TOKEN_TTL)
+   - On tab visibility change, frontend calls refresh
+   - Or wait for 401 → auto-refresh → retry
+
+5. **Logout** - Clears all auth cookies
+
+### CSRF Verification
+
+For POST/PATCH/DELETE requests:
+- Frontend reads `csrf_token` from cookie
+- Sends it as `X-CSRF-Token` header
+- Backend validates it matches
+
+---
+
+## Creating a Test User
+
+Since there's no seeding script yet, manually create via signup:
+1. Go to http://localhost:3000/signup
+2. Create account (email verification not enforced in dev)
+
+To make yourself an admin, update the DB directly:
+```sql
+-- SQLite (if running without Docker)
+-- Connect via sqlite3 or run this in backend test setup
+
+-- PostgreSQL (if using Docker)
+docker exec -it astrotask-postgres-1 psql -U postgres -d astrotask_db
+UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
+```
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Cookies not set | Check CORS_ORIGINS matches frontend URL exactly |
+| 403 on POST/PATCH | CSRF token missing - check csrf_token cookie exists |
+| Can't login | Check backend is running on :8080 |
+| "localStorage" errors | Old code path - should not happen with current code |
+
+---
+
+## Key Files Reference
+
+| File | Purpose |
+|------|---------|
+| `backend/cmd/server/main.go:26-35` | JWT_SECRET default logic |
+| `backend/internal/utils/cookies.go` | Cookie configuration |
+| `backend/internal/middleware/csrf.go` | CSRF validation |
+| `backend/internal/middleware/auth.go` | Cookie-first auth check |
+| `frontend/src/services/authApi.ts` | API calls with credentials |
+| `frontend/src/contexts/AuthContext.tsx` | Auth state management |

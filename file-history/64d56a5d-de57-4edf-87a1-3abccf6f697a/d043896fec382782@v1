@@ -1,0 +1,105 @@
+import { Task } from '@/services/api';
+import { timerLog } from '@/utils/debug';
+
+// Key for localStorage
+const TIMER_STATE_KEY = 'karrokan_timer_state';
+const MAX_RECOVERY_AGE_MS = 5 * 60 * 1000; // 5 minutes
+
+// Interface for persisted timer state
+export interface PersistedTimerState {
+  activeTask: Task | null;
+  sessionStartTime: number | null;
+  liveSeconds: number;
+  lastSaveTime: number;
+  version: number; // For future migrations
+}
+
+export interface RecoveryResult {
+  isValid: boolean;
+  reason?: string;
+  recoveredDuration?: number;
+  sessionStartTime?: number;
+}
+
+// Save timer state to localStorage
+export function saveTimerState(state: Omit<PersistedTimerState, 'lastSaveTime' | 'version'>): void {
+  try {
+    const persistedState: PersistedTimerState = {
+      ...state,
+      lastSaveTime: Date.now(),
+      version: 1
+    };
+    
+    localStorage.setItem(TIMER_STATE_KEY, JSON.stringify(persistedState));
+    timerLog('[TimerPersistence] Saved timer state:', {
+      taskId: state.activeTask?.id,
+      liveSeconds: state.liveSeconds,
+      sessionStartTime: state.sessionStartTime
+    });
+  } catch (error) {
+    timerLog('[TimerPersistence] Failed to save timer state:', { error: String(error) });
+  }
+}
+
+// Load timer state from localStorage
+export function loadTimerState(): PersistedTimerState | null {
+  try {
+    const stored = localStorage.getItem(TIMER_STATE_KEY);
+    if (!stored) {
+      timerLog('[TimerPersistence] No saved timer state found');
+      return null;
+    }
+    
+    const state = JSON.parse(stored) as PersistedTimerState;
+    timerLog('[TimerPersistence] Loaded timer state:', {
+      taskId: state.activeTask?.id,
+      liveSeconds: state.liveSeconds,
+      lastSaveTime: new Date(state.lastSaveTime).toISOString()
+    });
+    
+    return state;
+  } catch (error) {
+    timerLog('[TimerPersistence] Failed to load timer state:', { error: String(error) });
+    clearTimerState(); // Clear corrupted state
+    return null;
+  }
+}
+
+// Clear timer state from localStorage
+export function clearTimerState(): void {
+  try {
+    localStorage.removeItem(TIMER_STATE_KEY);
+    timerLog('[TimerPersistence] Cleared timer state');
+  } catch (error) {
+    timerLog('[TimerPersistence] Failed to clear timer state:', { error: String(error) });
+  }
+}
+
+// Validate if the saved state is recoverable
+export function validateTimerState(state: PersistedTimerState): RecoveryResult {
+  const now = Date.now();
+  
+  // Check if state is too old
+  const age = now - state.lastSaveTime;
+  if (age > MAX_RECOVERY_AGE_MS) {
+    return {
+      isValid: false,
+      reason: `State is too old (${Math.floor(age / 1000)}s > ${MAX_RECOVERY_AGE_MS / 1000}s)`
+    };
+  }
+  
+  // Check if we have an active task
+  if (!state.activeTask || !state.sessionStartTime) {
+    return {
+      isValid: false,
+      reason: 'No active task or session found'
+    };
+  }
+  
+  // Since backend now provides accurate session duration, we just need basic recovery
+  return {
+    isValid: true,
+    recoveredDuration: state.liveSeconds,
+    sessionStartTime: state.sessionStartTime
+  };
+}

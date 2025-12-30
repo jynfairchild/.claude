@@ -1,0 +1,94 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../contexts/AuthContext";
+import "./login.css";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    // Basic client-side validation
+    const emailBlank = email.trim().length === 0;
+    const passwordBlank = password.trim().length === 0;
+    setEmailError(emailBlank);
+    setPasswordError(passwordBlank);
+    if (emailBlank || passwordBlank) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await login(email, password);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Login failed";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-left-panel">
+        <div className="login-brand">
+          <Link href="/" className="brand-link" aria-label="Astrotask home">
+            <span className="brand-wordmark">
+              <span className="brand-wordmark-base">ASTRO</span>
+              <span className="brand-wordmark-accent">TASK</span>
+            </span>
+          </Link>
+          <span className="brand-welcome">A Privacy Focused <span className="brand-welcome-emphasis">KANBAN</span> built for Makers And Creatives.</span>
+        </div>
+      </div>
+      <div className="login-right-panel">
+        <form onSubmit={onSubmit} className={`login-card ${loading ? 'login-loading' : ''}`}>
+          <h1 className="login-title">Login</h1>
+
+          <div className={`login-field${emailError ? ' error' : ''}`}>
+            <input
+              className="login-input"
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); if (emailError && e.target.value.trim()) setEmailError(false); }}
+              placeholder="Email"
+              autoComplete="email"
+            />
+          </div>
+
+          <div className={`login-field${passwordError ? ' error' : ''}`}>
+            <input
+              className="login-input"
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); if (passwordError && e.target.value.trim()) setPasswordError(false); }}
+              placeholder="Password"
+              autoComplete="current-password"
+            />
+          </div>
+
+          {error && <p className="login-error">{error}</p>}
+
+          <button type="submit" className="login-cta" disabled={loading || !email.trim() || !password.trim()}>
+            <span className="login-cta-text">{loading ? "Logging in..." : "Login"}</span>
+          </button>
+
+          <button type="button" className="login-cta">
+            <span className="login-cta-text">Get an Invite</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,37 @@
+package models
+
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+// Invitation represents a pending invite for a new user to join the platform.
+// Invites are valid for a limited time (default 7 days) and can only be used once.
+type Invitation struct {
+	ID          uint           `gorm:"primaryKey" json:"id"`
+	Email       string         `gorm:"not null;index" json:"email"`
+	TokenHash   string         `gorm:"not null;uniqueIndex" json:"-"` // Hashed token for security
+	InvitedByID uint           `gorm:"not null" json:"invited_by_id"`
+	InvitedBy   *User          `gorm:"foreignKey:InvitedByID" json:"invited_by,omitempty"`
+	ExpiresAt   time.Time      `gorm:"not null" json:"expires_at"`
+	UsedAt      *time.Time     `json:"used_at,omitempty"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// IsExpired returns true if the invitation has passed its expiration date.
+func (i *Invitation) IsExpired() bool {
+	return time.Now().After(i.ExpiresAt)
+}
+
+// IsUsed returns true if the invitation has already been consumed.
+func (i *Invitation) IsUsed() bool {
+	return i.UsedAt != nil
+}
+
+// IsValid returns true if the invitation can still be used (not expired and not used).
+func (i *Invitation) IsValid() bool {
+	return !i.IsExpired() && !i.IsUsed()
+}

@@ -1,0 +1,14 @@
+# Local Development Environment (without Docker)
+# For Docker, use the root .env file instead
+
+DATABASE_URL=postgresql://postgres:localdev@localhost:5432/astrotask_db?sslmode=disable
+JWT_SECRET=local-dev-secret-key-not-for-production
+POSTGRES_PASSWORD=localdev
+
+# Email (leave empty to skip sending - invite links print to console)
+RESEND_API_KEY=
+EMAIL_FROM=noreply@localhost
+
+# Admin bootstrap
+ADMIN_EMAIL=admin@localhost
+REQUIRE_INVITE=true

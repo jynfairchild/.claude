@@ -1,0 +1,30 @@
+## [v0.6.6 – Timer Refresh Bug Fix: The Great Time Leak]
+**Date:** December 19, 2025
+
+### Changes Made:
+- Fixed critical bug where page refresh added ~5 seconds to timer total each time
+- Modified backend `tasks.go` to trust frontend's duration during active periodic syncs instead of recalculating from session sums
+- Updated frontend `useTaskTimer.ts` to calculate base time as `duration - session_duration` (since duration now includes current session)
+- Added enhanced debug logging in `TaskContext.tsx` showing frontendTotal, backendDuration, sessionDuration, and discrepancy
+- Updated backend test `TestUpdateTask_Active_PeriodicSync` to expect new behavior (trusts frontend duration)
+- Updated frontend timer tests with correct duration values reflecting new semantics
+- Consolidated `useTaskTimer.test.tsx` and `useTaskTimer.phase2.test.tsx` into single test file with 6 tests
+
+### Current Status:
+Timer is fully functional and survives page refreshes without gaining phantom time. All 6 frontend timer tests pass. All backend tests pass. Periodic syncs, visibility change handlers, and beforeunload keepalive requests all work correctly.
+
+### Unresolved Issues:
+- None related to timer functionality
+
+### Commit Message:
+Fix timer refresh bug that added ~5 seconds on each page reload
+
+- Backend was ignoring frontend's calculated duration during periodic syncs and recalculating from session sums, losing completed session time
+- Changed `tasks.go` lines 340-358 to trust `req.Duration` from frontend during active syncs
+- Frontend was double-counting because `task.duration` now includes current session time
+- Updated `useTaskTimer.ts` to compute base = duration - session_duration before adding elapsed
+- Clarified semantic meaning: duration = total (completed + current), session_duration = current session portion
+- Enhanced debug logging in TaskContext for future timer debugging
+- Updated backend and frontend tests to match new behavior
+- Merged phase2 timer tests into single consolidated test file
+---

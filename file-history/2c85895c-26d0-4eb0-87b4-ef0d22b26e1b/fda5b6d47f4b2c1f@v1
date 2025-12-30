@@ -1,0 +1,88 @@
+package utils
+
+import (
+    "net/http"
+    "os"
+    "strconv"
+    "strings"
+    "time"
+
+    "github.com/gin-gonic/gin"
+)
+
+type CookieConfig struct {
+    Domain   string
+    Secure   bool
+    Path     string
+    SameSite http.SameSite
+}
+
+// CookieOptionsFromEnv reads cookie config from env vars.
+// COOKIE_DOMAIN, SECURE_COOKIES ("true"/"false"), COOKIE_SAMESITE (Lax|Strict|None), COOKIE_PATH (default "/").
+func CookieOptionsFromEnv() CookieConfig {
+    cfg := CookieConfig{ Path: "/", SameSite: http.SameSiteLaxMode }
+    if v := os.Getenv("COOKIE_DOMAIN"); v != "" {
+        cfg.Domain = v
+    }
+    if v := os.Getenv("SECURE_COOKIES"); v != "" {
+        b, err := strconv.ParseBool(v)
+        if err == nil { cfg.Secure = b }
+    } else {
+        cfg.Secure = false
+    }
+    if v := os.Getenv("COOKIE_PATH"); v != "" {
+        cfg.Path = v
+    }
+    if v := strings.ToLower(os.Getenv("COOKIE_SAMESITE")); v != "" {
+        switch v {
+        case "lax":
+            cfg.SameSite = http.SameSiteLaxMode
+        case "strict":
+            cfg.SameSite = http.SameSiteStrictMode
+        case "none":
+            cfg.SameSite = http.SameSiteNoneMode
+        default:
+            cfg.SameSite = http.SameSiteLaxMode
+        }
+    }
+    return cfg
+}
+
+func setCookie(c *gin.Context, name, value string, ttl time.Duration, httpOnly bool) {
+    cfg := CookieOptionsFromEnv()
+    maxAge := int(ttl.Seconds())
+    if ttl <= 0 { maxAge = -1 }
+    http.SetCookie(c.Writer, &http.Cookie{
+        Name:     name,
+        Value:    value,
+        Path:     cfg.Path,
+        Domain:   cfg.Domain,
+        Expires:  time.Now().Add(ttl),
+        MaxAge:   maxAge,
+        Secure:   cfg.Secure,
+        HttpOnly: httpOnly,
+        SameSite: cfg.SameSite,
+    })
+}
+
+// The following helpers are placeholders for the cookie-based auth rollout.
+func SetAccessTokenCookie(c *gin.Context, token string, ttl time.Duration) {
+    setCookie(c, "access_token", token, ttl, true)
+}
+
+func SetRefreshTokenCookie(c *gin.Context, token string, ttl time.Duration) {
+    setCookie(c, "refresh_token", token, ttl, true)
+}
+
+func ClearAuthCookies(c *gin.Context) {
+    // Expire all auth cookies
+    setCookie(c, "access_token", "", -1, true)
+    setCookie(c, "refresh_token", "", -1, true)
+    setCookie(c, "csrf_token", "", -1, false)
+}
+
+// SetCSRFTokenCookie sets the CSRF token as a non-HttpOnly cookie (JS must read it)
+func SetCSRFTokenCookie(c *gin.Context, token string) {
+    setCookie(c, "csrf_token", token, 24*time.Hour, false) // 24 hours, NOT HttpOnly
+}
+

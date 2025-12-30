@@ -1,0 +1,52 @@
+'use client';
+
+import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+
+const PUBLIC_ROUTES = new Set([
+  '/',
+  '/login',
+  '/signup',
+  '/verify-email',
+  '/terms',
+  '/privacy',
+]);
+
+function isPublicPath(pathname: string) {
+  if (PUBLIC_ROUTES.has(pathname)) return true;
+  // Allow sub-paths such as `/verify-email/some-token`
+  for (const route of PUBLIC_ROUTES) {
+    if (route !== '/' && pathname.startsWith(`${route}/`)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function RouteGuard() {
+  const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isTestEnv = process.env.NODE_ENV === 'test';
+
+  useEffect(() => {
+    if (isTestEnv) return;
+    if (loading) return;
+
+    const publicPath = isPublicPath(pathname);
+
+    if (!isAuthenticated && !publicPath) {
+      router.replace('/login');
+      return;
+    }
+
+    // Redirect authenticated users away from auth pages, but allow legal pages
+    const isLegalPage = pathname === '/terms' || pathname === '/privacy';
+    if (isAuthenticated && publicPath && pathname !== '/dashboard' && !isLegalPage) {
+      router.replace('/dashboard');
+    }
+  }, [isAuthenticated, loading, pathname, router, isTestEnv]);
+
+  return null;
+}

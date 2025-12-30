@@ -1,0 +1,107 @@
+# Plan: Persist ActionBar Settings to Database
+
+## Goal
+Store ActionBar button visibility preferences in the database so they sync across devices/logins.
+
+## Approach
+Add `actionbar` column to User model storing an array of enabled button IDs (e.g., `["pomodoro", "break"]`). Empty array = all hidden (default).
+
+---
+
+## Files to Modify
+
+### Backend
+
+**1. `backend/internal/models/user.go`**
+- Add `Actionbar pq.StringArray` field with `gorm:"type:text[]"`
+- Import `github.com/lib/pq`
+
+**2. `backend/internal/handlers/auth.go`**
+- Include `actionbar` in user responses (login, signup, profile)
+- Add `UpdateProfile` handler for `PATCH /auth/profile`
+
+**3. `backend/cmd/server/main.go`**
+- Register new `PATCH /auth/profile` route
+
+### Frontend
+
+**4. `frontend/src/services/authApi.ts`**
+- Add `actionbar?: string[]` to `AuthUser` type
+- Add `updateProfile()` function for PATCH requests
+
+**5. `frontend/src/contexts/AuthContext.tsx`**
+- Add `updateUser()` method to update user preferences
+
+**6. `frontend/src/components/actionbar/ActionBar.tsx`**
+- Load enabled buttons from `user.actionbar` (with localStorage fallback)
+- Save changes to backend via API
+- Keep localStorage as cache for offline/fast hydration
+
+---
+
+## Implementation Steps
+
+### Step 1: Backend - User Model
+```go
+// user.go
+import "github.com/lib/pq"
+
+type User struct {
+    // ... existing fields ...
+    Actionbar pq.StringArray `json:"actionbar,omitempty" gorm:"type:text[]"`
+}
+```
+
+### Step 2: Backend - Update Auth Handler Responses
+Include `actionbar` in all user response objects (login, signup, profile).
+
+### Step 3: Backend - Add UpdateProfile Handler
+```go
+type UpdateProfileRequest struct {
+    Actionbar []string `json:"actionbar"`
+}
+
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+    userID := c.GetUint("userID")
+    // Update user.Actionbar field
+}
+```
+
+### Step 4: Backend - Register Route
+```go
+protected.PATCH("/auth/profile", authHandler.UpdateProfile)
+```
+
+### Step 5: Frontend - Update AuthUser Type
+```ts
+export type AuthUser = {
+  // ... existing fields ...
+  actionbar?: string[];
+};
+```
+
+### Step 6: Frontend - Add updateProfile API
+```ts
+async updateProfile(accessToken: string, data: { actionbar?: string[] }): Promise<{ user: AuthUser }> {
+  // PATCH /auth/profile
+}
+```
+
+### Step 7: Frontend - Update AuthContext
+Add method to update user and call API.
+
+### Step 8: Frontend - Update ActionBar Component
+- On mount: Load from `user.actionbar` if available, else localStorage
+- On toggle: Update backend + localStorage cache
+- Sync user.actionbar to localStorage for offline access
+
+---
+
+## Behavior
+
+| Scenario | Source |
+|----------|--------|
+| New user | Empty array = all buttons hidden |
+| Logged in user | Load from `user.actionbar` |
+| Logged out / offline | Fall back to localStorage |
+| Toggle button | Save to backend + update localStorage cache |

@@ -1,0 +1,266 @@
+'use client';
+
+import React, { useMemo, useState, useCallback } from 'react';
+import { useTask } from '@/contexts/TaskContext';
+import { useEncryption } from '@/contexts/EncryptionContext';
+import { TaskDragProvider } from '@/contexts/TaskDragContext';
+import { KanbanColumn } from './KanbanColumn';
+import { TaskCreationModal } from './TaskCreationModal';
+import { useTaskTimer } from '@/hooks/useTaskTimer';
+import { useKanbanKeyboard } from '@/hooks/useKanbanKeyboard';
+import { useLastActiveColumn } from '@/hooks/useLastActiveColumn';
+import { columnsApi, UserColumn } from '@/services/api';
+import './Kanban.css';
+import Image from 'next/image';
+import addIcon from '@/assets/components/kanban/add_24px.svg';
+import DoneTray from '@/components/DragTrays/DoneTray';
+import RemoveTray from '@/components/DragTrays/RemoveTray';
+import ActionBar from '@/components/actionbar/ActionBar';
+
+export default function Kanban() {
+  const { tasks, activeTask, updateTaskTimer, loadTasks, loadActiveTask } = useTask();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [targetColumn, setTargetColumn] = useState<number>(0);
+  const [lastActiveColumn, setLastActiveColumn] = useLastActiveColumn(0);
+  const [columnTitles, setColumnTitles] = useState<string[]>(['Todo', 'In Progress']);
+  const [colIndexToId, setColIndexToId] = useState<Record<number, number>>({});
+  
+  // Load user-defined column names (fallback to defaults)
+  React.useEffect(() => {
+    columnsApi.list().then(cols => {
+      if (cols && cols.length) {
+        const maxIdx = Math.max(...cols.map(c => c.col_index));
+        const titles: string[] = Array.from({ length: maxIdx + 1 }, (_, i) => cols.find(c => c.col_index === i)?.name || `Column ${i}`);
+        const mapping: Record<number, number> = {};
+        cols.forEach(c => { mapping[c.col_index] = c.id; });
+        setColumnTitles(titles);
+        setColIndexToId(mapping);
+      }
+    }).catch(() => {/* ignore errors, keep defaults */});
+  }, []);
+
+  const handleRenameColumn = useCallback(async (colIndex: number, newName: string) => {
+    // Optimistically update the UI to avoid flash
+    let previousName: string | undefined;
+    setColumnTitles(prev => {
+      const copy = [...prev];
+      previousName = copy[colIndex];
+      if (copy.length <= colIndex) copy.length = colIndex + 1;
+      copy[colIndex] = newName;
+      return copy;
+    });
+
+    try {
+      // Refresh current columns for up-to-date IDs
+      const cols = await columnsApi.list();
+      const existing = cols.find(c => c.col_index === colIndex);
+
+      if (existing) {
+        const updated = await columnsApi.update(existing.id, { name: newName });
+        setColumnTitles(prev => {
+          const copy = [...prev];
+          copy[colIndex] = updated.name;
+          return copy;
+        });
+        const newMap: Record<number, number> = { ...colIndexToId };
+        newMap[updated.col_index] = updated.id;
+        setColIndexToId(newMap);
+      } else {
+        const created = await columnsApi.create({ name: newName, col_index: colIndex });
+        setColumnTitles(prev => {
+          const copy = [...prev];
+          if (copy.length <= colIndex) copy.length = colIndex + 1;
+          copy[colIndex] = created.name;
+          return copy;
+        });
+        setColIndexToId(prev => ({ ...prev, [created.col_index]: created.id }));
+      }
+    } catch (e) {
+      console.error('Failed to rename column:', e);
+      // Revert optimistic title on failure
+      setColumnTitles(prev => {
+        const copy = [...prev];
+        if (typeof previousName !== 'undefined') copy[colIndex] = previousName;
+        return copy;
+      });
+    }
+  }, [colIndexToId]);
+  
+  // Use custom hooks
+  const { liveSeconds, sessionSeconds } = useTaskTimer({ 
+    activeTask, 
+    updateTaskTimer
+  });
+  
+  // Ensure active task's current session duration is fresh when entering the dashboard
+  // Only run on mount to avoid race conditions when tasks are started/resumed
+  React.useEffect(() => {
+    if (activeTask?.is_active && (!activeTask.session_duration || activeTask.session_duration <= 0)) {
+      // Best effort refresh; ignore errors to avoid blocking UI
+      loadActiveTask().catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+  
+  // Note: We don't need to auto-resume recovered tasks
+  // TaskContext already loads the active task from backend on mount
+  
+  useKanbanKeyboard({
+    isModalOpen,
+    onOpenNewTask: () => {
+      setTargetColumn(lastActiveColumn ?? 0);
+      setIsModalOpen(true);
+    }
+  });
+
+  // Format time from seconds to HH:MM:SS
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleOpenNewTaskModal = useCallback((columnIndex: number) => {
+    setTargetColumn(columnIndex);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleActionBarAddTask = useCallback(() => {
+    setTargetColumn(lastActiveColumn ?? 0);
+    setIsModalOpen(true);
+  }, [lastActiveColumn]);
+
+  const handleDropTask = useCallback((columnIndex: number) => {
+    setLastActiveColumn(columnIndex);
+  }, [setLastActiveColumn]);
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setTargetColumn(0);
+  };
+
+  const handleTaskCreated = (columnIndex: number) => {
+    setLastActiveColumn(columnIndex);
+  };
+
+  const handleRemoveColumn = useCallback(async (_colIndex: number, _columnId?: number, _columnName?: string) => {
+    try {
+      // Reload tasks (backend has shifted column_index values)
+      await loadTasks();
+      // Reload columns to get updated indices
+      const cols = await columnsApi.list();
+      if (cols && cols.length) {
+        const maxIdx = Math.max(...cols.map(c => c.col_index));
+        const titles: string[] = Array.from({ length: maxIdx + 1 }, (_, i) => cols.find(c => c.col_index === i)?.name || `Column ${i}`);
+        const mapping: Record<number, number> = {};
+        cols.forEach(c => { mapping[c.col_index] = c.id; });
+        setColumnTitles(titles);
+        setColIndexToId(mapping);
+      }
+    } catch (e) {
+      console.error('Failed to handle column removal:', e);
+    }
+  }, [loadTasks]);
+
+  const handleAddColumn = useCallback(async () => {
+    try {
+      const newIndex = columnTitles.length; // append to the end
+      // Create with a sensible default name; user can rename inline after
+      const created = await columnsApi.create({ name: `Column ${newIndex}`, col_index: newIndex });
+      setColumnTitles(prev => {
+        const next = [...prev];
+        // Ensure array has slots up to newIndex
+        if (next.length <= newIndex) {
+          next.length = newIndex + 1;
+        }
+        next[newIndex] = created.name;
+        return next;
+      });
+      setColIndexToId(prev => ({ ...prev, [created.col_index]: created.id }));
+    } catch (e) {
+      console.error('Failed to add column:', e);
+    }
+  }, [columnTitles.length]);
+  
+  // Group tasks by column and sort by position; render dynamically for all available columns
+  const columns = useMemo(() => {
+    const maxTaskIndex = tasks.length ? Math.max(...tasks.map(t => t.column_index)) : -1;
+    const count = Math.max(columnTitles.length, maxTaskIndex + 1, 2); // at least 2 columns by default
+
+    const toCard = (task: typeof tasks[number]) => {
+      const currentDuration = task.is_active && activeTask?.id === task.id ? liveSeconds : task.duration;
+      const currentSessionTime = task.is_active ? (activeTask?.id === task.id ? sessionSeconds : (task.session_duration || 0)) : 0;
+      return {
+        id: task.id,
+        title: task.title,
+        project: task.project || '',
+        tags: task.tags || [],
+        time: formatTime(currentSessionTime),
+        totalTime: formatTime(currentDuration),
+        isActive: task.is_active,
+        duration: currentDuration,
+        sessionDuration: currentSessionTime,
+        sessions: task.sessions,
+        position: task.position,
+      };
+    };
+
+    return Array.from({ length: count }, (_, idx) => {
+      const cards = tasks
+        .filter(task => task.column_index === idx && task.status === 'uncompleted')
+        .sort((a, b) => a.position - b.position)
+        .map(toCard);
+      return {
+        title: columnTitles[idx] ?? `Column ${idx}`,
+        columnIndex: idx,
+        columnId: colIndexToId[idx],
+        cards,
+        onNewTask: handleOpenNewTaskModal,
+        onDropTask: handleDropTask,
+        onRenameColumn: handleRenameColumn,
+        onRemoveColumn: handleRemoveColumn,
+      };
+    });
+  }, [tasks, activeTask, liveSeconds, sessionSeconds, handleDropTask, handleOpenNewTaskModal, columnTitles, colIndexToId, handleRenameColumn, handleRemoveColumn]);
+
+  return (
+    <TaskDragProvider>
+      <>
+        <div className="kanban-container">
+          <div className="kanban-content">
+            {columns.map((column, index) => (
+              <React.Fragment key={`col-${column.columnIndex}`}>
+                <KanbanColumn {...column} />
+                {index < columns.length - 1 && (
+                  <div className="kanban-column-separator" />
+                )}
+              </React.Fragment>
+            ))}
+            {/* Separator then Add Column area (button shows on hover) */}
+            <div className="kanban-column-separator" />
+            <div className="kanban-add-column-area">
+              <button className="kanban-new-column-button" onClick={handleAddColumn} aria-label="Add new column">
+                <Image src={addIcon} alt="Add new column" width={24} height={24} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <TaskCreationModal
+          isOpen={isModalOpen}
+          targetColumn={targetColumn}
+          lastActiveColumn={lastActiveColumn}
+          onClose={handleModalClose}
+          onTaskCreated={handleTaskCreated}
+        />
+
+        <RemoveTray />
+        <div className="kanban-floating-row">
+          <ActionBar onAddTask={handleActionBarAddTask} onAddColumn={handleAddColumn} />
+          <DoneTray />
+        </div>
+      </>
+    </TaskDragProvider>
+  );
+}

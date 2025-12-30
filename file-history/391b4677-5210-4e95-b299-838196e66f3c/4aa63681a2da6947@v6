@@ -1,0 +1,870 @@
+/* Base card styles - shared across all variants */
+.card {
+  align-items: flex-start;
+  background-color: white;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 372px;
+  transition: border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Inactive variant (default) */
+.card--inactive {
+  border: 1px solid var(--kkan-grey-200);
+  box-shadow: var(--shadow-default);
+}
+
+/* Active variant */
+.card--active {
+  border: 1px solid var(--kkan-blue-400);
+  box-shadow: 0 6px 0 0 rgba(30, 114, 238, 0.16);
+  cursor: pointer;
+}
+
+/* Minimal variant */
+.card--minimal {
+  border: 1px solid var(--kkan-grey-200);
+  box-shadow: var(--shadow-default);
+}
+
+/* Inactive expanded variant (shows sessions like expanded, but stays grey) */
+.card--inactive-expanded {
+  border: 1px solid var(--kkan-grey-200);
+  box-shadow: var(--shadow-default);
+}
+
+/* Expanded variant */
+.card--expanded {
+  border: 1px solid var(--kkan-blue-400);
+  box-shadow: 0 6px 0 0 rgba(30, 114, 238, 0.16);
+}
+
+/* Content wrapper */
+.card-content {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  padding: 18px;
+  position: relative;
+  width: 100%;
+  min-height: fit-content;
+  transition: padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card--active .card-content {
+  padding: 18px;
+  min-height: fit-content;
+}
+
+.card--expanded .card-content {
+  padding: 18px;
+  min-height: fit-content;
+}
+
+.card--inactive-expanded .card-content {
+  padding: 18px;
+  min-height: fit-content;
+}
+
+/* Top section with title and pause button */
+.card-top {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 16px;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+/* Section labels for expanded variant */
+.card-label {
+  color: var(--kkan-grey-500);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1.68px;
+  line-height: 14px;
+  position: relative;
+  white-space: nowrap;
+  width: fit-content;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card--expanded .card-label {
+  max-height: 14px;
+  opacity: 1;
+  margin-bottom: 8px;
+}
+
+.card--inactive-expanded .card-label {
+  max-height: 14px;
+  opacity: 1;
+  margin-bottom: 8px;
+}
+
+/* Add spacing between labels and content in expanded view */
+.card--expanded .card-meta-item .card-project,
+.card--expanded .card-meta-item .card-tags {
+  margin-top: 4px;
+}
+
+.card--inactive-expanded .card-meta-item .card-project,
+.card--inactive-expanded .card-meta-item .card-tags {
+  margin-top: 4px;
+}
+
+/* Title styles */
+.card-title {
+  color: var(--kkan-grey-950);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 26px;
+  margin-top: -1px;
+  position: relative;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.card-title.editable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.card-title.editable:hover {
+  color: var(--kkan-grey-500);
+}
+
+.card-title-input {
+  align-self: stretch;
+  color: var(--kkan-grey-800);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  height: 24px;
+  letter-spacing: 0;
+  line-height: 24px;
+  margin-top: -1px;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+  border: none;
+  border-radius: 4px;
+  padding: 0;
+  background-color: transparent;
+  outline: none;
+}
+
+/* Controls container for play/pause and expand buttons */
+.card-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 6px;
+  padding-right: 6px;
+}
+
+/* Play/Pause button */
+.card-pause {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, background-color 0.2s;
+  aspect-ratio: 1;
+  height: 36px;
+  width: 36px;
+  position: relative;
+  opacity: 0;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border-radius: 6px;
+  margin-top: -4px;
+}
+
+.card-pause:hover {
+  background-color: var(--kkan-grey-200);
+}
+
+.card:hover .card-pause {
+  opacity: 1;
+}
+
+.card--active .card-pause {
+  opacity: 0;
+}
+
+.card--active:hover .card-pause {
+  opacity: 1;
+}
+
+.card--expanded .card-pause {
+  opacity: 0;
+}
+
+.card--expanded:hover .card-pause {
+  opacity: 1;
+}
+
+.card--inactive-expanded .card-pause {
+  opacity: 0;
+}
+
+.card--inactive-expanded:hover .card-pause {
+  opacity: 1;
+}
+
+.card--minimal .card-pause {
+  opacity: 0;
+}
+
+.card--minimal:hover .card-pause {
+  opacity: 1;
+}
+
+/* Expand/Collapse button */
+.card-expand {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, background-color 0.2s;
+  aspect-ratio: 1;
+  height: 36px;
+  width: 36px;
+  opacity: 0;
+  border-radius: 6px;
+  margin-top: -6px;
+  margin-right: -6px;
+}
+
+.card-expand img {
+  filter: brightness(0) saturate(100%) invert(31%) sepia(9%) saturate(556%) hue-rotate(182deg) brightness(94%) contrast(91%); /* kkan-grey-700 */
+  transition: filter 0.2s;
+}
+
+.card:hover .card-expand {
+  opacity: 1;
+}
+
+.card-expand:hover {
+  background-color: var(--kkan-grey-200);
+}
+
+.card-expand:hover img {
+  filter: brightness(0) saturate(100%) invert(13%) sepia(5%) saturate(1016%) hue-rotate(196deg) brightness(94%) contrast(86%); /* kkan-grey-900 */
+}
+
+.card--active .card-expand {
+  opacity: 0;
+}
+
+.card--active:hover .card-expand {
+  opacity: 1;
+}
+
+.card--expanded .card-expand {
+  opacity: 0;
+}
+
+.card--expanded:hover .card-expand {
+  opacity: 1;
+}
+
+.card--inactive-expanded .card-expand {
+  opacity: 0;
+}
+
+.card--inactive-expanded:hover .card-expand {
+  opacity: 1;
+}
+
+.card--active .card-expand:hover,
+.card--expanded .card-expand:hover {
+  background-color: var(--kkan-grey-200);
+}
+
+.card--active .card-expand:hover img,
+.card--expanded .card-expand:hover img {
+  filter: brightness(0) saturate(100%) invert(13%) sepia(5%) saturate(1016%) hue-rotate(196deg) brightness(94%) contrast(86%); /* kkan-grey-900 */
+}
+
+.card--minimal .card-expand {
+  opacity: 0;
+}
+
+.card--minimal:hover .card-expand {
+  opacity: 1;
+}
+
+/* Meta section with project and tags */
+.card-meta {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  column-gap: 16px;
+  row-gap: 22px; /* Increased vertical gap when items wrap */
+  justify-content: space-between; /* Push project and tags apart */
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 18px;
+}
+
+.card-meta.card-meta--hidden {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+/* When there is no project in the row, keep tags aligned to the right */
+.card-meta:has(.card-tags):not(:has(.card-project)) .card-meta-item:has(.card-tags) {
+  margin-left: auto;
+}
+
+/* Meta items - responsive layout */
+.card-meta-item {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Project item stays compact but can shrink if needed */
+.card-meta-item:has(.card-project) {
+  flex: 0 1 auto;
+}
+
+/* Tags item stays compact */
+.card-meta-item:has(.card-tags) {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.card--minimal .card-meta {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+/* Project badge */
+.card-project {
+  align-items: center;
+  border-radius: 4px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  padding: 6px 16px;
+  position: relative;
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* When showing only the add-project icon, make the chip a compact rounded square */
+.card-project:has(.card-project-add) {
+  padding: 0;
+  width: 34px;
+  height: 34px;
+}
+
+.card--inactive .card-project:not(:empty) {
+  background-color: var(--kkan-grey-50);
+}
+
+.card--active .card-project:not(:empty) {
+  background-color: var(--kkan-blue-50);
+}
+
+.card--expanded .card-project:not(:empty) {
+  background-color: var(--kkan-blue-50);
+}
+
+.card--minimal .card-project:not(:empty) {
+  background-color: var(--kkan-grey-50);
+}
+
+/* Inherit inactive project styling for inactive-expanded */
+.card--inactive-expanded .card-project:not(:empty) {
+  background-color: var(--kkan-grey-50);
+}
+
+.card-project:empty {
+  width: 0;
+  height: 0; /* collapsed in non-expanded states to avoid space */
+  padding: 0;
+  background: transparent;
+}
+
+/* In expanded states, keep empty project chip at a stable height to prevent flicker
+   during the momentary swap between + icon and input */
+.card--expanded .card-project:empty,
+.card--inactive-expanded .card-project:empty {
+  height: 34px;
+}
+
+/* Ensure consistent height when showing text or input */
+.card-project:has(.card-project-input),
+.card-project:has(span) {
+  height: 34px;
+}
+
+.card-project span {
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 22px;
+  margin-top: -1px;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+  transition: color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card--inactive .card-project span {
+  color: var(--kkan-grey-700);
+}
+
+.card--active .card-project span {
+  color: var(--kkan-blue-700);
+}
+
+.card--expanded .card-project span {
+  color: var(--kkan-blue-700);
+}
+
+.card--minimal .card-project span {
+  color: var(--kkan-grey-700);
+}
+
+/* Inherit inactive text color for inactive-expanded */
+.card--inactive-expanded .card-project span {
+  color: var(--kkan-grey-700);
+}
+
+.card-project span.editable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.card--inactive .card-project span.editable:hover {
+  color: var(--kkan-grey-500);
+}
+
+.card--active .card-project span.editable:hover {
+  color: var(--kkan-blue-500);
+}
+
+.card--expanded .card-project span.editable:hover {
+  color: var(--kkan-blue-500);
+}
+
+.card--inactive-expanded .card-project span.editable:hover {
+  color: var(--kkan-grey-500);
+}
+
+.card-project-input {
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 22px;
+  position: relative;
+  white-space: nowrap;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  outline: none;
+  width: auto;
+  min-width: 2ch; /* keep minimal intrinsic width */
+}
+
+.card--inactive .card-project-input {
+  color: var(--kkan-grey-700);
+}
+
+.card--active .card-project-input {
+  color: var(--kkan-blue-700);
+}
+
+.card--expanded .card-project-input {
+  color: var(--kkan-blue-700);
+}
+
+.card--inactive-expanded .card-project-input {
+  color: var(--kkan-grey-700);
+}
+
+.card-project-add {
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.card-project-add img {
+  filter: brightness(0) saturate(100%) invert(31%) sepia(9%) saturate(556%) hue-rotate(182deg) brightness(94%) contrast(91%);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-project-add:hover img {
+  filter: brightness(0) saturate(100%) invert(13%) sepia(5%) saturate(1016%) hue-rotate(196deg) brightness(94%) contrast(86%);
+}
+
+/* Tags section */
+.card-tags {
+  align-items: flex-start;
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px 8px;
+  position: relative;
+  justify-content: flex-start; /* Align tags to the left */
+  width: auto;
+  transition: margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-tag {
+  align-items: center;
+  background-color: var(--kkan-grey-25);
+  border-radius: 54px;
+  border: none;
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  padding: 6px 12px;
+  position: relative;
+  color: var(--kkan-grey-800);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 22px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.card-tag:hover {
+  background: var(--kkan-grey-50);
+}
+
+.card-tag-add {
+  width: 34px; /* circle same height as tag */
+  height: 34px; /* 6 + 22 + 6 */
+  padding: 0;
+  justify-content: center;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              min-width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-tag-add img {
+  filter: brightness(0) saturate(100%) invert(25%) sepia(6%) saturate(1491%) hue-rotate(182deg) brightness(94%) contrast(90%);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-tag-add--active {
+  width: auto;
+  min-width: calc(7ch + 24px); /* 'Add tag' + 12px L/R */
+  padding: 6px 12px; /* ensure equal 12px on both sides */
+  cursor: text;
+}
+
+.card-tag-add--active img {
+  opacity: 0;
+}
+
+.card-tag-input {
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 22px;
+  color: var(--kkan-grey-400);
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  width: auto;
+  min-width: 7ch; /* default to placeholder width */
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-tag-add--active .card-tag-input,
+.card-tag-edit .card-tag-input {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-tag-input::placeholder {
+  color: var(--kkan-grey-400);
+}
+
+/* Timer section */
+.card-timer {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  margin-top: 0;
+}
+
+.card--active .card-timer {
+  max-height: 71px;
+  opacity: 1;
+  padding: 0px 8px 8px;
+}
+
+.card--expanded .card-timer {
+  max-height: 71px;
+  opacity: 1;
+  padding: 4px 16px 4px;
+}
+
+.card--inactive-expanded .card-timer {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+}
+
+.card-timer-inner {
+  align-items: center;
+  align-self: stretch;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  height: 55px;
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.card--inactive .card-timer-inner {
+  background-color: var(--kkan-grey-50);
+  border: 1px solid var(--kkan-grey-200);
+}
+
+.card--active .card-timer-inner {
+  background-color: var(--kkan-blue-50);
+  border: 1px solid var(--kkan-blue-400);
+}
+
+.card--expanded .card-timer-inner {
+  background-color: var(--kkan-blue-50);
+  border: 1px solid var(--kkan-blue-400);
+}
+
+.card--inactive-expanded .card-timer-inner {
+  background-color: var(--kkan-grey-50);
+  border: 1px solid var(--kkan-grey-200);
+}
+
+.card-time {
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 26px;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.card--inactive .card-time {
+  color: var(--kkan-grey-600);
+}
+
+.card--active .card-time {
+  color: var(--kkan-blue-600);
+}
+
+.card--expanded .card-time {
+  color: var(--kkan-blue-600);
+}
+
+.card--inactive-expanded .card-time {
+  color: var(--kkan-grey-600);
+}
+
+/* Session history section for expanded variant */
+.card-sessions {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0px 16px;
+  position: relative;
+  width: 100%;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card--expanded .card-sessions {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+.card--expanded .card-sessions.card-sessions--empty {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.card--inactive-expanded .card-sessions {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+.card--inactive-expanded .card-sessions.card-sessions--empty {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.card-sessions-list {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card--expanded .card-sessions:not(.card-sessions--empty) .card-sessions-list,
+.card--inactive-expanded .card-sessions:not(.card-sessions--empty) .card-sessions-list {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-session-row {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  font-stretch: semi-condensed;
+  line-height: 26px;
+}
+
+.card-session-row.total {
+  color: var(--kkan-grey-800);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.card-session-row.active {
+  color: var(--kkan-blue-600);
+}
+
+.card-session-row.inactive {
+  color: var(--kkan-grey-800);
+}
+
+.card-session-separator {
+  align-self: stretch;
+  background-color: var(--kkan-grey-200);
+  height: 1px;
+  position: relative;
+  width: 100%;
+}
+
+/* Drag and Drop styles */
+.card[draggable="true"] {
+  cursor: grab;
+}
+
+.card[draggable="true"]:active {
+  cursor: grabbing;
+  opacity: .8;
+}
+
+.card--dragging {
+  cursor: grabbing;
+}
+
+/* Special styling for active cards being dragged */
+.card--active-dragging {
+  opacity: 1;
+}
+
+/* Prevent drag on interactive elements */
+.card[draggable="true"] button,
+.card[draggable="true"] input,
+.card[draggable="true"] .editable {
+  cursor: auto;
+}
+.card-tag-edit {
+  height: 34px;
+  padding: 6px 12px;
+  cursor: text;
+}
+
+/* When editing an existing tag, keep the minimum width small (2 characters) */
+.card-tag-edit .card-tag-input {
+  min-width: 2ch;
+}

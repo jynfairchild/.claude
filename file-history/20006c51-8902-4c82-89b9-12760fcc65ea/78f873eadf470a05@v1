@@ -1,0 +1,30 @@
+.legal-header {
+  padding: 32px 40px;
+}
+
+.legal-brand {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.legal-brand-wordmark {
+  font-family: var(--font-primary);
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+}
+
+.legal-brand-base {
+  font-weight: 900;
+  color: var(--kkan-grey-900);
+}
+
+.legal-brand-accent {
+  font-weight: 500;
+  color: var(--kkan-grey-900);
+}
+
+.legal-brand:hover .legal-brand-base,
+.legal-brand:hover .legal-brand-accent {
+  color: var(--kkan-grey-600);
+}

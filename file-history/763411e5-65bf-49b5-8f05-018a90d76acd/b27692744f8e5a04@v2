@@ -1,0 +1,625 @@
+package handlers
+
+import (
+    "bytes"
+    "encoding/json"
+    stdlog "log"
+    "net/http"
+    "net/http/httptest"
+    "os"
+    "testing"
+
+    "github.com/gin-gonic/gin"
+    "golang.org/x/crypto/bcrypt"
+    "gorm.io/driver/sqlite"
+    "gorm.io/gorm"
+    gormlogger "gorm.io/gorm/logger"
+
+    a "simple_task_tracker/backend/internal/auth"
+    "simple_task_tracker/backend/internal/middleware"
+    "simple_task_tracker/backend/internal/models"
+)
+
+// setupAuthTestDB creates an in-memory DB with auth-related tables.
+func setupAuthTestDB(t *testing.T) *gorm.DB {
+    t.Helper()
+    glogger := gormlogger.New(
+        stdlog.New(testWriter{t}, "", 0),
+        gormlogger.Config{
+            SlowThreshold:             0,
+            LogLevel:                  gormlogger.Warn,
+            IgnoreRecordNotFoundError: true,
+            Colorful:                  false,
+        },
+    )
+    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{ Logger: glogger })
+    if err != nil {
+        t.Fatalf("failed to open sqlite: %v", err)
+    }
+    if err := db.AutoMigrate(&models.User{}, &models.RefreshToken{}, &models.EmailVerificationToken{}, &models.PasswordResetToken{}); err != nil {
+        t.Fatalf("failed to migrate: %v", err)
+    }
+    return db
+}
+
+// Reuse testWriter from sessions_test.go
+
+func setupAuthRouter(h *AuthHandler) (*gin.Engine, *httptest.ResponseRecorder) {
+    gin.SetMode(gin.TestMode)
+    r := gin.New()
+    r.Use(gin.Recovery())
+    api := r.Group("/api/v1")
+    api.POST("/auth/signup", h.Signup)
+    api.POST("/auth/login", h.Login)
+    api.POST("/auth/refresh", h.Refresh)
+    api.POST("/auth/logout", h.Logout)
+    api.POST("/auth/verify-email", h.VerifyEmail)
+    api.POST("/auth/request-password-reset", h.RequestPasswordReset)
+    api.POST("/auth/reset-password", h.ResetPassword)
+
+    // Protected routes
+    protected := api.Group("/")
+    protected.Use(middleware.AuthMiddleware())
+    protected.POST("/auth/logout-all", h.LogoutAll)
+    protected.POST("/auth/change-password", h.ChangePassword)
+    protected.GET("/auth/profile", h.GetProfile)
+    protected.PATCH("/auth/profile", h.UpdateProfile)
+
+    return r, httptest.NewRecorder()
+}
+
+func TestSignup_CreatesUser_AndReturnsTokens(t *testing.T) {
+    // Enable dev mode to return tokens in JSON response for testing
+    _ = os.Setenv("DEV_RETURN_TOKENS", "true")
+    defer os.Unsetenv("DEV_RETURN_TOKENS")
+
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    body := bytes.NewBufferString(`{"email":"new@ex.com","password":"password123","name":"New User"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusCreated {
+        t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
+    }
+
+    var resp map[string]any
+    if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+        t.Fatalf("invalid JSON: %v", err)
+    }
+    if resp["token"] == nil || resp["refresh_token"] == nil {
+        t.Fatalf("expected token and refresh_token in response")
+    }
+
+    // Verify user persisted with Argon2id hash
+    var u models.User
+    if err := db.Where("email = ?", "new@ex.com").First(&u).Error; err != nil {
+        t.Fatalf("user not found: %v", err)
+    }
+    if len(u.PasswordHash) == 0 || u.PasswordHash[:9] != "$argon2id" {
+        t.Fatalf("expected argon2id hash, got %q", u.PasswordHash)
+    }
+}
+
+func TestSignup_DuplicateEmail_Conflict(t *testing.T) {
+    db := setupAuthTestDB(t)
+    // Seed a user
+    u := models.User{Email: "dup@ex.com", Name: "Dup User", PasswordHash: "$argon2id$v=19$m=65536,t=1,p=1$X2NhbHNvbmlj$X2hhc2g"}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    body := bytes.NewBufferString(`{"email":"dup@ex.com","password":"password123","name":"Someone"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusConflict {
+        t.Fatalf("expected 409, got %d: %s", w.Code, w.Body.String())
+    }
+}
+
+func TestLogin_WithBcrypt_RehashesToArgon2(t *testing.T) {
+    db := setupAuthTestDB(t)
+    // Seed user with bcrypt hash for password "secret"
+    b, _ := bcrypt.GenerateFromPassword([]byte("secret"), bcrypt.DefaultCost)
+    u := models.User{Email: "login@ex.com", Name: "Login User", PasswordHash: string(b)}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    body := bytes.NewBufferString(`{"email":"login@ex.com","password":"secret"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+
+    // Reload and ensure PasswordHash migrated to argon2id
+    var got models.User
+    if err := db.First(&got, u.ID).Error; err != nil { t.Fatal(err) }
+    if len(got.PasswordHash) == 0 || got.PasswordHash[:9] != "$argon2id" {
+        t.Fatalf("expected argon2id rehash, got %q", got.PasswordHash)
+    }
+}
+
+func TestRefresh_Rotates_AndRevokesOld(t *testing.T) {
+    // Enable dev mode to return tokens in JSON response for testing
+    _ = os.Setenv("DEV_RETURN_TOKENS", "true")
+    defer os.Unsetenv("DEV_RETURN_TOKENS")
+
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    // Signup to get initial refresh token
+    sbody := bytes.NewBufferString(`{"email":"r@ex.com","password":"pass1234","name":"R U"}`)
+    sreq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", sbody)
+    sreq.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, sreq)
+    if w.Code != http.StatusCreated { t.Fatalf("signup: %d %s", w.Code, w.Body.String()) }
+    var sresp map[string]any
+    _ = json.Unmarshal(w.Body.Bytes(), &sresp)
+    oldRefresh := sresp["refresh_token"].(string)
+
+    // Refresh
+    w = httptest.NewRecorder()
+    rbody := bytes.NewBufferString(`{"refresh_token":"` + oldRefresh + `"}`)
+    rreq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/refresh", rbody)
+    rreq.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, rreq)
+    if w.Code != http.StatusOK { t.Fatalf("refresh: %d %s", w.Code, w.Body.String()) }
+    var rresp map[string]any
+    _ = json.Unmarshal(w.Body.Bytes(), &rresp)
+    newRefresh := rresp["refresh_token"].(string)
+
+    // Old token should be revoked
+    if _, err := a.FindValidRefreshToken(db, oldRefresh); err == nil {
+        t.Fatalf("expected old refresh token to be invalid after rotation")
+    }
+    // New token should be valid
+    if _, err := a.FindValidRefreshToken(db, newRefresh); err != nil {
+        t.Fatalf("new refresh token should be valid: %v", err)
+    }
+}
+
+func TestLogout_RevokesRefreshToken(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    // Create a user and a refresh token
+    u := models.User{Email: "lo@ex.com", Name: "Lo", PasswordHash: "phc"}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+    plain, _, err := a.CreateRefreshToken(db, u.ID, "ua", "ip")
+    if err != nil { t.Fatal(err) }
+
+    // Logout
+    body := bytes.NewBufferString(`{"refresh_token":"` + plain + `"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/logout", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("logout: %d %s", w.Code, w.Body.String()) }
+
+    // Token should be invalid now
+    if _, err := a.FindValidRefreshToken(db, plain); err == nil {
+        t.Fatalf("expected refresh token to be revoked")
+    }
+}
+
+func TestLogoutAll_RevokesAllForUser(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    // Seed user and tokens
+    u := models.User{Email: "all@ex.com", Name: "All", PasswordHash: "phc"}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+    t1, _, _ := a.CreateRefreshToken(db, u.ID, "ua", "ip")
+    t2, _, _ := a.CreateRefreshToken(db, u.ID, "ua2", "ip2")
+    _ = t1; _ = t2
+
+    // Protected endpoint requires a valid access token
+    _ = os.Setenv("JWT_SECRET", "test-secret")
+    access, err := a.GenerateToken(u.ID, u.Email, u.Name)
+    if err != nil { t.Fatal(err) }
+
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/logout-all", nil)
+    req.Header.Set("Authorization", "Bearer "+access)
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("logout-all: %d %s", w.Code, w.Body.String()) }
+
+    // All tokens should be revoked
+    var cnt int64
+    if err := db.Model(&models.RefreshToken{}).Where("user_id = ? AND revoked_at IS NOT NULL", u.ID).Count(&cnt).Error; err != nil {
+        t.Fatal(err)
+    }
+    if cnt != 2 {
+        t.Fatalf("expected 2 revoked tokens, got %d", cnt)
+    }
+}
+
+func TestVerifyEmail_SetsVerifiedAt(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    // Seed user
+    u := models.User{Email: "ver@ex.com", Name: "Ver", PasswordHash: "phc"}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+
+    // Create token
+    token, _, err := a.CreateEmailVerificationToken(db, u.ID)
+    if err != nil { t.Fatal(err) }
+
+    // Verify
+    body := bytes.NewBufferString(`{"token":"` + token + `"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/verify-email", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("verify: %d %s", w.Code, w.Body.String()) }
+
+    var got models.User
+    if err := db.First(&got, u.ID).Error; err != nil { t.Fatal(err) }
+    if got.EmailVerifiedAt == nil {
+        t.Fatalf("expected EmailVerifiedAt to be set")
+    }
+}
+
+func TestRequestPasswordReset_ReturnsTokenForExistingEmail(t *testing.T) {
+    // Ensure dev echo is enabled for this test
+    _ = os.Setenv("DEV_ECHO_TOKENS", "true")
+
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    // Seed user
+    u := models.User{Email: "pw@ex.com", Name: "PW", PasswordHash: "phc"}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+
+    // Request
+    body := bytes.NewBufferString(`{"email":"pw@ex.com"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/request-password-reset", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("request reset: %d %s", w.Code, w.Body.String()) }
+
+    var resp map[string]any
+    if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil { t.Fatalf("invalid JSON: %v", err) }
+    if resp["reset_token"] == nil {
+        t.Fatalf("expected dev reset_token in response for existing email")
+    }
+}
+
+func TestRequestPasswordReset_UnknownEmail_StillOK(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    body := bytes.NewBufferString(`{"email":"unknown@ex.com"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/request-password-reset", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("request reset: %d %s", w.Code, w.Body.String()) }
+    var resp map[string]any
+    _ = json.Unmarshal(w.Body.Bytes(), &resp)
+    if _, ok := resp["reset_token"]; ok {
+        t.Fatalf("should not include reset_token for unknown email")
+    }
+}
+
+func TestResetPassword_UpdatesHash_RevokesTokens(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    // Seed user with known password
+    oldHash, _ := a.HashPassword("oldpass123")
+    u := models.User{Email: "rs@ex.com", Name: "RS", PasswordHash: oldHash}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+    // Seed refresh tokens
+    _, _, _ = a.CreateRefreshToken(db, u.ID, "ua1", "ip1")
+    _, _, _ = a.CreateRefreshToken(db, u.ID, "ua2", "ip2")
+
+    // Create reset token
+    token, _, err := a.CreatePasswordResetToken(db, u.ID)
+    if err != nil { t.Fatal(err) }
+
+    // Reset
+    body := bytes.NewBufferString(`{"token":"` + token + `","new_password":"newpass789"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/reset-password", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("reset: %d %s", w.Code, w.Body.String()) }
+
+    // Password updated
+    var got models.User
+    if err := db.First(&got, u.ID).Error; err != nil { t.Fatal(err) }
+    okOld, _, _ := a.VerifyAndMaybeRehash(got.PasswordHash, "oldpass123")
+    okNew, _, _ := a.VerifyAndMaybeRehash(got.PasswordHash, "newpass789")
+    if okOld || !okNew { t.Fatalf("password not updated correctly") }
+
+    // Tokens revoked
+    var cnt int64
+    if err := db.Model(&models.RefreshToken{}).Where("user_id = ? AND revoked_at IS NOT NULL", u.ID).Count(&cnt).Error; err != nil { t.Fatal(err) }
+    if cnt != 2 { t.Fatalf("expected 2 revoked tokens, got %d", cnt) }
+}
+
+func TestChangePassword_Protected_AndRevokesTokens(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    // Seed user and tokens
+    oldHash, _ := a.HashPassword("oldpass123")
+    u := models.User{Email: "cp@ex.com", Name: "CP", PasswordHash: oldHash}
+    if err := db.Create(&u).Error; err != nil { t.Fatal(err) }
+    // One token
+    _, _, _ = a.CreateRefreshToken(db, u.ID, "ua", "ip")
+
+    _ = os.Setenv("JWT_SECRET", "test-secret")
+    access, err := a.GenerateToken(u.ID, u.Email, u.Name)
+    if err != nil { t.Fatal(err) }
+
+    body := bytes.NewBufferString(`{"current_password":"oldpass123","new_password":"newpass456"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/change-password", body)
+    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("Authorization", "Bearer "+access)
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("change password: %d %s", w.Code, w.Body.String()) }
+
+    var got models.User
+    if err := db.First(&got, u.ID).Error; err != nil { t.Fatal(err) }
+    okNew, _, _ := a.VerifyAndMaybeRehash(got.PasswordHash, "newpass456")
+    if !okNew { t.Fatalf("expected new password to be valid") }
+
+    // Tokens revoked
+    var cnt int64
+    if err := db.Model(&models.RefreshToken{}).Where("user_id = ? AND revoked_at IS NOT NULL", u.ID).Count(&cnt).Error; err != nil { t.Fatal(err) }
+    if cnt != 1 { t.Fatalf("expected 1 revoked token, got %d", cnt) }
+}
+
+// ========== Actionbar Tests ==========
+
+func TestSignup_ReturnsEmptyActionbar(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    body := bytes.NewBufferString(`{"email":"actionbar@ex.com","password":"password123","name":"Action User"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/signup", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusCreated {
+        t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
+    }
+
+    var resp map[string]any
+    if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+        t.Fatalf("invalid JSON: %v", err)
+    }
+
+    user := resp["user"].(map[string]any)
+    actionbar := user["actionbar"]
+    if actionbar == nil {
+        t.Fatalf("expected actionbar in response, got nil")
+    }
+    arr, ok := actionbar.([]any)
+    if !ok {
+        t.Fatalf("expected actionbar to be array, got %T", actionbar)
+    }
+    if len(arr) != 0 {
+        t.Fatalf("expected empty actionbar array, got %v", arr)
+    }
+
+    // Verify in database
+    var u models.User
+    if err := db.Where("email = ?", "actionbar@ex.com").First(&u).Error; err != nil {
+        t.Fatalf("user not found: %v", err)
+    }
+    if u.Actionbar == nil {
+        t.Fatalf("expected actionbar to be initialized in DB")
+    }
+    if len(u.Actionbar) != 0 {
+        t.Fatalf("expected empty actionbar in DB, got %v", u.Actionbar)
+    }
+}
+
+func TestLogin_ReturnsActionbar(t *testing.T) {
+    db := setupAuthTestDB(t)
+    // Seed user with actionbar
+    hash, _ := a.HashPassword("secret")
+    u := models.User{
+        Email:        "login-ab@ex.com",
+        Name:         "Login AB",
+        PasswordHash: hash,
+        Actionbar:    []string{"pomodoro", "meeting"},
+    }
+    if err := db.Create(&u).Error; err != nil {
+        t.Fatal(err)
+    }
+
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    body := bytes.NewBufferString(`{"email":"login-ab@ex.com","password":"secret"}`)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+
+    var resp map[string]any
+    if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+        t.Fatalf("invalid JSON: %v", err)
+    }
+
+    user := resp["user"].(map[string]any)
+    actionbar := user["actionbar"].([]any)
+    if len(actionbar) != 2 {
+        t.Fatalf("expected 2 items in actionbar, got %d", len(actionbar))
+    }
+    if actionbar[0].(string) != "pomodoro" || actionbar[1].(string) != "meeting" {
+        t.Fatalf("unexpected actionbar values: %v", actionbar)
+    }
+}
+
+func TestGetProfile_ReturnsActionbar(t *testing.T) {
+    db := setupAuthTestDB(t)
+    u := models.User{
+        Email:        "profile-ab@ex.com",
+        Name:         "Profile AB",
+        PasswordHash: "phc",
+        Actionbar:    []string{"break"},
+    }
+    if err := db.Create(&u).Error; err != nil {
+        t.Fatal(err)
+    }
+
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    _ = os.Setenv("JWT_SECRET", "test-secret")
+    access, err := a.GenerateToken(u.ID, u.Email, u.Name)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    req := httptest.NewRequest(http.MethodGet, "/api/v1/auth/profile", nil)
+    req.Header.Set("Authorization", "Bearer "+access)
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+
+    var resp map[string]any
+    if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+        t.Fatalf("invalid JSON: %v", err)
+    }
+
+    user := resp["user"].(map[string]any)
+    actionbar := user["actionbar"].([]any)
+    if len(actionbar) != 1 || actionbar[0].(string) != "break" {
+        t.Fatalf("expected ['break'], got %v", actionbar)
+    }
+}
+
+func TestUpdateProfile_UpdatesActionbar(t *testing.T) {
+    db := setupAuthTestDB(t)
+    u := models.User{
+        Email:        "update-ab@ex.com",
+        Name:         "Update AB",
+        PasswordHash: "phc",
+        Actionbar:    []string{},
+    }
+    if err := db.Create(&u).Error; err != nil {
+        t.Fatal(err)
+    }
+
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    _ = os.Setenv("JWT_SECRET", "test-secret")
+    access, err := a.GenerateToken(u.ID, u.Email, u.Name)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    body := bytes.NewBufferString(`{"actionbar":["pomodoro","break","meeting"]}`)
+    req := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/profile", body)
+    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("Authorization", "Bearer "+access)
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+
+    var resp map[string]any
+    if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+        t.Fatalf("invalid JSON: %v", err)
+    }
+
+    user := resp["user"].(map[string]any)
+    actionbar := user["actionbar"].([]any)
+    if len(actionbar) != 3 {
+        t.Fatalf("expected 3 items in response actionbar, got %d", len(actionbar))
+    }
+
+    // Verify in database
+    var got models.User
+    if err := db.First(&got, u.ID).Error; err != nil {
+        t.Fatal(err)
+    }
+    if len(got.Actionbar) != 3 {
+        t.Fatalf("expected 3 items in DB actionbar, got %d", len(got.Actionbar))
+    }
+}
+
+func TestUpdateProfile_ClearsActionbar(t *testing.T) {
+    db := setupAuthTestDB(t)
+    u := models.User{
+        Email:        "clear-ab@ex.com",
+        Name:         "Clear AB",
+        PasswordHash: "phc",
+        Actionbar:    []string{"pomodoro", "break"},
+    }
+    if err := db.Create(&u).Error; err != nil {
+        t.Fatal(err)
+    }
+
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    _ = os.Setenv("JWT_SECRET", "test-secret")
+    access, err := a.GenerateToken(u.ID, u.Email, u.Name)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    body := bytes.NewBufferString(`{"actionbar":[]}`)
+    req := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/profile", body)
+    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("Authorization", "Bearer "+access)
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+
+    // Verify in database
+    var got models.User
+    if err := db.First(&got, u.ID).Error; err != nil {
+        t.Fatal(err)
+    }
+    if len(got.Actionbar) != 0 {
+        t.Fatalf("expected empty actionbar in DB, got %v", got.Actionbar)
+    }
+}
+
+func TestUpdateProfile_Unauthorized(t *testing.T) {
+    db := setupAuthTestDB(t)
+    h := NewAuthHandler(db)
+    r, w := setupAuthRouter(h)
+
+    body := bytes.NewBufferString(`{"actionbar":["pomodoro"]}`)
+    req := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/profile", body)
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusUnauthorized {
+        t.Fatalf("expected 401, got %d: %s", w.Code, w.Body.String())
+    }
+}

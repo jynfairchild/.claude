@@ -1,0 +1,232 @@
+2025-12-27T05:20:20.578Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (16.5ms): security find-generic-password -a $USER -w -s "Claude Code"
+2025-12-27T05:20:20.595Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (16.2ms): security find-generic-password -a "dangercat" -w -s "Claude Code-credentials"
+2025-12-27T05:20:20.603Z [DEBUG] Watching for changes in setting files /Users/dangercat/.claude...
+2025-12-27T05:20:20.627Z [DEBUG] [LSP MANAGER] initializeLspServerManager() called
+2025-12-27T05:20:20.627Z [DEBUG] [LSP MANAGER] Created manager instance, state=pending
+2025-12-27T05:20:20.627Z [DEBUG] [LSP MANAGER] Starting async initialization (generation 1)
+2025-12-27T05:20:20.630Z [DEBUG] LSP server manager initialized successfully
+2025-12-27T05:20:20.630Z [DEBUG] LSP notification handlers registered successfully for all 0 server(s)
+2025-12-27T05:20:20.632Z [DEBUG] Loading plugin typescript-lsp from source: "./plugins/typescript-lsp"
+2025-12-27T05:20:20.633Z [DEBUG] Using provided version for typescript-lsp@claude-plugins-official: 1.0.0
+2025-12-27T05:20:20.633Z [DEBUG] Plugin typescript-lsp@claude-plugins-official version 1.0.0 already cached at /Users/dangercat/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0
+2025-12-27T05:20:20.633Z [DEBUG] Copied local plugin typescript-lsp to versioned cache: /Users/dangercat/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0
+2025-12-27T05:20:20.633Z [DEBUG] Plugin typescript-lsp has no entry.skills defined
+2025-12-27T05:20:20.637Z [DEBUG] Loading plugin gopls-lsp from source: "./plugins/gopls-lsp"
+2025-12-27T05:20:20.637Z [DEBUG] Using provided version for gopls-lsp@claude-plugins-official: 1.0.0
+2025-12-27T05:20:20.637Z [DEBUG] Plugin gopls-lsp@claude-plugins-official version 1.0.0 already cached at /Users/dangercat/.claude/plugins/cache/claude-plugins-official/gopls-lsp/1.0.0
+2025-12-27T05:20:20.637Z [DEBUG] Copied local plugin gopls-lsp to versioned cache: /Users/dangercat/.claude/plugins/cache/claude-plugins-official/gopls-lsp/1.0.0
+2025-12-27T05:20:20.637Z [DEBUG] Plugin gopls-lsp has no entry.skills defined
+2025-12-27T05:20:20.637Z [DEBUG] Found 2 plugins (2 enabled, 0 disabled)
+2025-12-27T05:20:20.639Z [DEBUG] Stats cache is up to date
+2025-12-27T05:20:20.642Z [DEBUG] Loading skills from: managed=/Library/Application Support/ClaudeCode/.claude/skills, user=/Users/dangercat/.claude/skills, project=[]
+2025-12-27T05:20:20.642Z [DEBUG] Passes: Using fresh cached eligibility data
+2025-12-27T05:20:20.745Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (100.6ms): ps aux | grep -E "Visual Studio Code|Code Helper|Cursor Helper|Windsurf Helper|IntelliJ IDEA|PyCharm
+2025-12-27T05:20:20.748Z [DEBUG] Loaded 2 installed plugins from /Users/dangercat/.claude/plugins/installed_plugins.json
+2025-12-27T05:20:20.769Z [DEBUG] Creating shell snapshot for zsh (/bin/zsh)
+2025-12-27T05:20:20.769Z [DEBUG] Looking for shell config file: /Users/dangercat/.zshrc
+2025-12-27T05:20:20.769Z [DEBUG] Snapshots directory: /Users/dangercat/.claude/shell-snapshots
+2025-12-27T05:20:20.770Z [DEBUG] Creating snapshot at: /Users/dangercat/.claude/shell-snapshots/snapshot-zsh-1766812820769-uyiyf7.sh
+2025-12-27T05:20:20.770Z [DEBUG] Shell binary exists: true
+2025-12-27T05:20:20.770Z [DEBUG] Execution timeout: 10000ms
+2025-12-27T05:20:20.771Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/20006c51-8902-4c82-89b9-12760fcc65ea-agent-20006c51-8902-4c82-89b9-12760fcc65ea.json.tmp.31642.1766812820771
+2025-12-27T05:20:20.780Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.6ms)
+2025-12-27T05:20:20.780Z [DEBUG] Temp file written successfully, size: 2 bytes
+2025-12-27T05:20:20.780Z [DEBUG] Renaming /Users/dangercat/.claude/todos/20006c51-8902-4c82-89b9-12760fcc65ea-agent-20006c51-8902-4c82-89b9-12760fcc65ea.json.tmp.31642.1766812820771 to /Users/dangercat/.claude/todos/20006c51-8902-4c82-89b9-12760fcc65ea-agent-20006c51-8902-4c82-89b9-12760fcc65ea.json
+2025-12-27T05:20:20.780Z [DEBUG] File /Users/dangercat/.claude/todos/20006c51-8902-4c82-89b9-12760fcc65ea-agent-20006c51-8902-4c82-89b9-12760fcc65ea.json written atomically
+2025-12-27T05:20:20.785Z [DEBUG] getPluginSkills: Processing 2 enabled plugins
+2025-12-27T05:20:20.785Z [DEBUG] Checking plugin typescript-lsp: skillsPath=none, skillsPaths=0 paths
+2025-12-27T05:20:20.785Z [DEBUG] Checking plugin gopls-lsp: skillsPath=none, skillsPaths=0 paths
+2025-12-27T05:20:20.785Z [DEBUG] Total plugin skills loaded: 0
+2025-12-27T05:20:20.785Z [DEBUG] Total plugin commands loaded: 0
+2025-12-27T05:20:20.785Z [DEBUG] Registered 0 hooks from 2 plugins
+2025-12-27T05:20:20.790Z [DEBUG] Total plugin agents loaded: 0
+2025-12-27T05:20:20.797Z [DEBUG] Git remote URL: git@github.com:jynfairchild/astrotask.git
+2025-12-27T05:20:20.797Z [DEBUG] Parsed repository: jynfairchild/astrotask from git@github.com:jynfairchild/astrotask.git
+2025-12-27T05:20:20.797Z [DEBUG] Parsed repository: jynfairchild/astrotask from URL: git@github.com:jynfairchild/astrotask.git
+2025-12-27T05:20:20.797Z [DEBUG] Path /Users/dangercat/Documents/GitHub/astrotask already tracked for repo jynfairchild/astrotask
+2025-12-27T05:20:20.798Z [DEBUG] Ripgrep first use test: PASSED (mode=builtin, path=/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/arm64-darwin/rg)
+2025-12-27T05:20:20.805Z [DEBUG] Loaded 5 unique skills (managed: 0, user: 0, project: 0, legacy commands: 5)
+2025-12-27T05:20:20.805Z [DEBUG] getSkills returning: 5 skill dir commands, 0 plugin skills
+2025-12-27T05:20:20.906Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.31642.1766812820906
+2025-12-27T05:20:20.906Z [DEBUG] Preserving file permissions: 100644
+2025-12-27T05:20:20.915Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.3ms)
+2025-12-27T05:20:20.915Z [DEBUG] Temp file written successfully, size: 75415 bytes
+2025-12-27T05:20:20.915Z [DEBUG] Applied original permissions to temp file
+2025-12-27T05:20:20.915Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.31642.1766812820906 to /Users/dangercat/.claude.json
+2025-12-27T05:20:20.915Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-27T05:20:21.143Z [DEBUG] Passes: Using fresh cached eligibility data
+2025-12-27T05:20:21.148Z [DEBUG] All plugins already exist, skipping migration
+2025-12-27T05:20:21.151Z [DEBUG] Initialized versioned plugins system with 2 plugins
+2025-12-27T05:20:21.154Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.31642.1766812821154
+2025-12-27T05:20:21.154Z [DEBUG] Preserving file permissions: 100644
+2025-12-27T05:20:21.160Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.4ms)
+2025-12-27T05:20:21.160Z [DEBUG] Temp file written successfully, size: 75415 bytes
+2025-12-27T05:20:21.160Z [DEBUG] Applied original permissions to temp file
+2025-12-27T05:20:21.160Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.31642.1766812821154 to /Users/dangercat/.claude.json
+2025-12-27T05:20:21.161Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-27T05:20:21.166Z [DEBUG] Getting matching hook commands for SessionStart with query: startup
+2025-12-27T05:20:21.166Z [DEBUG] Found 0 hook matchers in settings
+2025-12-27T05:20:21.166Z [DEBUG] Matched 0 unique hooks for query "startup" (0 before deduplication)
+2025-12-27T05:20:21.171Z [DEBUG] Skills and commands included in Skill tool: context, commit, explore, wdiary, move_claude
+2025-12-27T05:20:21.209Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.31642.1766812821209
+2025-12-27T05:20:21.209Z [DEBUG] Preserving file permissions: 100644
+2025-12-27T05:20:21.215Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.3ms)
+2025-12-27T05:20:21.215Z [DEBUG] Temp file written successfully, size: 75445 bytes
+2025-12-27T05:20:21.215Z [DEBUG] Applied original permissions to temp file
+2025-12-27T05:20:21.215Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.31642.1766812821209 to /Users/dangercat/.claude.json
+2025-12-27T05:20:21.215Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-27T05:20:21.218Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.31642.1766812821218
+2025-12-27T05:20:21.218Z [DEBUG] Preserving file permissions: 100644
+2025-12-27T05:20:21.224Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.9ms)
+2025-12-27T05:20:21.224Z [DEBUG] Temp file written successfully, size: 75372 bytes
+2025-12-27T05:20:21.224Z [DEBUG] Applied original permissions to temp file
+2025-12-27T05:20:21.224Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.31642.1766812821218 to /Users/dangercat/.claude.json
+2025-12-27T05:20:21.224Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-27T05:20:21.227Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.31642.1766812821227
+2025-12-27T05:20:21.227Z [DEBUG] Preserving file permissions: 100644
+2025-12-27T05:20:21.232Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.7ms)
+2025-12-27T05:20:21.232Z [DEBUG] Temp file written successfully, size: 75372 bytes
+2025-12-27T05:20:21.233Z [DEBUG] Applied original permissions to temp file
+2025-12-27T05:20:21.233Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.31642.1766812821227 to /Users/dangercat/.claude.json
+2025-12-27T05:20:21.233Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-27T05:20:21.236Z [DEBUG] Official marketplace auto-install skipped: already_attempted
+2025-12-27T05:20:21.237Z [DEBUG] performStartupChecks called
+2025-12-27T05:20:21.237Z [DEBUG] Trust not accepted for current directory - skipping plugin installations
+2025-12-27T05:20:21.241Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-27T05:20:21.243Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.31642.1766812821243
+2025-12-27T05:20:21.243Z [DEBUG] Preserving file permissions: 100644
+2025-12-27T05:20:21.248Z [DEBUG] Temp file written successfully, size: 75445 bytes
+2025-12-27T05:20:21.248Z [DEBUG] Applied original permissions to temp file
+2025-12-27T05:20:21.248Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.31642.1766812821243 to /Users/dangercat/.claude.json
+2025-12-27T05:20:21.249Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-27T05:20:21.250Z [DEBUG] Loaded plugins - Enabled: 2, Disabled: 0, Commands: 0, Agents: 0, Errors: 0
+2025-12-27T05:20:21.257Z [DEBUG] Getting matching hook commands for SubagentStart with query: Explore
+2025-12-27T05:20:21.257Z [DEBUG] Found 0 hook matchers in settings
+2025-12-27T05:20:21.257Z [DEBUG] Matched 0 unique hooks for query "Explore" (0 before deduplication)
+2025-12-27T05:20:21.260Z [DEBUG] Getting matching hook commands for SubagentStart with query: Plan
+2025-12-27T05:20:21.260Z [DEBUG] Found 0 hook matchers in settings
+2025-12-27T05:20:21.260Z [DEBUG] Matched 0 unique hooks for query "Plan" (0 before deduplication)
+2025-12-27T05:20:21.280Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.7ms)
+2025-12-27T05:20:21.283Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.31642.1766812821283
+2025-12-27T05:20:21.283Z [DEBUG] Preserving file permissions: 100644
+2025-12-27T05:20:21.288Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.0ms)
+2025-12-27T05:20:21.288Z [DEBUG] Temp file written successfully, size: 75445 bytes
+2025-12-27T05:20:21.288Z [DEBUG] Applied original permissions to temp file
+2025-12-27T05:20:21.288Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.31642.1766812821283 to /Users/dangercat/.claude.json
+2025-12-27T05:20:21.288Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-27T05:20:21.295Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.8ms)
+2025-12-27T05:20:21.301Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.1ms)
+2025-12-27T05:20:21.523Z [DEBUG] Shell snapshot created successfully (263660 bytes)
+2025-12-27T05:20:21.898Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.1ms)
+2025-12-27T05:20:21.898Z [DEBUG] Successfully refreshed marketplace: claude-plugins-official
+2025-12-27T05:20:21.898Z [DEBUG] Plugin autoupdate: checking installed plugins
+2025-12-27T05:20:21.903Z [DEBUG] Using provided version for typescript-lsp@claude-plugins-official: 1.0.0
+2025-12-27T05:20:21.903Z [DEBUG] Using provided version for gopls-lsp@claude-plugins-official: 1.0.0
+2025-12-27T05:20:22.220Z [DEBUG] Stream started - received first chunk
+2025-12-27T05:20:22.930Z [DEBUG] Stream started - received first chunk
+2025-12-27T05:20:23.698Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-27T05:20:23.698Z [DEBUG] Found 0 hook matchers in settings
+2025-12-27T05:20:23.698Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-27T05:20:25.092Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-27T05:20:25.092Z [DEBUG] Found 0 hook matchers in settings
+2025-12-27T05:20:25.092Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-27T05:21:00.628Z [DEBUG] Getting matching hook commands for SessionStart with query: resume
+2025-12-27T05:21:00.628Z [DEBUG] Found 0 hook matchers in settings
+2025-12-27T05:21:00.628Z [DEBUG] Matched 0 unique hooks for query "resume" (0 before deduplication)
+2025-12-27T05:21:00.632Z [DEBUG] FileHistory: Copied backup 2b33530aaddc6bdb@v7 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.633Z [DEBUG] FileHistory: Copied backup f777e832140c71d7@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.633Z [DEBUG] FileHistory: Copied backup 4782b4bb10e29c90@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.634Z [DEBUG] FileHistory: Copied backup d304092df2435c95@v11 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.635Z [DEBUG] FileHistory: Copied backup ca72c2e21e968ecc@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.636Z [DEBUG] FileHistory: Copied backup 3e9b92a58be42c53@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.637Z [DEBUG] FileHistory: Copied backup fda5b6d47f4b2c1f@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.637Z [DEBUG] FileHistory: Copied backup 988ce82b2ccae90c@v9 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.638Z [DEBUG] FileHistory: Copied backup 033a00f4e6b65ce8@v8 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.638Z [DEBUG] FileHistory: Copied backup 9dba5a721ea36be9@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.639Z [DEBUG] FileHistory: Copied backup cc20a09ea08be118@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.640Z [DEBUG] FileHistory: Copied backup 6c489b3d3617118c@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.641Z [DEBUG] FileHistory: Copied backup 074f7358c0e945f6@v4 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.641Z [DEBUG] FileHistory: Copied backup b25809e02b54c78e@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.642Z [DEBUG] FileHistory: Copied backup 95bc66bf7bbd60bc@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.643Z [DEBUG] FileHistory: Copied backup d4b2b324bee6a478@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.644Z [DEBUG] FileHistory: Copied backup 8983bab31d4c54b4@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.644Z [DEBUG] FileHistory: Copied backup 121c6f71bd88d373@v4 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.645Z [DEBUG] FileHistory: Copied backup 03bbcb51d1ff9229@v10 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.646Z [DEBUG] FileHistory: Copied backup f5acd52a57d38baa@v5 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.646Z [DEBUG] FileHistory: Copied backup a9ad71ae67e87127@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.647Z [DEBUG] FileHistory: Copied backup edfcf0ff621371ef@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.647Z [DEBUG] FileHistory: Copied backup 68899e53cfe930e9@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.648Z [DEBUG] FileHistory: Copied backup 3482f85cfe1d98a5@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.648Z [DEBUG] FileHistory: Copied backup 2aa8eefd9ec09c17@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.649Z [DEBUG] FileHistory: Copied backup 35094cbfaeee96d9@v5 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.649Z [DEBUG] FileHistory: Copied backup 61f9bccead4ca327@v17 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.650Z [DEBUG] FileHistory: Copied backup 87922d1882869e5d@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.650Z [DEBUG] FileHistory: Copied backup 6342ad28df53ef86@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.651Z [DEBUG] FileHistory: Copied backup b3eb4f0864bb98b9@v4 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.651Z [DEBUG] FileHistory: Copied backup 2eb17cf86cc008bc@v12 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.651Z [DEBUG] FileHistory: Copied backup 0b75dbf00951f78d@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.652Z [DEBUG] FileHistory: Copied backup 2344b8e1d9584c5a@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.652Z [DEBUG] FileHistory: Copied backup 79ea48072f57d3e6@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.653Z [DEBUG] FileHistory: Copied backup b27692744f8e5a04@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.653Z [DEBUG] FileHistory: Copied backup e04c2d259b8bc6a3@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.654Z [DEBUG] FileHistory: Copied backup b758bfaa3cdae4d9@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.654Z [DEBUG] FileHistory: Copied backup e1eda3bc4f1f90dd@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.655Z [DEBUG] FileHistory: Copied backup e92b766a7a7b5e77@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.655Z [DEBUG] FileHistory: Copied backup af45c776b83a0e38@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.655Z [DEBUG] FileHistory: Copied backup 254f91810fbd7864@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.656Z [DEBUG] FileHistory: Copied backup d8bf1cc4c330f936@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.656Z [DEBUG] FileHistory: Copied backup 2e9226a45cf2a592@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.657Z [DEBUG] FileHistory: Copied backup 4c3adddab4a47f56@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.657Z [DEBUG] FileHistory: Copied backup 9f65f7e9149f6ca7@v6 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.658Z [DEBUG] FileHistory: Copied backup 0c7b4c4f55b0228a@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.658Z [DEBUG] FileHistory: Copied backup be284e430b48aa79@v4 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.659Z [DEBUG] FileHistory: Copied backup f294dc2ff78ace89@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.659Z [DEBUG] FileHistory: Copied backup eb2c60829843178c@v5 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.660Z [DEBUG] FileHistory: Copied backup 7637a8876c641f37@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.660Z [DEBUG] FileHistory: Copied backup 134c9b1781fc54f9@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.661Z [DEBUG] FileHistory: Copied backup edf48982574874e7@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.661Z [DEBUG] FileHistory: Copied backup a2636a6b1bcdbbf3@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.661Z [DEBUG] FileHistory: Copied backup 7655d7ba559a3ec5@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.662Z [DEBUG] FileHistory: Copied backup b64cabbf7f645c4a@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.662Z [DEBUG] FileHistory: Copied backup fd3e850d47a4afe6@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.662Z [DEBUG] FileHistory: Copied backup edc01863ca54c149@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.663Z [DEBUG] FileHistory: Copied backup 2251ad3d9edb9a2e@v19 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.663Z [DEBUG] FileHistory: Copied backup 2035cf1790292c1c@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.664Z [DEBUG] FileHistory: Copied backup b11664e19b94bf68@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.664Z [DEBUG] FileHistory: Copied backup 00c82d720508a408@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.664Z [DEBUG] FileHistory: Copied backup 78f873eadf470a05@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.665Z [DEBUG] FileHistory: Copied backup 32ef18187954d0d7@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.665Z [DEBUG] FileHistory: Copied backup bfd4e2f4b9a06b1e@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.665Z [DEBUG] FileHistory: Copied backup c500505750c34e7e@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.666Z [DEBUG] FileHistory: Copied backup bc7145cd31594fef@v21 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.666Z [DEBUG] FileHistory: Copied backup c11f04a5a1e3d556@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.666Z [DEBUG] FileHistory: Copied backup 6d606f83ca5bec2d@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.667Z [DEBUG] FileHistory: Copied backup 1bc1ac356277b037@v8 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.667Z [DEBUG] FileHistory: Copied backup 1c5efaf1dcccd8c9@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.667Z [DEBUG] FileHistory: Copied backup 76ec945f25fc1aad@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.668Z [DEBUG] FileHistory: Copied backup 4d95b5ec315a9b4b@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.668Z [DEBUG] FileHistory: Copied backup 103ad86bfd1b2f40@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.668Z [DEBUG] FileHistory: Copied backup b06f6d95ac4fa83f@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.669Z [DEBUG] FileHistory: Copied backup 95506d71896a6666@v12 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.669Z [DEBUG] FileHistory: Copied backup 895875f7b9c21f1b@v9 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.670Z [DEBUG] FileHistory: Copied backup b1560be806bd17d9@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.670Z [DEBUG] FileHistory: Copied backup 520abf09ffcc7dbd@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.670Z [DEBUG] FileHistory: Copied backup 641676f71fe6817e@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.671Z [DEBUG] FileHistory: Copied backup d7473efef4f65520@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.671Z [DEBUG] FileHistory: Copied backup 86393d2e84810a80@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.672Z [DEBUG] FileHistory: Copied backup c2adb569967e96cb@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.672Z [DEBUG] FileHistory: Copied backup 86d05c82ebfa49ca@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.672Z [DEBUG] FileHistory: Copied backup 7c44b93112a164cb@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.673Z [DEBUG] FileHistory: Copied backup f692156350324f9e@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.673Z [DEBUG] FileHistory: Copied backup 3fac8bb926f0434e@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.674Z [DEBUG] FileHistory: Copied backup e53130e2f3b16d3a@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.674Z [DEBUG] FileHistory: Copied backup 53cf5e4ff069ffc2@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.674Z [DEBUG] FileHistory: Copied backup 5bd6478418469ddf@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.675Z [DEBUG] FileHistory: Copied backup cea11d45e4e19201@v27 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.675Z [DEBUG] FileHistory: Copied backup ee5c1da3217f3078@v7 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.675Z [DEBUG] FileHistory: Copied backup ca1c4d24f14bfdc6@v2 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.676Z [DEBUG] FileHistory: Copied backup 7ba877b2a2cc36ab@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.676Z [DEBUG] FileHistory: Copied backup b979cd18e2147027@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.676Z [DEBUG] FileHistory: Copied backup 0007a11ea41ce928@v3 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.677Z [DEBUG] FileHistory: Copied backup af0f77e5f19603e6@v1 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea
+2025-12-27T05:21:00.677Z [DEBUG] FileHistory: Copied backup b6eac1ce8b7842d0@v7 from session 2c85895c-26d0-4eb0-87b4-ef0d22b26e1b to 20006c51-8902-4c82-89b9-12760fcc65ea

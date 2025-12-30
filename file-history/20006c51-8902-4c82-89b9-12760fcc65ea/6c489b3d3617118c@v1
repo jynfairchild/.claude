@@ -1,0 +1,51 @@
+import { authApi } from './authApi';
+import { authLog } from '@/utils/debug';
+
+// Cooldown window to avoid back-to-back refreshes
+const COOLDOWN_MS = 2000;
+
+let inFlight: Promise<void> | null = null;
+let lastSuccessAt = 0;
+
+export function getLastRefreshSuccessAt(): number { return lastSuccessAt; }
+
+/**
+ * Global refresh gate that deduplicates concurrent refresh requests.
+ * Since tokens are now in HttpOnly cookies, we don't need to track token values.
+ */
+export async function globalRefresh(): Promise<void> {
+  // If there's an in-flight refresh, join it
+  if (inFlight) {
+    authLog('globalRefresh: join in-flight refresh');
+    return inFlight;
+  }
+
+  const now = Date.now();
+
+  // Within cooldown: skip to avoid rotation thrash
+  if (now - lastSuccessAt < COOLDOWN_MS) {
+    authLog('globalRefresh: within cooldown, skipping', { cooldownMs: COOLDOWN_MS, sinceMs: now - lastSuccessAt });
+    return;
+  }
+
+  authLog('globalRefresh: starting network refresh');
+  inFlight = (async () => {
+    await authApi.refresh();
+    lastSuccessAt = Date.now();
+    authLog('globalRefresh: refresh success', { at: lastSuccessAt });
+  })();
+
+  try {
+    return await inFlight;
+  } finally {
+    authLog('globalRefresh: clear in-flight');
+    inFlight = null;
+  }
+}
+
+// Test utility to clear cached refresh state between specs
+export function resetRefreshGateForTests(): void {
+  if (process.env.NODE_ENV !== 'test') return;
+  inFlight = null;
+  lastSuccessAt = 0;
+}

@@ -1,0 +1,68 @@
+package models
+
+// AggregateStats is the response for the metrics overview endpoint.
+// All values are computed on-demand via SQL queries.
+type AggregateStats struct {
+	Users    UserStats    `json:"users"`
+	Tasks    TaskStats    `json:"tasks"`
+	Sessions SessionStats `json:"sessions"`
+	TopUsers []TopUser    `json:"top_users"`
+}
+
+// UserStats contains user-related metrics
+type UserStats struct {
+	Total      int64 `json:"total"`
+	Verified   int64 `json:"verified"`
+	Unverified int64 `json:"unverified"`
+	Admins     int64 `json:"admins"`
+	Today      int64 `json:"today"`
+	ThisWeek   int64 `json:"this_week"`
+	ThisMonth  int64 `json:"this_month"`
+	ThisYear   int64 `json:"this_year"`
+}
+
+// TaskStats contains task-related metrics
+type TaskStats struct {
+	Total        int64   `json:"total"`         // Active (non-deleted) tasks
+	TotalCreated int64   `json:"total_created"` // All tasks ever created (including deleted)
+	Deleted      int64   `json:"deleted"`       // Deleted tasks count
+	Active       int64   `json:"active"`        // Currently running timers
+	Completed    int64   `json:"completed"`     // status = 'completed'
+	Uncompleted  int64   `json:"uncompleted"`   // status = 'uncompleted'
+	AvgDuration  float64 `json:"avg_duration"`  // Average duration in seconds
+	Today        int64   `json:"today"`
+	ThisWeek     int64   `json:"this_week"`
+}
+
+// SessionStats contains session/time-tracking metrics
+type SessionStats struct {
+	Total            int64 `json:"total"`
+	ActiveNow        int64 `json:"active_now"`         // Sessions with no end_time
+	TotalTimeTracked int64 `json:"total_time_tracked"` // Total seconds tracked all-time
+	TodayTime        int64 `json:"today_time"`         // Seconds tracked today
+	ThisWeekTime     int64 `json:"this_week_time"`     // Seconds tracked this week
+	ThisMonthTime    int64 `json:"this_month_time"`    // Seconds tracked this month
+}
+
+// TopUser represents a user ranked by activity
+type TopUser struct {
+	UserID       uint   `json:"user_id"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	TimeTracked  int64  `json:"time_tracked"`  // Total seconds
+	TaskCount    int64  `json:"task_count"`
+	SessionCount int64  `json:"session_count"`
+}
+
+// ChartDataPoint represents a single data point for time-series charts
+type ChartDataPoint struct {
+	Date  string `json:"date"`  // Format: "2025-01-15"
+	Value int64  `json:"value"`
+}
+
+// ChartResponse is the response for the charts endpoint
+type ChartResponse struct {
+	Period string           `json:"period"` // week, month, year
+	Metric string           `json:"metric"` // signups, tasks, sessions, time
+	Data   []ChartDataPoint `json:"data"`
+}

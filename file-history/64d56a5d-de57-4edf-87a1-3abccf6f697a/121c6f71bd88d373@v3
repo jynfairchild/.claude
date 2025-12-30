@@ -1,0 +1,169 @@
+"use client";
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ACTION_BUTTONS } from '@/components/header/actionButtons';
+import Dropdown from '@/components/ui/Dropdown';
+import { useAuth } from '@/contexts/AuthContext';
+import './ActionBar.css';
+
+const STORAGE_KEY = 'kk_actionbar_enabled';
+const TOGGLE_TARGETS = [
+  { id: 'pomodoro', label: 'Pomodoro Timer' },
+  { id: 'break', label: 'Break Timer' },
+  { id: 'meeting', label: 'Meeting Timer' },
+] as const;
+
+const TOGGLE_IDS = TOGGLE_TARGETS.map(t => t.id);
+
+// Convert enabled array to hidden buttons map
+function enabledToHidden(enabled: string[]): Record<string, boolean> {
+  const hidden: Record<string, boolean> = {};
+  for (const id of TOGGLE_IDS) {
+    hidden[id] = !enabled.includes(id);
+  }
+  return hidden;
+}
+
+// Convert hidden buttons map to enabled array
+function hiddenToEnabled(hidden: Record<string, boolean>): string[] {
+  return TOGGLE_IDS.filter(id => !hidden[id]);
+}
+
+export function ActionBar() {
+  const { user, updateActionbar } = useAuth();
+  const [hiddenButtons, setHiddenButtons] = useState<Record<string, boolean>>(() => enabledToHidden([]));
+  const initializedRef = useRef(false);
+
+  // Load from user.actionbar or localStorage on mount
+  useEffect(() => {
+    if (initializedRef.current) return;
+
+    // Prefer user.actionbar from backend if available
+    if (user?.actionbar) {
+      initializedRef.current = true;
+      const hidden = enabledToHidden(user.actionbar);
+      setHiddenButtons(hidden);
+      // Sync to localStorage as cache
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(user.actionbar));
+      } catch {}
+      return;
+    }
+
+    // Fall back to localStorage if no user or no actionbar set
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const enabled = JSON.parse(raw);
+        if (Array.isArray(enabled)) {
+          initializedRef.current = true;
+          setHiddenButtons(enabledToHidden(enabled));
+        }
+      }
+    } catch {
+      // ignore malformed storage
+    }
+  }, [user?.actionbar]);
+
+  const toggleVisibility = useCallback(async (id: string) => {
+    // Optimistic update
+    const newHidden = { ...hiddenButtons, [id]: !hiddenButtons[id] };
+    setHiddenButtons(newHidden);
+
+    const newEnabled = hiddenToEnabled(newHidden);
+
+    // Update localStorage cache
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newEnabled));
+    } catch {}
+
+    // Save to backend if logged in
+    try {
+      await updateActionbar(newEnabled);
+    } catch {
+      // Revert on error
+      setHiddenButtons(hiddenButtons);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(hiddenToEnabled(hiddenButtons)));
+      } catch {}
+    }
+  }, [hiddenButtons, updateActionbar]);
+
+  const visibleButtons = useMemo(
+    () => ACTION_BUTTONS.filter(button => !hiddenButtons[button.id]),
+    [hiddenButtons],
+  );
+
+  const isButtonVisible = useCallback((id: string) => !(hiddenButtons[id] ?? false), [hiddenButtons]);
+
+  return (
+    <div className="action-bar" role="group" aria-label="Dashboard actions">
+      {visibleButtons.map(({ id, label, icon, iconOnly }) => (
+        <button
+          key={id}
+          type="button"
+          className={`action-button${iconOnly ? ' icon-only' : ''}`}
+          aria-label={iconOnly ? label : undefined}
+        >
+          <span className="action-button-icon" aria-hidden="true">
+            <img src={icon} alt="" />
+          </span>
+          {!iconOnly && label}
+        </button>
+      ))}
+
+      <Dropdown
+        align="right"
+        vertical="top"
+        panelClassName="action-bar-dropdown action-bar-dropdown--above"
+        trigger={({ onClick, "aria-expanded": expanded }) => (
+          <button
+            type="button"
+            className="action-bar-more"
+            aria-label="More actions"
+            aria-haspopup="menu"
+            aria-expanded={expanded}
+            onClick={onClick}
+          >
+            <span aria-hidden="true" className="action-bar-more-icon">
+              <img src="/icons/more_vert_24px.svg" alt="" />
+            </span>
+          </button>
+        )}
+      >
+        {() => (
+          <div className="action-bar-menu">
+            <p className="action-bar-menu-title">Action Bar Options</p>
+            <div className="dropdown-separator" />
+            {TOGGLE_TARGETS.map(({ id, label }) => {
+              const enabled = isButtonVisible(id);
+              return (
+                <button
+                  type="button"
+                  className="dropdown-item action-bar-menu-item"
+                  key={id}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    toggleVisibility(id);
+                  }}
+                  aria-pressed={enabled}
+                >
+                  <span className="action-bar-menu-label">{label}</span>
+                  <span
+                    className={`action-bar-toggle${enabled ? ' active' : ''}`}
+                    aria-hidden="true"
+                  >
+                    <span className="action-bar-toggle-slider" />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </Dropdown>
+    </div>
+  );
+}
+
+export default ActionBar;

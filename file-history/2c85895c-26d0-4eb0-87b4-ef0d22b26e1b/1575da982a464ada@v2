@@ -1,0 +1,16 @@
+# Alpha Plan
+
+## TODO
+
+1. [ ] Fix "Request an Invite" JSON parse error
+   - Error: `JSON.parse: unexpected non-whitespace character after JSON data at line 1 column 5`
+
+2. [ ] Add aliases for Docker build, tag, and push to AWS ECR
+
+3. [ ] Move DNS to AWS Route 53 (fixes apex domain HTTPS redirect)
+
+4. [ ] Update backend README
+
+5. [ ] Update passwords (rotate compromised credentials)
+
+6. [ ] Verify local development is working

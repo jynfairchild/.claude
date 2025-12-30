@@ -1,0 +1,51 @@
+## [v0.6.9 – Admin Metrics Dashboard]
+**Date:** 2025-12-21
+
+### Changes Made:
+- Created admin-only `/metrics` page with real-time analytics dashboard
+- Added backend metrics handler with `GET /admin/metrics/overview` and `GET /admin/metrics/charts` endpoints
+- Implemented aggregate stats: user counts (total, verified, by period), task counts (total, active, completed, avg duration), session stats (total time tracked, active now)
+- Added top 10 users leaderboard ranked by time tracked
+- Created time-series chart data with configurable periods (week/month/year) and metrics (signups/tasks/sessions/time)
+- Installed Recharts library for responsive line charts with tooltips
+- Added admin middleware protection for metrics endpoints (403 for non-admin users)
+- Implemented 30-second polling for real-time dashboard updates
+- Added Metrics link to profile dropdown (admin-only visibility)
+- Created comprehensive backend tests (18 tests) covering access control, data counts, and chart endpoints
+- Created frontend API tests (16 tests) for metricsApi service
+- Created frontend component tests (14 tests) for metrics page
+
+### Files Created:
+- `backend/internal/models/metrics.go` - Type definitions for metrics responses
+- `backend/internal/handlers/metrics.go` - API handlers for overview and chart data
+- `backend/internal/handlers/metrics_test.go` - Backend handler tests
+- `frontend/src/services/metricsApi.ts` - Frontend API client
+- `frontend/src/services/metricsApi.test.ts` - API client tests
+- `frontend/src/app/metrics/page.tsx` - Admin metrics dashboard page
+- `frontend/src/app/metrics/metrics.css` - Dashboard styles
+- `frontend/src/app/metrics/metrics.test.tsx` - Page component tests
+
+### Files Modified:
+- `backend/cmd/server/main.go` - Added metricsHandler and admin routes
+- `frontend/package.json` - Added recharts dependency
+- `frontend/src/components/header/Header.tsx` - Added Metrics link for admins
+
+### Current Status:
+All features working. Backend and frontend build successfully. All 48 new metrics tests pass. Dashboard displays user stats, task stats, session time tracking, trend charts, and top users table. Admin-only access enforced at both API and UI levels.
+
+### Unresolved Issues:
+- Chart queries use PostgreSQL-specific `TO_CHAR` function (works in production, returns empty in SQLite tests)
+- 3 pre-existing ActionBar test failures unrelated to this feature
+
+### Commit Message:
+Add admin metrics dashboard with real-time analytics and comprehensive tests
+
+- Create /metrics admin page with stats cards for users, tasks, and time tracked
+- Add backend GET /admin/metrics/overview endpoint with aggregate counts
+- Add backend GET /admin/metrics/charts endpoint for time-series data
+- Implement Recharts line charts with period/metric selectors
+- Add top 10 users leaderboard ranked by total time tracked
+- Protect endpoints with admin middleware (403 for non-admin)
+- Add 30-second polling for real-time dashboard updates
+- Add Metrics link to header dropdown for admin users only
+- Create 48 tests covering handlers, API client, and page component

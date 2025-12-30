@@ -1,0 +1,79 @@
+2025-12-22T13:05:20.569Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (16.3ms): security find-generic-password -a $USER -w -s "Claude Code"
+2025-12-22T13:05:20.588Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (18.2ms): security find-generic-password -a "dangercat" -w -s "Claude Code-credentials"
+2025-12-22T13:05:20.596Z [DEBUG] Watching for changes in setting files /Users/dangercat/.claude...
+2025-12-22T13:05:20.618Z [DEBUG] [LSP MANAGER] initializeLspServerManager() called
+2025-12-22T13:05:20.618Z [DEBUG] [LSP MANAGER] Created manager instance, state=pending
+2025-12-22T13:05:20.618Z [DEBUG] [LSP MANAGER] Starting async initialization (generation 1)
+2025-12-22T13:05:20.621Z [DEBUG] LSP server manager initialized successfully
+2025-12-22T13:05:20.621Z [DEBUG] LSP notification handlers registered successfully for all 0 server(s)
+2025-12-22T13:05:20.624Z [DEBUG] Loading plugin typescript-lsp from source: "./plugins/typescript-lsp"
+2025-12-22T13:05:20.624Z [DEBUG] Using provided version for typescript-lsp@claude-plugins-official: 1.0.0
+2025-12-22T13:05:20.624Z [DEBUG] Plugin typescript-lsp@claude-plugins-official version 1.0.0 already cached at /Users/dangercat/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0
+2025-12-22T13:05:20.624Z [DEBUG] Copied local plugin typescript-lsp to versioned cache: /Users/dangercat/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0
+2025-12-22T13:05:20.624Z [DEBUG] Plugin typescript-lsp has no entry.skills defined
+2025-12-22T13:05:20.624Z [DEBUG] Found 1 plugins (1 enabled, 0 disabled)
+2025-12-22T13:05:20.626Z [DEBUG] Stats cache is up to date
+2025-12-22T13:05:20.628Z [DEBUG] Loading skills from: managed=/Library/Application Support/ClaudeCode/.claude/skills, user=/Users/dangercat/.claude/skills, project=[]
+2025-12-22T13:05:20.628Z [DEBUG] Passes: Using fresh cached eligibility data
+2025-12-22T13:05:20.703Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (73.4ms): ps aux | grep -E "Visual Studio Code|Code Helper|Cursor Helper|Windsurf Helper|IntelliJ IDEA|PyCharm
+2025-12-22T13:05:20.704Z [DEBUG] Loaded 1 installed plugins from /Users/dangercat/.claude/plugins/installed_plugins.json
+2025-12-22T13:05:20.733Z [DEBUG] Creating shell snapshot for zsh (/bin/zsh)
+2025-12-22T13:05:20.733Z [DEBUG] Looking for shell config file: /Users/dangercat/.zshrc
+2025-12-22T13:05:20.733Z [DEBUG] Snapshots directory: /Users/dangercat/.claude/shell-snapshots
+2025-12-22T13:05:20.734Z [DEBUG] Creating snapshot at: /Users/dangercat/.claude/shell-snapshots/snapshot-zsh-1766408720733-37m3bi.sh
+2025-12-22T13:05:20.734Z [DEBUG] Shell binary exists: true
+2025-12-22T13:05:20.734Z [DEBUG] Execution timeout: 10000ms
+2025-12-22T13:05:20.736Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/763411e5-65bf-49b5-8f05-018a90d76acd-agent-763411e5-65bf-49b5-8f05-018a90d76acd.json.tmp.41688.1766408720736
+2025-12-22T13:05:20.743Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.5ms)
+2025-12-22T13:05:20.743Z [DEBUG] Temp file written successfully, size: 2 bytes
+2025-12-22T13:05:20.743Z [DEBUG] Renaming /Users/dangercat/.claude/todos/763411e5-65bf-49b5-8f05-018a90d76acd-agent-763411e5-65bf-49b5-8f05-018a90d76acd.json.tmp.41688.1766408720736 to /Users/dangercat/.claude/todos/763411e5-65bf-49b5-8f05-018a90d76acd-agent-763411e5-65bf-49b5-8f05-018a90d76acd.json
+2025-12-22T13:05:20.743Z [DEBUG] File /Users/dangercat/.claude/todos/763411e5-65bf-49b5-8f05-018a90d76acd-agent-763411e5-65bf-49b5-8f05-018a90d76acd.json written atomically
+2025-12-22T13:05:20.748Z [DEBUG] getPluginSkills: Processing 1 enabled plugins
+2025-12-22T13:05:20.748Z [DEBUG] Checking plugin typescript-lsp: skillsPath=none, skillsPaths=0 paths
+2025-12-22T13:05:20.748Z [DEBUG] Total plugin skills loaded: 0
+2025-12-22T13:05:20.748Z [DEBUG] Total plugin commands loaded: 0
+2025-12-22T13:05:20.748Z [DEBUG] Registered 0 hooks from 1 plugins
+2025-12-22T13:05:20.752Z [DEBUG] Total plugin agents loaded: 0
+2025-12-22T13:05:20.758Z [DEBUG] Git remote URL: git@github.com:jynfairchild/astrotask.git
+2025-12-22T13:05:20.759Z [DEBUG] Parsed repository: jynfairchild/astrotask from git@github.com:jynfairchild/astrotask.git
+2025-12-22T13:05:20.759Z [DEBUG] Parsed repository: jynfairchild/astrotask from URL: git@github.com:jynfairchild/astrotask.git
+2025-12-22T13:05:20.759Z [DEBUG] Path /Users/dangercat/Documents/GitHub/astrotask already tracked for repo jynfairchild/astrotask
+2025-12-22T13:05:20.760Z [DEBUG] Ripgrep first use test: PASSED (mode=builtin, path=/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/arm64-darwin/rg)
+2025-12-22T13:05:20.766Z [DEBUG] Loaded 5 unique skills (managed: 0, user: 0, project: 0, legacy commands: 5)
+2025-12-22T13:05:20.766Z [DEBUG] getSkills returning: 5 skill dir commands, 0 plugin skills
+2025-12-22T13:05:20.853Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.41688.1766408720853
+2025-12-22T13:05:20.853Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T13:05:20.862Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.8ms)
+2025-12-22T13:05:20.862Z [DEBUG] Temp file written successfully, size: 75411 bytes
+2025-12-22T13:05:20.862Z [DEBUG] Applied original permissions to temp file
+2025-12-22T13:05:20.862Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.41688.1766408720853 to /Users/dangercat/.claude.json
+2025-12-22T13:05:20.863Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T13:05:21.146Z [DEBUG] Passes: Using fresh cached eligibility data
+2025-12-22T13:05:21.151Z [DEBUG] All plugins already exist, skipping migration
+2025-12-22T13:05:21.154Z [DEBUG] Initialized versioned plugins system with 1 plugins
+2025-12-22T13:05:21.157Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.41688.1766408721157
+2025-12-22T13:05:21.157Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T13:05:21.163Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.8ms)
+2025-12-22T13:05:21.163Z [DEBUG] Temp file written successfully, size: 75411 bytes
+2025-12-22T13:05:21.163Z [DEBUG] Applied original permissions to temp file
+2025-12-22T13:05:21.163Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.41688.1766408721157 to /Users/dangercat/.claude.json
+2025-12-22T13:05:21.163Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T13:05:21.170Z [DEBUG] Skills and commands included in Skill tool: context, explore, move_claude, wdiary, commit
+2025-12-22T13:05:21.179Z [DEBUG] Getting matching hook commands for SubagentStart with query: Explore
+2025-12-22T13:05:21.179Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T13:05:21.179Z [DEBUG] Matched 0 unique hooks for query "Explore" (0 before deduplication)
+2025-12-22T13:05:21.181Z [DEBUG] Getting matching hook commands for SubagentStart with query: Plan
+2025-12-22T13:05:21.181Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T13:05:21.181Z [DEBUG] Matched 0 unique hooks for query "Plan" (0 before deduplication)
+2025-12-22T13:05:21.197Z [DEBUG] Summarizing all 12 messages (~1117 tokens)
+2025-12-22T13:05:21.217Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.0ms)
+2025-12-22T13:05:21.475Z [DEBUG] Shell snapshot created successfully (264481 bytes)
+2025-12-22T13:05:21.932Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.7ms)
+2025-12-22T13:05:21.932Z [DEBUG] Successfully refreshed marketplace: claude-plugins-official
+2025-12-22T13:05:21.932Z [DEBUG] Plugin autoupdate: checking installed plugins
+2025-12-22T13:05:21.935Z [DEBUG] Using provided version for typescript-lsp@claude-plugins-official: 1.0.0
+2025-12-22T13:05:22.007Z [DEBUG] Stream started - received first chunk
+2025-12-22T13:05:22.090Z [DEBUG] Stream started - received first chunk
+2025-12-22T13:05:25.057Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T13:05:25.057Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T13:05:25.057Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)

@@ -1,0 +1,55 @@
+import { fetchWithAuth } from './http';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+
+export interface Invitation {
+  id: number;
+  email: string;
+  invited_by_id: number | null;
+  expires_at: string;
+  used_at: string | null;
+  created_at: string;
+}
+
+export interface CreateInvitationResponse {
+  invite_url: string;
+  email: string;
+  expires_at: string;
+}
+
+export interface InvitationsListResponse {
+  invitations: Invitation[];
+}
+
+export const invitesApi = {
+  async list(): Promise<Invitation[]> {
+    const res = await fetchWithAuth(`${API_BASE_URL}/admin/invitations`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch invitations: ${res.statusText}`);
+    }
+    const data: InvitationsListResponse = await res.json();
+    return data.invitations || [];
+  },
+
+  async create(email: string): Promise<CreateInvitationResponse> {
+    const res = await fetchWithAuth(`${API_BASE_URL}/admin/invitations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `Failed to create invitation: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  async revoke(id: number): Promise<void> {
+    const res = await fetchWithAuth(`${API_BASE_URL}/admin/invitations/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to revoke invitation: ${res.statusText}`);
+    }
+  },
+};

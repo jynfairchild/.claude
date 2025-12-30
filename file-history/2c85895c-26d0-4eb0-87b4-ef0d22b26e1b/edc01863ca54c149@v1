@@ -1,0 +1,66 @@
+.admin-nav {
+  background: var(--kkan-grey-900, #111827);
+  padding: 0 24px;
+}
+
+.admin-nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+}
+
+.admin-nav-back {
+  color: var(--kkan-grey-400, #9CA3AF);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.admin-nav-back:hover {
+  color: var(--kkan-white, #FFFFFF);
+}
+
+.admin-nav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-nav-link {
+  color: var(--kkan-grey-400, #9CA3AF);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.admin-nav-link:hover {
+  color: var(--kkan-white, #FFFFFF);
+  background: var(--kkan-grey-800, #1F2937);
+}
+
+.admin-nav-link--active {
+  color: var(--kkan-white, #FFFFFF);
+  background: var(--kkan-grey-700, #374151);
+}
+
+@media (max-width: 768px) {
+  .admin-nav {
+    padding: 0 16px;
+  }
+
+  .admin-nav-link {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .admin-nav-back {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,79 @@
+package middleware
+
+import (
+    "net/http"
+    "strings"
+
+    "github.com/gin-gonic/gin"
+    "gorm.io/gorm"
+    "simple_task_tracker/backend/internal/auth"
+    "simple_task_tracker/backend/internal/models"
+)
+
+func AuthMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        var tokenString string
+
+        // Try cookie first (production mode)
+        if cookie, err := c.Cookie("access_token"); err == nil && cookie != "" {
+            tokenString = cookie
+        } else {
+            // Fallback to Authorization header (dev/backwards compatibility)
+            authHeader := c.GetHeader("Authorization")
+            if authHeader != "" {
+                // Expect format: "Bearer <token>" (case-insensitive), tolerate extra spaces
+                parts := strings.Fields(authHeader)
+                if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+                    tokenString = parts[1]
+                }
+            }
+        }
+
+        if tokenString == "" {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+            c.Abort()
+            return
+        }
+
+        claims, err := auth.ValidateToken(tokenString)
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+            c.Abort()
+            return
+        }
+
+        c.Set("userID", claims.UserID)
+        c.Set("email", claims.Email)
+        c.Set("name", claims.Name)
+
+        c.Next()
+    }
+}
+
+// AdminMiddleware requires the user to have admin role.
+// Must be used after AuthMiddleware.
+func AdminMiddleware(db *gorm.DB) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        userID, exists := c.Get("userID")
+        if !exists {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+            c.Abort()
+            return
+        }
+
+        var user models.User
+        if err := db.First(&user, userID).Error; err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+            c.Abort()
+            return
+        }
+
+        if user.Role != "admin" {
+            c.JSON(http.StatusForbidden, gin.H{"error": "admin access required"})
+            c.Abort()
+            return
+        }
+
+        c.Next()
+    }
+}

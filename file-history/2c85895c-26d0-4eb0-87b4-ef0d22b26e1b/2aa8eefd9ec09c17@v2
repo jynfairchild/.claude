@@ -1,0 +1,160 @@
+package auth
+
+import (
+    "crypto/rand"
+    "crypto/sha256"
+    "encoding/base64"
+    "errors"
+    "fmt"
+    "os"
+    "time"
+
+    "gorm.io/gorm"
+
+    "simple_task_tracker/backend/internal/models"
+)
+
+func emailVerifyTTL() time.Duration {
+    if v := os.Getenv("EMAIL_VERIFY_TTL"); v != "" { if d, err := time.ParseDuration(v); err == nil { return d } }
+    return 48 * time.Hour
+}
+
+func passwordResetTTL() time.Duration {
+    if v := os.Getenv("PASSWORD_RESET_TTL"); v != "" { if d, err := time.ParseDuration(v); err == nil { return d } }
+    return 1 * time.Hour
+}
+
+func genOpaque(n int) (string, error) {
+    b := make([]byte, n)
+    if _, err := rand.Read(b); err != nil { return "", fmt.Errorf("rand: %w", err) }
+    return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+func hashOpaque(token string) string {
+    sum := sha256.Sum256([]byte(token))
+    return base64.RawURLEncoding.EncodeToString(sum[:])
+}
+
+// Email verification tokens
+func CreateEmailVerificationToken(db *gorm.DB, userID uint) (string, *models.EmailVerificationToken, error) {
+    plain, err := genOpaque(24)
+    if err != nil { return "", nil, err }
+    rec := &models.EmailVerificationToken{
+        UserID:    userID,
+        TokenHash: hashOpaque(plain),
+        ExpiresAt: time.Now().Add(emailVerifyTTL()),
+    }
+    if err := db.Create(rec).Error; err != nil { return "", nil, err }
+    return plain, rec, nil
+}
+
+func ConsumeEmailVerificationToken(db *gorm.DB, token string) (*models.EmailVerificationToken, error) {
+    if token == "" { return nil, errors.New("missing token") }
+    var rec models.EmailVerificationToken
+    if err := db.Where("token_hash = ?", hashOpaque(token)).First(&rec).Error; err != nil { return nil, err }
+    if rec.UsedAt != nil { return nil, errors.New("token already used") }
+    if time.Now().After(rec.ExpiresAt) { return nil, errors.New("token expired") }
+    now := time.Now()
+    rec.UsedAt = &now
+    if err := db.Save(&rec).Error; err != nil { return nil, err }
+    return &rec, nil
+}
+
+// Password reset tokens
+func CreatePasswordResetToken(db *gorm.DB, userID uint) (string, *models.PasswordResetToken, error) {
+    plain, err := genOpaque(24)
+    if err != nil { return "", nil, err }
+    rec := &models.PasswordResetToken{
+        UserID:    userID,
+        TokenHash: hashOpaque(plain),
+        ExpiresAt: time.Now().Add(passwordResetTTL()),
+    }
+    if err := db.Create(rec).Error; err != nil { return "", nil, err }
+    return plain, rec, nil
+}
+
+func ConsumePasswordResetToken(db *gorm.DB, token string) (*models.PasswordResetToken, error) {
+    if token == "" { return nil, errors.New("missing token") }
+    var rec models.PasswordResetToken
+    if err := db.Where("token_hash = ?", hashOpaque(token)).First(&rec).Error; err != nil { return nil, err }
+    if rec.UsedAt != nil { return nil, errors.New("token already used") }
+    if time.Now().After(rec.ExpiresAt) { return nil, errors.New("token expired") }
+    now := time.Now()
+    rec.UsedAt = &now
+    if err := db.Save(&rec).Error; err != nil { return nil, err }
+    return &rec, nil
+}
+
+// Invitation tokens for magic link invite system
+
+func invitationTTL() time.Duration {
+    if v := os.Getenv("INVITATION_TTL"); v != "" {
+        if d, err := time.ParseDuration(v); err == nil {
+            return d
+        }
+    }
+    return 7 * 24 * time.Hour // 7 days default
+}
+
+// CreateInvitationToken creates a new invitation for the given email address.
+// Returns the plain token (to be sent in the invite link), the invitation record, and any error.
+func CreateInvitationToken(db *gorm.DB, email string, invitedByID *uint) (string, *models.Invitation, error) {
+    plain, err := genOpaque(24)
+    if err != nil {
+        return "", nil, err
+    }
+    rec := &models.Invitation{
+        Email:       email,
+        TokenHash:   hashOpaque(plain),
+        InvitedByID: invitedByID, // nil for system-generated invites
+        ExpiresAt:   time.Now().Add(invitationTTL()),
+    }
+    if err := db.Create(rec).Error; err != nil {
+        return "", nil, err
+    }
+    return plain, rec, nil
+}
+
+// ValidateInvitationToken checks if an invitation token is valid without consuming it.
+// Returns the invitation record if valid, or an error if invalid/expired/used.
+func ValidateInvitationToken(db *gorm.DB, token string) (*models.Invitation, error) {
+    if token == "" {
+        return nil, errors.New("missing token")
+    }
+    var rec models.Invitation
+    if err := db.Where("token_hash = ?", hashOpaque(token)).First(&rec).Error; err != nil {
+        return nil, err
+    }
+    if rec.UsedAt != nil {
+        return nil, errors.New("invitation already used")
+    }
+    if time.Now().After(rec.ExpiresAt) {
+        return nil, errors.New("invitation expired")
+    }
+    return &rec, nil
+}
+
+// ConsumeInvitationToken validates and marks an invitation token as used.
+// Returns the invitation record if successfully consumed.
+func ConsumeInvitationToken(db *gorm.DB, token string) (*models.Invitation, error) {
+    if token == "" {
+        return nil, errors.New("missing token")
+    }
+    var rec models.Invitation
+    if err := db.Where("token_hash = ?", hashOpaque(token)).First(&rec).Error; err != nil {
+        return nil, err
+    }
+    if rec.UsedAt != nil {
+        return nil, errors.New("invitation already used")
+    }
+    if time.Now().After(rec.ExpiresAt) {
+        return nil, errors.New("invitation expired")
+    }
+    now := time.Now()
+    rec.UsedAt = &now
+    if err := db.Save(&rec).Error; err != nil {
+        return nil, err
+    }
+    return &rec, nil
+}
+

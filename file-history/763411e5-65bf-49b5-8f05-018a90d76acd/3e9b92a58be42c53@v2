@@ -1,0 +1,90 @@
+package middleware
+
+import (
+	"crypto/rand"
+	"encoding/base64"
+	"net/http"
+	"os"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
+
+// csrfSecure returns whether cookies should be marked Secure (HTTPS only)
+func csrfSecure() bool {
+	v := os.Getenv("SECURE_COOKIES")
+	if v == "" {
+		return false
+	}
+	b, err := strconv.ParseBool(v)
+	if err != nil {
+		return false
+	}
+	return b
+}
+
+// csrfDomain returns the cookie domain from env
+func csrfDomain() string {
+	return os.Getenv("COOKIE_DOMAIN")
+}
+
+// GenerateCSRFToken creates a new CSRF token and sets it as a non-HttpOnly cookie
+// (so JavaScript can read it and send it in headers)
+func GenerateCSRFToken(c *gin.Context) string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	token := base64.RawURLEncoding.EncodeToString(b)
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "csrf_token",
+		Value:    token,
+		Path:     "/",
+		Domain:   csrfDomain(),
+		MaxAge:   86400, // 24 hours
+		Secure:   csrfSecure(),
+		HttpOnly: false, // JS must be able to read this
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	return token
+}
+
+// CSRFMiddleware validates CSRF tokens on state-changing requests (POST, PUT, PATCH, DELETE)
+// The token must be sent in the X-CSRF-Token header and match the csrf_token cookie
+func CSRFMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Skip CSRF check for safe methods
+		method := c.Request.Method
+		if method == "GET" || method == "HEAD" || method == "OPTIONS" {
+			c.Next()
+			return
+		}
+
+		// Get CSRF token from cookie
+		cookieToken, err := c.Cookie("csrf_token")
+		if err != nil || cookieToken == "" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token missing"})
+			c.Abort()
+			return
+		}
+
+		// Get CSRF token from header
+		headerToken := c.GetHeader("X-CSRF-Token")
+		if headerToken == "" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "X-CSRF-Token header required"})
+			c.Abort()
+			return
+		}
+
+		// Compare tokens
+		if headerToken != cookieToken {
+			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token mismatch"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}

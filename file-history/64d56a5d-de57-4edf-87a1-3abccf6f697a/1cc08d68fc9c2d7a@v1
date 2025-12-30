@@ -1,0 +1,389 @@
+package handlers
+
+import (
+    "bytes"
+    "encoding/json"
+    "net/http"
+    "net/http/httptest"
+    "strconv"
+    "testing"
+    "time"
+
+    "github.com/gin-gonic/gin"
+    "gorm.io/gorm"
+
+    "simple_task_tracker/backend/internal/models"
+)
+
+func setupColumnRouter(h *ColumnHandler) (*gin.Engine, *httptest.ResponseRecorder) {
+    gin.SetMode(gin.TestMode)
+    r := gin.New()
+    r.Use(gin.Recovery())
+    // Simulate auth middleware for tests: userID=1
+    r.Use(func(c *gin.Context) { c.Set("userID", uint(1)); c.Next() })
+    r.GET("/api/v1/columns", h.List)
+    r.POST("/api/v1/columns", h.Create)
+    r.PATCH("/api/v1/columns/:id", h.Update)
+    r.DELETE("/api/v1/columns/:id", h.Delete)
+    return r, httptest.NewRecorder()
+}
+
+// ensureColumnsMigrated extends the shared test DB with the user_columns table
+func ensureColumnsMigrated(t *testing.T, db *gorm.DB) {
+    t.Helper()
+    if err := db.AutoMigrate(&models.UserColumn{}); err != nil {
+        t.Fatalf("failed to migrate user_columns: %v", err)
+    }
+}
+
+func TestColumns_List_SeedsDefaultsWhenEmpty(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    req := httptest.NewRequest(http.MethodGet, "/api/v1/columns", nil)
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+    var cols []models.UserColumn
+    if err := json.Unmarshal(w.Body.Bytes(), &cols); err != nil {
+        t.Fatalf("invalid JSON: %v", err)
+    }
+    if len(cols) != 2 {
+        t.Fatalf("expected 2 default columns, got %d", len(cols))
+    }
+    if cols[0].ColIndex != 0 || cols[0].Name != "Todo" || cols[1].ColIndex != 1 || cols[1].Name != "In Progress" {
+        t.Fatalf("unexpected defaults: %+v", cols)
+    }
+}
+
+func TestColumns_Create_AddsNewColumn(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    payload := map[string]any{"name": "Review", "col_index": 2}
+    bts, _ := json.Marshal(payload)
+    req := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewReader(bts))
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusCreated {
+        t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
+    }
+    var col models.UserColumn
+    if err := json.Unmarshal(w.Body.Bytes(), &col); err != nil {
+        t.Fatalf("invalid JSON: %v", err)
+    }
+    if col.ID == 0 || col.UserID != 1 || col.Name != "Review" || col.ColIndex != 2 {
+        t.Fatalf("unexpected created column: %+v", col)
+    }
+}
+
+func TestColumns_Update_RenameAndReindex(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    // Create initial column
+    w = httptest.NewRecorder()
+    reqC := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(`{"name":"Backlog","col_index":0}`))
+    reqC.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, reqC)
+    if w.Code != http.StatusCreated { t.Fatalf("create failed: %d %s", w.Code, w.Body.String()) }
+    var created models.UserColumn
+    _ = json.Unmarshal(w.Body.Bytes(), &created)
+
+    // Update
+    w = httptest.NewRecorder()
+    upd := map[string]any{"name": "QA", "col_index": 3}
+    bts, _ := json.Marshal(upd)
+    req := httptest.NewRequest(http.MethodPatch, "/api/v1/columns/"+strconv.Itoa(int(created.ID)), bytes.NewReader(bts))
+    req.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, req)
+
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+    var updated models.UserColumn
+    _ = json.Unmarshal(w.Body.Bytes(), &updated)
+    if updated.Name != "QA" || updated.ColIndex != 3 {
+        t.Fatalf("expected renamed/reindexed column, got %+v", updated)
+    }
+}
+
+func TestColumns_Delete_RemovesRow(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    // Create two columns so deletion is allowed (cannot delete last column)
+    w = httptest.NewRecorder()
+    reqC := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(`{"name":"X","col_index":5}`))
+    reqC.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, reqC)
+    if w.Code != http.StatusCreated { t.Fatalf("create failed: %d %s", w.Code, w.Body.String()) }
+    var created models.UserColumn
+    _ = json.Unmarshal(w.Body.Bytes(), &created)
+
+    // Second column to keep
+    w = httptest.NewRecorder()
+    reqC2 := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(`{"name":"Keep","col_index":6}`))
+    reqC2.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, reqC2)
+    if w.Code != http.StatusCreated { t.Fatalf("create 2 failed: %d %s", w.Code, w.Body.String()) }
+
+    w = httptest.NewRecorder()
+    req := httptest.NewRequest(http.MethodDelete, "/api/v1/columns/"+strconv.Itoa(int(created.ID)), nil)
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+    }
+    // Verify not found
+    var row models.UserColumn
+    if err := db.First(&row, created.ID).Error; err == nil {
+        t.Fatalf("expected row deleted, still found: %+v", row)
+    }
+}
+
+func TestColumns_List_ProjectFilter_IsolatedDefaults(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    // Seed defaults for blank project
+    req := httptest.NewRequest(http.MethodGet, "/api/v1/columns", nil)
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("expected 200, got %d", w.Code) }
+
+    // Query for a specific project should seed separate defaults
+    w = httptest.NewRecorder()
+    req = httptest.NewRequest(http.MethodGet, "/api/v1/columns?project=ProjA", nil)
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusOK { t.Fatalf("expected 200, got %d", w.Code) }
+    var cols []models.UserColumn
+    if err := json.Unmarshal(w.Body.Bytes(), &cols); err != nil { t.Fatalf("invalid JSON: %v", err) }
+    if len(cols) != 2 || cols[0].Project != "ProjA" || cols[1].Project != "ProjA" {
+        t.Fatalf("expected defaults for project ProjA, got %+v", cols)
+    }
+}
+
+func TestColumns_Delete_CascadesTasksForThatUserAndIndex(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    // Seed tasks for user 1 in col 2 (to be deleted)
+    mkTask := func(user uint, idx int) models.Task {
+        tsk := models.Task{UserID: user, Title: "T", ColumnIndex: idx, Status: "uncompleted", Position: 0, StartTime: time.Now()}
+        if err := db.Create(&tsk).Error; err != nil { t.Fatalf("insert task: %v", err) }
+        return tsk
+    }
+    _ = mkTask(1, 2)
+    _ = mkTask(1, 2)
+    _ = mkTask(1, 2)
+    // Other columns for same user should remain
+    other1 := mkTask(1, 1)
+    other2 := mkTask(1, 1)
+    // Different user same col index should remain
+    _ = mkTask(2, 2)
+
+    // Create a column record for user 1, col_index 2 and another to keep
+    w = httptest.NewRecorder()
+    reqC := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(`{"name":"Col2","col_index":2}`))
+    reqC.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, reqC)
+    if w.Code != http.StatusCreated { t.Fatalf("create column failed: %d %s", w.Code, w.Body.String()) }
+    var col models.UserColumn
+    _ = json.Unmarshal(w.Body.Bytes(), &col)
+
+    // Second column to keep so deletion is permitted
+    w = httptest.NewRecorder()
+    reqKeep := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(`{"name":"Keep","col_index":9}`))
+    reqKeep.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, reqKeep)
+    if w.Code != http.StatusCreated { t.Fatalf("create keep failed: %d %s", w.Code, w.Body.String()) }
+
+    // Delete column -> should delete tasks of user 1 in col 2
+    w = httptest.NewRecorder()
+    reqD := httptest.NewRequest(http.MethodDelete, "/api/v1/columns/"+strconv.Itoa(int(col.ID)), nil)
+    r.ServeHTTP(w, reqD)
+    if w.Code != http.StatusOK { t.Fatalf("delete failed: %d %s", w.Code, w.Body.String()) }
+
+    // Verify: tasks for user 1 col 2 gone
+    var remain []models.Task
+    if err := db.Where("user_id = ? AND column_index = ?", 1, 2).Find(&remain).Error; err != nil { t.Fatal(err) }
+    if len(remain) != 0 { t.Fatalf("expected 0 tasks in user 1 col 2, got %d", len(remain)) }
+
+    // Verify: tasks in other column for same user still exist
+    var still []models.Task
+    if err := db.Where("id IN ?", []uint{other1.ID, other2.ID}).Find(&still).Error; err != nil { t.Fatal(err) }
+    if len(still) != 2 { t.Fatalf("expected other column tasks to remain, found %d", len(still)) }
+
+    // Verify: tasks for other user same col remain
+    var otherUser []models.Task
+    if err := db.Where("user_id = ? AND column_index = ?", 2, 2).Find(&otherUser).Error; err != nil { t.Fatal(err) }
+    if len(otherUser) != 1 { t.Fatalf("expected other user tasks untouched, got %d", len(otherUser)) }
+}
+
+func TestColumns_Delete_404WhenMissing(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    req := httptest.NewRequest(http.MethodDelete, "/api/v1/columns/9999", nil)
+    r.ServeHTTP(w, req)
+    if w.Code != http.StatusNotFound {
+        t.Fatalf("expected 404, got %d: %s", w.Code, w.Body.String())
+    }
+}
+
+func TestColumns_Delete_PreventDeletingLastColumn(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    // Create two columns for user 1
+    w = httptest.NewRecorder()
+    reqC1 := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(`{"name":"A","col_index":0}`))
+    reqC1.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, reqC1)
+    if w.Code != http.StatusCreated { t.Fatalf("create A failed: %d %s", w.Code, w.Body.String()) }
+    var a models.UserColumn
+    _ = json.Unmarshal(w.Body.Bytes(), &a)
+
+    w = httptest.NewRecorder()
+    reqC2 := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(`{"name":"B","col_index":1}`))
+    reqC2.Header.Set("Content-Type", "application/json")
+    r.ServeHTTP(w, reqC2)
+    if w.Code != http.StatusCreated { t.Fatalf("create B failed: %d %s", w.Code, w.Body.String()) }
+    var b models.UserColumn
+    _ = json.Unmarshal(w.Body.Bytes(), &b)
+
+    // Delete one column (B)
+    w = httptest.NewRecorder()
+    reqD1 := httptest.NewRequest(http.MethodDelete, "/api/v1/columns/"+strconv.Itoa(int(b.ID)), nil)
+    r.ServeHTTP(w, reqD1)
+    if w.Code != http.StatusOK { t.Fatalf("delete B failed: %d %s", w.Code, w.Body.String()) }
+
+    // Attempt to delete the last remaining column (A) -> expect 400
+    w = httptest.NewRecorder()
+    reqD2 := httptest.NewRequest(http.MethodDelete, "/api/v1/columns/"+strconv.Itoa(int(a.ID)), nil)
+    r.ServeHTTP(w, reqD2)
+    if w.Code != http.StatusBadRequest {
+        t.Fatalf("expected 400 preventing last column deletion, got %d: %s", w.Code, w.Body.String())
+    }
+}
+
+func TestColumns_Delete_ShiftsRemainingColumnsAndTasks(t *testing.T) {
+    db := setupTestDB(t)
+    ensureColumnsMigrated(t, db)
+    h := NewColumnHandler(db)
+    r, w := setupColumnRouter(h)
+
+    // Create 4 columns: 0, 1, 2, 3
+    createCol := func(name string, idx int) models.UserColumn {
+        w = httptest.NewRecorder()
+        payload := `{"name":"` + name + `","col_index":` + strconv.Itoa(idx) + `}`
+        req := httptest.NewRequest(http.MethodPost, "/api/v1/columns", bytes.NewBufferString(payload))
+        req.Header.Set("Content-Type", "application/json")
+        r.ServeHTTP(w, req)
+        if w.Code != http.StatusCreated {
+            t.Fatalf("create %s failed: %d %s", name, w.Code, w.Body.String())
+        }
+        var col models.UserColumn
+        _ = json.Unmarshal(w.Body.Bytes(), &col)
+        return col
+    }
+
+    col0 := createCol("Col0", 0)
+    col1 := createCol("Col1", 1) // Will be deleted
+    col2 := createCol("Col2", 2)
+    col3 := createCol("Col3", 3)
+
+    // Create tasks in each column
+    mkTask := func(colIdx int, title string) models.Task {
+        tsk := models.Task{UserID: 1, Title: title, ColumnIndex: colIdx, Status: "uncompleted", Position: 0, StartTime: time.Now()}
+        if err := db.Create(&tsk).Error; err != nil {
+            t.Fatalf("insert task: %v", err)
+        }
+        return tsk
+    }
+
+    task0 := mkTask(0, "Task in Col0")
+    _      = mkTask(1, "Task in Col1") // Will be deleted with column
+    task2 := mkTask(2, "Task in Col2")
+    task3 := mkTask(3, "Task in Col3")
+
+    // Delete column 1 (middle column)
+    w = httptest.NewRecorder()
+    reqD := httptest.NewRequest(http.MethodDelete, "/api/v1/columns/"+strconv.Itoa(int(col1.ID)), nil)
+    r.ServeHTTP(w, reqD)
+    if w.Code != http.StatusOK {
+        t.Fatalf("delete failed: %d %s", w.Code, w.Body.String())
+    }
+
+    // Verify columns shifted: col2 -> 1, col3 -> 2
+    var updatedCol0, updatedCol2, updatedCol3 models.UserColumn
+    if err := db.First(&updatedCol0, col0.ID).Error; err != nil {
+        t.Fatalf("col0 not found: %v", err)
+    }
+    if updatedCol0.ColIndex != 0 {
+        t.Fatalf("col0 should still be at index 0, got %d", updatedCol0.ColIndex)
+    }
+
+    if err := db.First(&updatedCol2, col2.ID).Error; err != nil {
+        t.Fatalf("col2 not found: %v", err)
+    }
+    if updatedCol2.ColIndex != 1 {
+        t.Fatalf("col2 should have shifted to index 1, got %d", updatedCol2.ColIndex)
+    }
+
+    if err := db.First(&updatedCol3, col3.ID).Error; err != nil {
+        t.Fatalf("col3 not found: %v", err)
+    }
+    if updatedCol3.ColIndex != 2 {
+        t.Fatalf("col3 should have shifted to index 2, got %d", updatedCol3.ColIndex)
+    }
+
+    // Verify tasks shifted: task2 -> col 1, task3 -> col 2
+    var updatedTask0, updatedTask2, updatedTask3 models.Task
+    if err := db.First(&updatedTask0, task0.ID).Error; err != nil {
+        t.Fatalf("task0 not found: %v", err)
+    }
+    if updatedTask0.ColumnIndex != 0 {
+        t.Fatalf("task0 should still be in col 0, got %d", updatedTask0.ColumnIndex)
+    }
+
+    if err := db.First(&updatedTask2, task2.ID).Error; err != nil {
+        t.Fatalf("task2 not found: %v", err)
+    }
+    if updatedTask2.ColumnIndex != 1 {
+        t.Fatalf("task2 should have shifted to col 1, got %d", updatedTask2.ColumnIndex)
+    }
+
+    if err := db.First(&updatedTask3, task3.ID).Error; err != nil {
+        t.Fatalf("task3 not found: %v", err)
+    }
+    if updatedTask3.ColumnIndex != 2 {
+        t.Fatalf("task3 should have shifted to col 2, got %d", updatedTask3.ColumnIndex)
+    }
+
+    // Verify column 1's task was deleted
+    var deletedTasks []models.Task
+    if err := db.Where("title = ?", "Task in Col1").Find(&deletedTasks).Error; err != nil {
+        t.Fatalf("query failed: %v", err)
+    }
+    if len(deletedTasks) != 0 {
+        t.Fatalf("task in deleted column should be gone, found %d", len(deletedTasks))
+    }
+}

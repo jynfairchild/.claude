@@ -1,0 +1,39 @@
+## v0.7.5 – Signup Page Redesign with Info Panels
+
+**Date:** December 25, 2024
+
+### Changes Made:
+- Redesigned signup page with two-column layout (form + info panels)
+- Added disabled button state: grey100 fill, grey200 stroke, shadow-grey, grey400 text
+- Button stays disabled until all fields (nickname, email, password) and checkbox are filled
+- Added ASTROTASK logomark (40px) with version number, links to root page
+- Added "WELCOME TO THE ALPHA" tagline below logomark (18px, grey500, uppercase)
+- Changed name field placeholder from "Name" to "Nickname"
+- Changed signup title to 20px bold
+- Created info column 200px to the right of signup form
+- Added Alpha warning box (red theme): explains alpha state, potential data resets, pro tier promise
+- Added Zero Knowledge Encryption info box (grey theme): lists what's encrypted vs not
+- Styled bullet list for encrypted items (column titles, task titles, projects, tags)
+- Added italic paragraph with bold "not" emphasizing what data is NOT encrypted
+- Fixed REQUIRE_INVITE missing from local .env (was only in docker-compose)
+
+### Current Status:
+- Signup page has full two-column layout with informative panels
+- Invite-only signup now enforced in local development
+- All styling matches design system (Berkeley Mono, KKAN palette, semicondensed variants)
+
+### Unresolved Issues:
+- None
+
+### Commit Message:
+Redesign signup page with two-column layout and info panels
+
+- Add disabled button state with grey styling until form is complete
+- Add ASTROTASK logomark (40px) with version number linking to root
+- Add "Welcome to the Alpha" tagline below logomark
+- Create two-column layout with 200px gap between form and info
+- Add Alpha warning box (red theme) explaining alpha state and data policies
+- Add Zero Knowledge Encryption info box (grey theme) listing encrypted fields
+- Style bullet list and italic disclaimer for unencrypted duration data
+- Change name placeholder to "Nickname", title to 20px bold
+- Add REQUIRE_INVITE=true to local .env for invite-only signup

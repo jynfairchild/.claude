@@ -1,0 +1,28 @@
+# Alpha Plan
+
+## TODO
+
+1. [x] Fix "Request an Invite" JSON parse error
+   - Error: `JSON.parse: unexpected non-whitespace character after JSON data at line 1 column 5`
+   - Fixed: Removed duplicate `/api/v1` in `frontend/src/app/request-invite/page.tsx`
+
+2. [x] Add aliases for Docker build, tag, and push to AWS ECR
+   - Added functions to ~/.zshrc for backend and frontend
+   - `astro-backend-ship` and `astro-frontend-ship` for full deploy
+
+3. [x] Move DNS to AWS Route 53 (fixes apex domain HTTPS redirect)
+   - Created hosted zone with all DNS records (MX, TXT, CNAME, A)
+   - Changed Namecheap nameservers to Route 53
+   - Domain transfer initiated - waiting 5-7 days to complete
+
+4. [x] Update README with local dev setup
+   - Added Docker and hybrid setup instructions
+   - Documented environment variables
+   - Added API endpoint reference
+   - Added troubleshooting section
+
+5. [ ] Update passwords (rotate compromised credentials)
+
+6. [x] Verify local development is working
+   - Docker Compose with simple `localdev` password
+   - Hybrid mode (Postgres in Docker, services locally)

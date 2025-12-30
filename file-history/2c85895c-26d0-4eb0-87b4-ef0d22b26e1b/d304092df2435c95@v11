@@ -1,0 +1,979 @@
+package handlers
+
+import (
+    "crypto/rand"
+    "encoding/base64"
+    "net/http"
+    "os"
+    "strconv"
+    "strings"
+    "time"
+
+    "github.com/gin-gonic/gin"
+    "github.com/go-playground/validator/v10"
+    "github.com/lib/pq"
+    "gorm.io/gorm"
+
+    "simple_task_tracker/backend/internal/auth"
+    emailpkg "simple_task_tracker/backend/internal/email"
+    "simple_task_tracker/backend/internal/models"
+    "simple_task_tracker/backend/internal/utils"
+)
+
+// generateCSRFToken creates a random CSRF token
+func generateCSRFToken() string {
+    b := make([]byte, 32)
+    if _, err := rand.Read(b); err != nil {
+        return ""
+    }
+    return base64.RawURLEncoding.EncodeToString(b)
+}
+
+type AuthHandler struct {
+	db       *gorm.DB
+	validate *validator.Validate
+}
+
+func NewAuthHandler(db *gorm.DB) *AuthHandler {
+    return &AuthHandler{
+        db:       db,
+        validate: validator.New(),
+    }
+}
+
+// devEchoTokensEnabled controls whether sensitive one-time tokens (verification, password reset)
+// are echoed in API responses. Defaults to true for developer convenience unless explicitly disabled.
+func devEchoTokensEnabled() bool {
+    v := os.Getenv("DEV_ECHO_TOKENS")
+    if v == "" { return false } // secure-by-default: disabled unless explicitly enabled
+    b, err := strconv.ParseBool(v)
+    if err != nil { return false }
+    return b
+}
+
+// devReturnTokensInJSON controls whether access/refresh tokens are returned in JSON response body.
+// In production, tokens should only be set as HttpOnly cookies. In dev, returning them in JSON
+// makes testing easier (e.g., with curl or Postman).
+func devReturnTokensInJSON() bool {
+    v := os.Getenv("DEV_RETURN_TOKENS")
+    if v == "" { return false } // secure-by-default
+    b, err := strconv.ParseBool(v)
+    if err != nil { return false }
+    return b
+}
+
+type SignupRequest struct {
+    Email       string `json:"email" validate:"required,email"`
+    Password    string `json:"password" validate:"required,min=6"`
+    Name        string `json:"name" validate:"required"`
+    InviteToken string `json:"invite_token,omitempty"` // Optional invitation token for invite-only signup
+}
+
+type LoginRequest struct {
+    Email    string `json:"email" validate:"required,email"`
+    Password string `json:"password" validate:"required"`
+}
+
+type RefreshRequest struct {
+    RefreshToken string `json:"refresh_token" validate:"required"`
+}
+
+type LogoutRequest struct {
+    RefreshToken string `json:"refresh_token" validate:"required"`
+}
+
+type VerifyEmailRequest struct {
+    Token string `json:"token" validate:"required"`
+}
+
+type RequestPasswordResetRequest struct {
+    Email string `json:"email" validate:"required,email"`
+}
+
+type ResetPasswordRequest struct {
+    Token       string `json:"token" validate:"required"`
+    NewPassword string `json:"new_password" validate:"required,min=6"`
+}
+
+type ChangePasswordRequest struct {
+    CurrentPassword string `json:"current_password" validate:"required"`
+    NewPassword     string `json:"new_password" validate:"required,min=6"`
+}
+
+// ReencryptRequest is used when changing password to re-encrypt all user data
+type ReencryptRequest struct {
+    CurrentPassword string              `json:"current_password" validate:"required"`
+    NewPassword     string              `json:"new_password" validate:"required,min=6"`
+    NewSalt         string              `json:"new_salt" validate:"required"`
+    Tasks           []ReencryptedTask   `json:"tasks"`
+    Columns         []ReencryptedColumn `json:"columns"`
+}
+
+type ReencryptedTask struct {
+    ID      uint     `json:"id"`
+    Title   string   `json:"title"`
+    Project string   `json:"project"`
+    Tags    []string `json:"tags"`
+}
+
+type ReencryptedColumn struct {
+    ID   uint   `json:"id"`
+    Name string `json:"name"`
+}
+
+type UpdateProfileRequest struct {
+    Actionbar []string `json:"actionbar"`
+    Name      *string  `json:"name,omitempty"`
+    Email     *string  `json:"email,omitempty"`
+}
+
+func (h *AuthHandler) Signup(c *gin.Context) {
+	var req SignupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.validate.Struct(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check if invite-only mode is enabled
+	requireInvite := os.Getenv("REQUIRE_INVITE") == "true"
+
+	// Validate and consume invitation token if provided
+	var inviteVerified bool
+	if req.InviteToken != "" {
+		invite, err := auth.ConsumeInvitationToken(h.db, req.InviteToken)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or expired invitation"})
+			return
+		}
+		// Verify email matches the invitation
+		if invite.Email != req.Email {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Email does not match invitation"})
+			return
+		}
+		inviteVerified = true
+	} else if requireInvite {
+		// Invite-only mode but no token provided
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invitation required to sign up"})
+		return
+	}
+
+    var existingUser models.User
+    if err := h.db.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
+        c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
+        return
+    }
+
+    hashedPassword, err := auth.HashPassword(req.Password)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+        return
+    }
+
+    // Generate encryption salt for zero-knowledge client-side encryption
+    saltBytes := make([]byte, 32)
+    if _, err := rand.Read(saltBytes); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate encryption salt"})
+        return
+    }
+    encryptionSalt := base64.StdEncoding.EncodeToString(saltBytes)
+
+	// Auto-verify email if invited
+	var emailVerifiedAt *time.Time
+	if inviteVerified {
+		now := time.Now()
+		emailVerifiedAt = &now
+	}
+
+    // Check if this email should be auto-promoted to admin
+    adminEmail := os.Getenv("ADMIN_EMAIL")
+    role := "user"
+    if adminEmail != "" && strings.EqualFold(req.Email, adminEmail) {
+        role = "admin"
+    }
+
+    user := models.User{
+        Email:           req.Email,
+        Name:            req.Name,
+        PasswordHash:    hashedPassword,
+        EncryptionSalt:  encryptionSalt,
+        Role:            role,
+        Plan:            "normal",
+        Actionbar:       pq.StringArray{},
+        EmailVerifiedAt: emailVerifiedAt,
+    }
+	
+    if err := h.db.Create(&user).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+        return
+    }
+
+    token, err := auth.GenerateToken(user.ID, user.Email, user.Name)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+        return
+    }
+
+    // Issue refresh token
+    ua := c.Request.UserAgent()
+    ip := c.ClientIP()
+    refreshToken, _, err := auth.CreateRefreshToken(h.db, user.ID, ua, ip)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create refresh token"})
+        return
+    }
+
+    // Set HttpOnly cookies for access and refresh tokens
+    utils.SetAccessTokenCookie(c, token, auth.AccessTTL())
+    utils.SetRefreshTokenCookie(c, refreshToken, auth.RefreshTTL())
+
+    // Set CSRF token cookie (non-HttpOnly so JS can read it)
+    csrfToken := generateCSRFToken()
+    utils.SetCSRFTokenCookie(c, csrfToken)
+
+    resp := gin.H{
+        "message": "User created successfully",
+        "user": gin.H{
+            "id":               user.ID,
+            "email":            user.Email,
+            "name":             user.Name,
+            "role":             user.Role,
+            "plan":             user.Plan,
+            "actionbar":        user.Actionbar,
+            "email_verified_at": user.EmailVerifiedAt,
+            "encryption_salt":  user.EncryptionSalt,
+        },
+    }
+
+    // Create email verification token only if not invited (invited users are auto-verified)
+    if !inviteVerified {
+        verifyToken, _, err := auth.CreateEmailVerificationToken(h.db, user.ID)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create verification token"})
+            return
+        }
+        if devEchoTokensEnabled() {
+            resp["verification_token"] = verifyToken
+        }
+    }
+
+    // DEV: optionally include tokens in JSON for testing tools
+    if devReturnTokensInJSON() {
+        resp["token"] = token
+        resp["refresh_token"] = refreshToken
+    }
+
+    c.JSON(http.StatusCreated, resp)
+}
+
+func (h *AuthHandler) Login(c *gin.Context) {
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.validate.Struct(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+    if err := h.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+        return
+    }
+    ok, newHash, err := auth.VerifyAndMaybeRehash(user.PasswordHash, req.Password)
+    if err != nil || !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+        return
+    }
+    if newHash != "" {
+        // Migrate credential to Argon2id
+        user.PasswordHash = newHash
+        now := time.Now()
+        user.UpdatedAt = now
+        _ = h.db.Model(&user).Update("password_hash", newHash).Error
+    }
+
+    // Generate encryption salt for existing users who don't have one
+    if user.EncryptionSalt == "" {
+        saltBytes := make([]byte, 32)
+        if _, err := rand.Read(saltBytes); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate encryption salt"})
+            return
+        }
+        user.EncryptionSalt = base64.StdEncoding.EncodeToString(saltBytes)
+        _ = h.db.Model(&user).Update("encryption_salt", user.EncryptionSalt).Error
+    }
+
+    token, err := auth.GenerateToken(user.ID, user.Email, user.Name)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+        return
+    }
+
+    // Create refresh token
+    ua := c.Request.UserAgent()
+    ip := c.ClientIP()
+    refreshToken, _, err := auth.CreateRefreshToken(h.db, user.ID, ua, ip)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create refresh token"})
+        return
+    }
+
+    // Set HttpOnly cookies for access and refresh tokens
+    utils.SetAccessTokenCookie(c, token, auth.AccessTTL())
+    utils.SetRefreshTokenCookie(c, refreshToken, auth.RefreshTTL())
+
+    // Set CSRF token cookie (non-HttpOnly so JS can read it)
+    csrfToken := generateCSRFToken()
+    utils.SetCSRFTokenCookie(c, csrfToken)
+
+    resp := gin.H{
+        "message": "Login successful",
+        "user": gin.H{
+            "id":              user.ID,
+            "email":           user.Email,
+            "name":            user.Name,
+            "role":            user.Role,
+            "plan":            user.Plan,
+            "actionbar":       user.Actionbar,
+            "encryption_salt": user.EncryptionSalt,
+        },
+    }
+    // DEV: optionally include tokens in JSON for testing tools
+    if devReturnTokensInJSON() {
+        resp["token"] = token
+        resp["refresh_token"] = refreshToken
+    }
+    c.JSON(http.StatusOK, resp)
+}
+
+func (h *AuthHandler) GetProfile(c *gin.Context) {
+	userID := c.GetUint("userID")
+
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+    c.JSON(http.StatusOK, gin.H{
+        "user": gin.H{
+            "id":              user.ID,
+            "email":           user.Email,
+            "name":            user.Name,
+            "role":            user.Role,
+            "plan":            user.Plan,
+            "actionbar":       user.Actionbar,
+            "encryption_salt": user.EncryptionSalt,
+            "created_at":      user.CreatedAt,
+        },
+    })
+}
+
+// Refresh exchanges a valid refresh token for a new access token and rotated refresh token
+func (h *AuthHandler) Refresh(c *gin.Context) {
+    // Try to get refresh token from cookie first, then fallback to JSON body
+    var refreshTokenStr string
+    if cookie, err := c.Cookie("refresh_token"); err == nil && cookie != "" {
+        refreshTokenStr = cookie
+    } else {
+        var req RefreshRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Refresh token required"})
+            return
+        }
+        if err := h.validate.Struct(req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        refreshTokenStr = req.RefreshToken
+    }
+
+    // Rotate refresh token
+    ua := c.Request.UserAgent()
+    ip := c.ClientIP()
+    newRefresh, rt, err := auth.RotateRefreshToken(h.db, refreshTokenStr, ua, ip)
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired refresh token"})
+        return
+    }
+
+    // Issue new access token
+    var user models.User
+    if err := h.db.First(&user, rt.UserID).Error; err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+        return
+    }
+    access, err := auth.GenerateToken(user.ID, user.Email, user.Name)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+        return
+    }
+
+    // Set new HttpOnly cookies
+    utils.SetAccessTokenCookie(c, access, auth.AccessTTL())
+    utils.SetRefreshTokenCookie(c, newRefresh, auth.RefreshTTL())
+
+    // Regenerate CSRF token
+    csrfToken := generateCSRFToken()
+    utils.SetCSRFTokenCookie(c, csrfToken)
+
+    resp := gin.H{
+        "message":         "Token refreshed",
+        "refresh_expires": rt.ExpiresAt,
+    }
+    // DEV: optionally include tokens in JSON for testing tools
+    if devReturnTokensInJSON() {
+        resp["token"] = access
+        resp["refresh_token"] = newRefresh
+    }
+    c.JSON(http.StatusOK, resp)
+}
+
+// Logout revokes a single refresh token (from cookie or request body) and clears cookies
+func (h *AuthHandler) Logout(c *gin.Context) {
+    // Try to get refresh token from cookie first, then fallback to JSON body
+    var refreshTokenStr string
+    if cookie, err := c.Cookie("refresh_token"); err == nil && cookie != "" {
+        refreshTokenStr = cookie
+    } else {
+        var req LogoutRequest
+        if err := c.ShouldBindJSON(&req); err == nil && req.RefreshToken != "" {
+            refreshTokenStr = req.RefreshToken
+        }
+    }
+
+    // Revoke the refresh token if we have one
+    if refreshTokenStr != "" {
+        _ = auth.RevokeRefreshToken(h.db, refreshTokenStr) // Best effort, don't fail logout
+    }
+
+    // Always clear auth cookies
+    utils.ClearAuthCookies(c)
+
+    c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
+}
+
+// LogoutAll revokes all refresh tokens for the authenticated user and clears cookies
+func (h *AuthHandler) LogoutAll(c *gin.Context) {
+    userID := c.GetUint("userID")
+    if userID == 0 {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+    if err := auth.RevokeAllUserRefreshTokens(h.db, userID); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke sessions"})
+        return
+    }
+
+    // Clear auth cookies for this session
+    utils.ClearAuthCookies(c)
+
+    c.JSON(http.StatusOK, gin.H{"message": "All sessions revoked"})
+}
+
+// VerifyEmail marks a user's email as verified using a one-time token
+func (h *AuthHandler) VerifyEmail(c *gin.Context) {
+    var req VerifyEmailRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    rec, err := auth.ConsumeEmailVerificationToken(h.db, req.Token)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or expired token"})
+        return
+    }
+    var user models.User
+    if err := h.db.First(&user, rec.UserID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+    now := time.Now()
+    user.EmailVerifiedAt = &now
+    if err := h.db.Save(&user).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to verify email"})
+        return
+    }
+    c.JSON(http.StatusOK, gin.H{"message": "Email verified"})
+}
+
+// RequestPasswordReset creates a one-time token and (in dev) returns it in response
+func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
+    var req RequestPasswordResetRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    // Respond 200 regardless to avoid account enumeration
+    var user models.User
+    if err := h.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
+        c.JSON(http.StatusOK, gin.H{"message": "If the email exists, a reset token was issued"})
+        return
+    }
+    token, _, err := auth.CreatePasswordResetToken(h.db, user.ID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create reset token"})
+        return
+    }
+    resp := gin.H{"message": "Password reset token created"}
+    if devEchoTokensEnabled() {
+        resp["reset_token"] = token
+    }
+    c.JSON(http.StatusOK, resp)
+}
+
+// ResetPassword consumes a valid reset token and sets a new password
+func (h *AuthHandler) ResetPassword(c *gin.Context) {
+    var req ResetPasswordRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    rec, err := auth.ConsumePasswordResetToken(h.db, req.Token)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or expired token"})
+        return
+    }
+    var user models.User
+    if err := h.db.First(&user, rec.UserID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+    newHash, err := auth.HashPassword(req.NewPassword)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+        return
+    }
+    user.PasswordHash = newHash
+    if err := h.db.Save(&user).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+        return
+    }
+    // Revoke all refresh tokens for safety
+    _ = auth.RevokeAllUserRefreshTokens(h.db, user.ID)
+    c.JSON(http.StatusOK, gin.H{"message": "Password updated"})
+}
+
+// ChangePassword updates password for authenticated user
+func (h *AuthHandler) ChangePassword(c *gin.Context) {
+    userID := c.GetUint("userID")
+    if userID == 0 {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+    var req ChangePasswordRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    var user models.User
+    if err := h.db.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+    ok, _, err := auth.VerifyAndMaybeRehash(user.PasswordHash, req.CurrentPassword)
+    if err != nil || !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Current password incorrect"})
+        return
+    }
+    newHash, err := auth.HashPassword(req.NewPassword)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+        return
+    }
+    user.PasswordHash = newHash
+    if err := h.db.Save(&user).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+        return
+    }
+    _ = auth.RevokeAllUserRefreshTokens(h.db, user.ID)
+    c.JSON(http.StatusOK, gin.H{"message": "Password changed"})
+}
+
+// ReencryptData handles password change with data re-encryption
+// This endpoint changes the password AND updates all encrypted data with new encryption
+func (h *AuthHandler) ReencryptData(c *gin.Context) {
+    userID := c.GetUint("userID")
+    if userID == 0 {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+
+    var req ReencryptRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    var user models.User
+    if err := h.db.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+
+    // Verify current password
+    ok, _, err := auth.VerifyAndMaybeRehash(user.PasswordHash, req.CurrentPassword)
+    if err != nil || !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Current password incorrect"})
+        return
+    }
+
+    // Hash new password
+    newHash, err := auth.HashPassword(req.NewPassword)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+        return
+    }
+
+    // Perform all updates in a transaction
+    if err := h.db.Transaction(func(tx *gorm.DB) error {
+        // Update user's password and encryption salt
+        user.PasswordHash = newHash
+        user.EncryptionSalt = req.NewSalt
+        if err := tx.Save(&user).Error; err != nil {
+            return err
+        }
+
+        // Update each task with re-encrypted data
+        for _, task := range req.Tasks {
+            // Verify task belongs to user
+            var existingTask models.Task
+            if err := tx.Where("id = ? AND user_id = ?", task.ID, userID).First(&existingTask).Error; err != nil {
+                continue // Skip tasks that don't exist or don't belong to user
+            }
+
+            // Update only the encrypted fields
+            updates := map[string]interface{}{
+                "title":   task.Title,
+                "project": task.Project,
+                "tags":    pq.StringArray(task.Tags),
+            }
+            if err := tx.Model(&existingTask).Updates(updates).Error; err != nil {
+                return err
+            }
+        }
+
+        // Update each column with re-encrypted data
+        for _, col := range req.Columns {
+            // Verify column belongs to user
+            var existingCol models.UserColumn
+            if err := tx.Where("id = ? AND user_id = ?", col.ID, userID).First(&existingCol).Error; err != nil {
+                continue // Skip columns that don't exist or don't belong to user
+            }
+
+            // Update only the encrypted name field
+            if err := tx.Model(&existingCol).Update("name", col.Name).Error; err != nil {
+                return err
+            }
+        }
+
+        return nil
+    }); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update data"})
+        return
+    }
+
+    // Revoke all refresh tokens for security
+    _ = auth.RevokeAllUserRefreshTokens(h.db, user.ID)
+
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Password changed and data re-encrypted",
+        "user": gin.H{
+            "id":              user.ID,
+            "email":           user.Email,
+            "name":            user.Name,
+            "role":            user.Role,
+            "plan":            user.Plan,
+            "actionbar":       user.Actionbar,
+            "encryption_salt": user.EncryptionSalt,
+        },
+    })
+}
+
+// UpdateProfile updates user profile settings (e.g., actionbar preferences)
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+    userID := c.GetUint("userID")
+    if userID == 0 {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+    var req UpdateProfileRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    var user models.User
+    if err := h.db.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+    user.Actionbar = req.Actionbar
+    if req.Name != nil {
+        user.Name = *req.Name
+    }
+    if req.Email != nil && *req.Email != user.Email {
+        // Validate email format
+        if err := h.validate.Var(*req.Email, "required,email"); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+            return
+        }
+        // Check if email is already taken by another user
+        var existingUser models.User
+        if err := h.db.Where("email = ? AND id != ?", *req.Email, userID).First(&existingUser).Error; err == nil {
+            c.JSON(http.StatusConflict, gin.H{"error": "Email already in use"})
+            return
+        }
+        user.Email = *req.Email
+    }
+    if err := h.db.Save(&user).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+        return
+    }
+    c.JSON(http.StatusOK, gin.H{
+        "user": gin.H{
+            "id":              user.ID,
+            "email":           user.Email,
+            "name":            user.Name,
+            "role":            user.Role,
+            "plan":            user.Plan,
+            "actionbar":       user.Actionbar,
+            "encryption_salt": user.EncryptionSalt,
+            "created_at":      user.CreatedAt,
+        },
+    })
+}
+
+type DeleteUserDataRequest struct {
+    Password string `json:"password" validate:"required"`
+}
+
+// DeleteUserData removes all user data but keeps the account for future login
+func (h *AuthHandler) DeleteUserData(c *gin.Context) {
+    userID := c.GetUint("userID")
+    if userID == 0 {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+
+    var req DeleteUserDataRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Password required"})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    // Verify password
+    var user models.User
+    if err := h.db.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+    ok, _, err := auth.VerifyAndMaybeRehash(user.PasswordHash, req.Password)
+    if err != nil || !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
+        return
+    }
+
+    // Delete all user data in a transaction
+    if err := h.db.Transaction(func(tx *gorm.DB) error {
+        // 1. Delete refresh tokens (no cascade)
+        if err := tx.Where("user_id = ?", userID).Delete(&models.RefreshToken{}).Error; err != nil {
+            return err
+        }
+
+        // 2. Delete password reset tokens
+        if err := tx.Where("user_id = ?", userID).Delete(&models.PasswordResetToken{}).Error; err != nil {
+            return err
+        }
+
+        // 3. Delete email verification tokens
+        if err := tx.Where("user_id = ?", userID).Delete(&models.EmailVerificationToken{}).Error; err != nil {
+            return err
+        }
+
+        // 4. Delete invitations created by this user
+        if err := tx.Where("invited_by_id = ?", userID).Delete(&models.Invitation{}).Error; err != nil {
+            return err
+        }
+
+        // 5. Delete all tasks (sessions cascade automatically via FK)
+        // Use Unscoped to hard-delete including soft-deleted records
+        if err := tx.Unscoped().Where("user_id = ?", userID).Delete(&models.Task{}).Error; err != nil {
+            return err
+        }
+
+        // 6. Delete all projects (hard delete including soft-deleted)
+        if err := tx.Unscoped().Where("user_id = ?", userID).Delete(&models.Project{}).Error; err != nil {
+            return err
+        }
+
+        // 7. Delete all user columns (kanban board configuration)
+        if err := tx.Where("user_id = ?", userID).Delete(&models.UserColumn{}).Error; err != nil {
+            return err
+        }
+
+        // 8. Reset user preferences (actionbar, last_login_at)
+        if err := tx.Model(&models.User{}).Where("id = ?", userID).
+            Updates(map[string]interface{}{
+                "actionbar":     pq.StringArray{},
+                "last_login_at": nil,
+            }).Error; err != nil {
+            return err
+        }
+
+        return nil
+    }); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user data"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "All user data deleted successfully"})
+}
+
+// DeleteAccount permanently deletes the user account and all associated data
+func (h *AuthHandler) DeleteAccount(c *gin.Context) {
+    userID := c.GetUint("userID")
+    if userID == 0 {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+
+    var req DeleteUserDataRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Password required"})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    // Verify password
+    var user models.User
+    if err := h.db.First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        return
+    }
+    ok, _, err := auth.VerifyAndMaybeRehash(user.PasswordHash, req.Password)
+    if err != nil || !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
+        return
+    }
+
+    // Delete all user data and the account in a transaction
+    if err := h.db.Transaction(func(tx *gorm.DB) error {
+        // 1. Delete refresh tokens
+        if err := tx.Where("user_id = ?", userID).Delete(&models.RefreshToken{}).Error; err != nil {
+            return err
+        }
+
+        // 2. Delete password reset tokens
+        if err := tx.Where("user_id = ?", userID).Delete(&models.PasswordResetToken{}).Error; err != nil {
+            return err
+        }
+
+        // 3. Delete email verification tokens
+        if err := tx.Where("user_id = ?", userID).Delete(&models.EmailVerificationToken{}).Error; err != nil {
+            return err
+        }
+
+        // 4. Delete invitations created by this user
+        if err := tx.Where("invited_by_id = ?", userID).Delete(&models.Invitation{}).Error; err != nil {
+            return err
+        }
+
+        // 5. Delete all tasks (sessions cascade automatically via FK)
+        if err := tx.Unscoped().Where("user_id = ?", userID).Delete(&models.Task{}).Error; err != nil {
+            return err
+        }
+
+        // 6. Delete all projects
+        if err := tx.Unscoped().Where("user_id = ?", userID).Delete(&models.Project{}).Error; err != nil {
+            return err
+        }
+
+        // 7. Delete all user columns
+        if err := tx.Where("user_id = ?", userID).Delete(&models.UserColumn{}).Error; err != nil {
+            return err
+        }
+
+        // 8. Delete the user account itself
+        if err := tx.Delete(&models.User{}, userID).Error; err != nil {
+            return err
+        }
+
+        return nil
+    }); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete account"})
+        return
+    }
+
+    // Clear auth cookies
+    utils.ClearAuthCookies(c)
+
+    c.JSON(http.StatusOK, gin.H{"message": "Account deleted successfully"})
+}
+
+type InviteRequestInput struct {
+    Email   string `json:"email" validate:"required,email"`
+    Message string `json:"message"`
+}
+
+// RequestInvite handles public invite requests - sends notification email to admin
+func (h *AuthHandler) RequestInvite(c *gin.Context) {
+    var req InviteRequestInput
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+        return
+    }
+    if err := h.validate.Struct(req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email address"})
+        return
+    }
+
+    // Get admin email from environment
+    adminEmail := os.Getenv("ADMIN_EMAIL")
+    if adminEmail == "" {
+        adminEmail = "jyn@astrotask.io"
+    }
+
+    // Send notification email to admin
+    if err := emailpkg.SendInviteRequestNotification(adminEmail, req.Email, req.Message); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to submit request"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Invite request submitted"})
+}

@@ -1,0 +1,246 @@
+.request-invite-page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: var(--kkan-white);
+}
+
+.request-invite-card {
+  width: 442px;
+  margin: 0 16px;
+}
+
+.request-invite-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.request-invite-brand .brand-link {
+  display: inline-flex;
+  align-items: baseline;
+  text-decoration: none;
+  color: inherit;
+}
+
+.request-invite-brand .brand-wordmark {
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 32px;
+  line-height: 32px;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+}
+
+.request-invite-brand .brand-wordmark-base {
+  font-weight: 900;
+  color: var(--kkan-grey-900);
+}
+
+.request-invite-brand .brand-wordmark-accent {
+  color: var(--kkan-grey-900);
+  font-weight: 500;
+}
+
+.request-invite-title {
+  color: var(--kkan-grey-800);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1.41px;
+  line-height: 20px;
+  margin: 0 0 24px 0;
+}
+
+.request-invite-subtitle {
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--kkan-grey-500);
+  margin: 0 0 24px 0;
+}
+
+.request-invite-field {
+  background: var(--kkan-white);
+  border: 1px solid var(--kkan-grey-200);
+  border-radius: 12px;
+  box-shadow: var(--shadow-default);
+  padding: 12px 16px;
+}
+
+.request-invite-field:first-of-type {
+  margin-top: 0;
+}
+
+.request-invite-field + .request-invite-field {
+  margin-top: 18px;
+}
+
+.request-invite-field--textarea {
+  padding: 16px;
+}
+
+.request-invite-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--kkan-grey-900);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 26px;
+  transition: color 0.2s ease;
+}
+
+.request-invite-input::placeholder {
+  color: var(--kkan-grey-300);
+}
+
+.request-invite-textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--kkan-grey-900);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  resize: vertical;
+  min-height: 88px;
+}
+
+.request-invite-textarea::placeholder {
+  color: var(--kkan-grey-300);
+}
+
+.request-invite-cta {
+  margin-top: 32px;
+  background: var(--kkan-blue-25);
+  border: 1px solid var(--kkan-blue-400);
+  border-radius: 12px;
+  box-shadow: 0 6px 0 0 rgba(0, 104, 255, 0.16);
+  padding: 12px 16px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.request-invite-cta:hover {
+  background: var(--kkan-blue-50);
+}
+
+.request-invite-cta:active {
+  background: var(--kkan-blue-100);
+  transform: translateY(1px);
+}
+
+.request-invite-cta:focus,
+.request-invite-cta:focus-visible {
+  background: var(--kkan-blue-50);
+  border-color: var(--kkan-blue-400);
+  outline: none;
+  box-shadow: 0 6px 0 0 rgba(0, 104, 255, 0.16);
+}
+
+.request-invite-cta:disabled {
+  background: var(--kkan-grey-100);
+  border-color: var(--kkan-grey-200);
+  box-shadow: var(--shadow-grey);
+  cursor: not-allowed;
+}
+
+.request-invite-cta:disabled .request-invite-cta-text {
+  color: var(--kkan-grey-400);
+}
+
+.request-invite-cta:disabled:hover {
+  background: var(--kkan-grey-100);
+}
+
+.request-invite-cta:disabled:active {
+  background: var(--kkan-grey-100);
+  transform: none;
+}
+
+.request-invite-cta-text {
+  color: var(--kkan-blue-600);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.request-invite-subrow {
+  margin-top: 32px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.request-invite-subtext {
+  color: var(--kkan-black);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.request-invite-link {
+  color: var(--kkan-blue-600);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.request-invite-error {
+  color: #b00020;
+  margin-top: 12px;
+  font-family: 'Berkeley Mono', monospace;
+}
+
+.request-invite-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Success state */
+.request-invite-success {
+  text-align: left;
+}
+
+.request-invite-success .request-invite-title {
+  margin-bottom: 24px;
+}
+
+.request-invite-text {
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 26px;
+  color: var(--kkan-grey-700);
+  margin: 0 0 32px 0;
+}
+
+.request-invite-text strong {
+  font-weight: 800;
+  color: var(--kkan-grey-900);
+}
+
+.request-invite-back-link {
+  color: var(--kkan-blue-600);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.request-invite-back-link:hover {
+  text-decoration: underline;
+}

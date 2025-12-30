@@ -1,0 +1,44 @@
+## [v0.7.2 – Terms of Service & Privacy Policy Pages]
+**Date:** 2025-12-22
+
+### Changes Made:
+- Created `/terms` and `/privacy` pages that render markdown content at build time
+- Built LegalHeader component with logo that links to /dashboard (logged in) or /login (logged out)
+- Added Terms/Privacy agreement checkbox to signup form (required before signup)
+- Integrated custom SVG checkbox icons (check_box_fill1_24px.svg, check_box_outline_blank_24px.svg)
+- Made /terms and /privacy accessible to guests by adding to PUBLIC_ROUTES in RouteGuard
+- Prevented authenticated users from being redirected away from legal pages
+- Added Terms and Privacy links to user dropdown menu with divider separators
+- Created shared legal.css for consistent legal page styling
+
+### Files Created:
+- `frontend/src/components/LegalHeader/LegalHeader.tsx` - Logo header for legal pages
+- `frontend/src/components/LegalHeader/LegalHeader.css` - Legal header styles
+- `frontend/src/app/terms/page.tsx` - Terms of Service page with markdown parsing
+- `frontend/src/app/privacy/page.tsx` - Privacy Policy page with markdown parsing
+- `frontend/src/app/terms/legal.css` - Shared legal page styles
+- `frontend/terms.md` - Terms of Service content
+- `frontend/privacy.md` - Privacy Policy content
+
+### Files Modified:
+- `frontend/src/app/signup/page.tsx` - Added terms agreement checkbox with custom icons
+- `frontend/src/app/signup/signup.css` - Added checkbox and agreement styling
+- `frontend/src/components/auth/RouteGuard.tsx` - Added /terms and /privacy to public routes
+- `frontend/src/components/header/Header.tsx` - Added Terms/Privacy links to dropdown menu
+- `frontend/src/components/header/Header.css` - Added dropdown-divider styling
+
+### Current Status:
+All features working. Terms and Privacy pages are accessible to both guests and logged-in users. Signup requires explicit agreement checkbox before account creation. Legal links available in user dropdown menu.
+
+### Unresolved Issues:
+- None
+
+### Commit Message:
+Add Terms of Service and Privacy Policy pages with signup agreement requirement
+
+- Create /terms and /privacy pages with markdown content rendering
+- Build LegalHeader component linking to dashboard or login based on auth state
+- Add required agreement checkbox to signup form with custom SVG icons
+- Make legal pages accessible to guests (added to PUBLIC_ROUTES)
+- Add Terms and Privacy links to user dropdown menu with dividers
+- Create shared legal.css styling for consistent legal page appearance

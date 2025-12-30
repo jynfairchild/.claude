@@ -1,0 +1,38 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import "./AdminNav.css";
+
+export const AdminNav = () => {
+  const pathname = usePathname();
+
+  return (
+    <div className="admin-nav-bar">
+      <Link href="/dashboard" className="admin-nav-back">
+        ← Dashboard
+      </Link>
+      <nav className="header-nav admin-nav" aria-label="Admin navigation">
+        <Link
+          href="/metrics"
+          className={`nav-link${pathname === "/metrics" ? " active" : ""}`}
+        >
+          <span className="nav-icon" aria-hidden="true">
+            <img src="/icons/dashboard_24px.svg" alt="" />
+          </span>
+          Metrics
+        </Link>
+        <Link
+          href="/invites"
+          className={`nav-link${pathname === "/invites" ? " active" : ""}`}
+        >
+          <span className="nav-icon" aria-hidden="true">
+            <img src="/icons/people_24px.svg" alt="" />
+          </span>
+          Invites
+        </Link>
+      </nav>
+    </div>
+  );
+};

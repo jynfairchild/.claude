@@ -1,0 +1,245 @@
+"use client";
+
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { authApi, type AuthUser } from "../services/authApi";
+import { globalRefresh, getLastRefreshSuccessAt } from "@/services/refreshGate";
+import { getJwtExp } from "@/utils/jwt";
+import { authLog } from "@/utils/debug";
+
+type AuthState = {
+  user: AuthUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  loading: boolean;
+  needsReauth: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (data: { email: string; password: string; name: string; }) => Promise<void>;
+  logout: () => Promise<void>;
+  refresh: () => Promise<boolean>;
+  clearReauthFlag: () => void;
+  updateActionbar: (actionbar: string[]) => Promise<void>;
+};
+
+const AuthContext = createContext<AuthState | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [needsReauth, setNeedsReauth] = useState<boolean>(false);
+  const refreshTimerRef = useRef<number | null>(null);
+
+  const clearRefreshTimer = () => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+  };
+
+  const scheduleProactiveRefresh = (token: string | null, rt: string | null) => {
+    clearRefreshTimer();
+    if (!token || !rt || needsReauth) return;
+    const exp = getJwtExp(token);
+    if (!exp) return;
+    const now = Date.now();
+    const marginMs = 5 * 60 * 1000; // 5 minutes
+    const due = exp * 1000 - marginMs;
+    const delay = Math.max(0, due - now);
+    // Add small jitter to avoid thundering herd (0-10s)
+    const jitter = Math.floor(Math.random() * 10000);
+    authLog('scheduleProactiveRefresh', { exp, now, marginMs, due, delay, jitter });
+    refreshTimerRef.current = window.setTimeout(() => {
+      // Trigger refresh but ignore errors here
+      authLog('proactive refresh timer fired');
+      refresh().catch(() => {});
+    }, delay + jitter);
+  };
+
+  // DEV-ONLY: hydrate tokens from localStorage. In prod, we will use cookies.
+  useEffect(() => {
+    try {
+      const at = localStorage.getItem("kk_access_token");
+      const rt = localStorage.getItem("kk_refresh_token");
+      const nr = localStorage.getItem("kk_auth_needs_reauth");
+      if (at) setAccessToken(at);
+      if (rt) setRefreshToken(rt);
+      if (nr === '1') setNeedsReauth(true);
+    } catch {}
+    setLoading(false);
+    // Schedule proactive refresh if tokens exist
+    try {
+      const at2 = localStorage.getItem("kk_access_token");
+      const rt2 = localStorage.getItem("kk_refresh_token");
+      authLog('hydrate tokens on mount');
+      scheduleProactiveRefresh(at2, rt2);
+    } catch {}
+  }, []);
+
+  // Populate user profile when we have a token but no user (e.g., after refresh or page reload)
+  useEffect(() => {
+    if (!accessToken || user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await authApi.me(accessToken);
+        if (!cancelled) setUser(resp.user);
+      } catch {
+        // If profile fetch fails (e.g., token expired), attempt refresh once
+        authLog('profile fetch failed, attempting one-time refresh');
+        try {
+          const refreshed = await authApi.refresh(refreshToken || "");
+          setAccessToken(refreshed.token);
+          setRefreshToken(refreshed.refresh_token);
+          try {
+            localStorage.setItem("kk_access_token", refreshed.token);
+            localStorage.setItem("kk_refresh_token", refreshed.refresh_token);
+          } catch {}
+          const me = await authApi.me(refreshed.token);
+          if (!cancelled) setUser(me.user);
+        } catch {
+          // Soft-expire: do not logout or clear tokens; mark reauth needed
+          authLog('profile refresh failed, soft-expire');
+          setNeedsReauth(true);
+          try { localStorage.setItem('kk_auth_needs_reauth', '1'); } catch {}
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [accessToken, refreshToken, user]);
+
+  // Sync tokens across tabs and with external updaters (e.g., fetch wrapper)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.storageArea !== localStorage) return;
+      if (e.key === 'kk_access_token') {
+        setAccessToken(e.newValue);
+        authLog('storage event: kk_access_token changed');
+        scheduleProactiveRefresh(e.newValue, refreshToken);
+      }
+      if (e.key === 'kk_refresh_token') {
+        setRefreshToken(e.newValue);
+        authLog('storage event: kk_refresh_token changed');
+        scheduleProactiveRefresh(accessToken, e.newValue);
+      }
+      if (e.key === 'kk_auth_needs_reauth') {
+        setNeedsReauth(e.newValue === '1');
+        authLog('storage event: kk_auth_needs_reauth changed', { value: e.newValue });
+        if (e.newValue === '1') clearRefreshTimer();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [accessToken, refreshToken]);
+
+  // Refresh near expiry on visibility regain
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (!accessToken || !refreshToken) return;
+      const exp = getJwtExp(accessToken);
+      if (!exp) return;
+      const marginS = 300; // 5 minutes
+      const nowS = Math.floor(Date.now() / 1000);
+      if (nowS >= exp - marginS) {
+        authLog('visibility: within margin, refreshing', { exp, nowS, marginS });
+        refresh().catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [accessToken, refreshToken]);
+
+  const login = async (email: string, password: string) => {
+    authLog('login() called');
+    const resp = await authApi.login({ email, password });
+    setAccessToken(resp.token);
+    setRefreshToken(resp.refresh_token);
+    setUser(resp.user);
+    setNeedsReauth(false);
+    try {
+      localStorage.setItem("kk_access_token", resp.token);
+      localStorage.setItem("kk_refresh_token", resp.refresh_token);
+      localStorage.removeItem('kk_auth_needs_reauth');
+    } catch {}
+    scheduleProactiveRefresh(resp.token, resp.refresh_token);
+  };
+
+  const signup = async (data: { email: string; password: string; name: string; }) => {
+    authLog('signup() called');
+    const resp = await authApi.signup(data);
+    setAccessToken(resp.token);
+    setRefreshToken(resp.refresh_token);
+    setUser(resp.user);
+    setNeedsReauth(false);
+    try {
+      localStorage.setItem("kk_access_token", resp.token);
+      localStorage.setItem("kk_refresh_token", resp.refresh_token);
+      localStorage.removeItem('kk_auth_needs_reauth');
+    } catch {}
+    scheduleProactiveRefresh(resp.token, resp.refresh_token);
+  };
+
+  const logout = async () => {
+    authLog('logout() called');
+    if (refreshToken) {
+      try { await authApi.logout(refreshToken); } catch {}
+    }
+    setAccessToken(null);
+    setRefreshToken(null);
+    setUser(null);
+    setNeedsReauth(false);
+    try {
+      localStorage.removeItem("kk_access_token");
+      localStorage.removeItem("kk_refresh_token");
+      localStorage.removeItem('kk_auth_needs_reauth');
+    } catch {}
+    clearRefreshTimer();
+  };
+
+  const refresh = async () => {
+    authLog('refresh() called (AuthContext)');
+    const rt = refreshToken || (() => { try { return localStorage.getItem('kk_refresh_token'); } catch { return null; } })();
+    if (!rt) return false;
+    try {
+      const resp = await globalRefresh(rt);
+      authLog('refresh() success (AuthContext)');
+      setAccessToken(resp.token);
+      setRefreshToken(resp.refresh_token);
+      try {
+        localStorage.setItem("kk_access_token", resp.token);
+        localStorage.setItem("kk_refresh_token", resp.refresh_token);
+        localStorage.removeItem('kk_auth_needs_reauth');
+      } catch {}
+      scheduleProactiveRefresh(resp.token, resp.refresh_token);
+      return true;
+    } catch {
+      // If another refresh just succeeded moments ago, treat this failure as benign.
+      const last = getLastRefreshSuccessAt();
+      if (last && Date.now() - last < 1500) {
+        authLog('refresh() benign failure due to recent success');
+        return true;
+      }
+      // Soft-expire: do not logout or clear tokens; mark reauth needed
+      authLog('refresh() failed (AuthContext), soft-expire');
+      setNeedsReauth(true);
+      try { localStorage.setItem('kk_auth_needs_reauth', '1'); } catch {}
+      clearRefreshTimer();
+      return false;
+    }
+  };
+
+  const clearReauthFlag = () => {
+    setNeedsReauth(false);
+    try { localStorage.removeItem('kk_auth_needs_reauth'); } catch {}
+  };
+
+  const value = useMemo(() => ({ user, accessToken, refreshToken, loading, needsReauth, login, signup, logout, refresh, clearReauthFlag }), [user, accessToken, refreshToken, loading, needsReauth]);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}

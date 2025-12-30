@@ -1,0 +1,381 @@
+# Research: Zero-Knowledge Encryption for User Data
+
+## Overview
+
+**Question:** Can user data (task titles, project names, tags) be encrypted client-side using the user's password, so the server only stores ciphertext?
+
+**Short Answer:** Yes, this is technically feasible and is exactly how password managers like Bitwarden, LastPass, and Keeper work. However, it's a significant architectural change with important trade-offs.
+
+---
+
+## How Zero-Knowledge Encryption Works
+
+### The Core Concept
+1. User enters their password
+2. A **Key Derivation Function (KDF)** transforms the password into an encryption key
+3. Data is encrypted/decrypted **entirely in the browser** using this key
+4. Server only ever stores encrypted ciphertext
+5. Even with full database access, the server cannot read user data
+
+### Industry Standard Approach
+```
+User Password
+     ↓
+PBKDF2-SHA256 (600K iterations) or Argon2id
+     ↓
+256-bit Master Key (never leaves browser)
+     ↓
+AES-256-GCM encryption
+     ↓
+Encrypted data → Server storage
+```
+
+**Sources:**
+- [Bitwarden Zero-Knowledge White Paper](https://bitwarden.com/resources/zero-knowledge-encryption-white-paper/)
+- [Keeper Encryption Model](https://docs.keeper.io/en/enterprise-guide/keeper-encryption-model)
+- [LastPass Security Model](https://www.lastpass.com/security/zero-knowledge-security)
+
+---
+
+## Current Astrotask Data Architecture
+
+### Fields That Would Be Encrypted (Text/Sensitive)
+
+| Model | Field | Current Type |
+|-------|-------|--------------|
+| Task | title | string |
+| Task | project | string |
+| Task | tags | string[] |
+| Project | name | string |
+| User | name | string |
+| User | actionbar | string[] |
+
+### Fields That Stay Unencrypted (Aggregation)
+
+| Model | Field | Reason |
+|-------|-------|--------|
+| Task | duration | Needed for time tracking metrics |
+| Task | session_count | Needed for counts |
+| Task | column_index, position | Layout metadata |
+| Task | status, is_active | Boolean flags |
+| Session | duration, start_time, end_time | Time-series aggregation |
+| All | created_at, updated_at | Time-series data |
+| All | id, user_id | Relationships |
+
+**Key Insight:** Your metrics dashboard (total time tracked, session counts, time-series charts) would continue to work because they aggregate on **numeric fields**, not encrypted text.
+
+---
+
+## What The Backend Would See
+
+```
+BEFORE (plaintext):
+{
+  "id": 123,
+  "title": "Design login page",
+  "project": "Mobile App",
+  "tags": ["design", "urgent"],
+  "duration": 3600,
+  "status": "uncompleted"
+}
+
+AFTER (encrypted):
+{
+  "id": 123,
+  "title_encrypted": "aGVsbG8gd29ybGQhIHRoaXMgaXMgZW5jcnlwdGVk...",
+  "project_encrypted": "c29tZSBlbmNyeXB0ZWQgcHJvamVjdCBuYW1l...",
+  "tags_encrypted": "WyJlbmNyeXB0ZWQiLCAidGFncyJd...",
+  "duration": 3600,       // ← Still readable for aggregation
+  "status": "uncompleted" // ← Still readable
+}
+```
+
+---
+
+## Implementation Architecture
+
+### Option A: Full Client-Side (Recommended for True ZKE)
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    BROWSER                          │
+│  ┌─────────────┐     ┌────────────────────────┐    │
+│  │  Password   │────▶│  Key Derivation (KDF)  │    │
+│  └─────────────┘     └───────────┬────────────┘    │
+│                                  ▼                  │
+│                    ┌────────────────────────┐      │
+│                    │  Master Key (memory)   │      │
+│                    └───────────┬────────────┘      │
+│                                ▼                    │
+│  ┌────────────────────────────────────────────┐    │
+│  │  Encrypt on save │ Decrypt on load         │    │
+│  │  (Web Crypto API: AES-256-GCM)            │    │
+│  └────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────┘
+                         │
+                         ▼ (ciphertext only)
+┌─────────────────────────────────────────────────────┐
+│                    SERVER                           │
+│  • Stores encrypted blobs                          │
+│  • Cannot decrypt anything                         │
+│  • Can still aggregate on numeric fields           │
+└─────────────────────────────────────────────────────┘
+```
+
+### Key Derivation Flow
+```typescript
+// Frontend: When user logs in
+async function deriveEncryptionKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 600000, // Industry standard
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+```
+
+---
+
+## Critical Trade-offs
+
+### What You Gain
+- **True privacy**: Server cannot read user's task titles, projects, or tags
+- **GDPR-friendly**: Encrypted data = reduced compliance burden
+- **Trust**: Users know their data is protected even from you
+- **Breach protection**: Database leak reveals nothing readable
+
+### What You Lose
+
+| Concern | Impact |
+|---------|--------|
+| **Password recovery impossible** | If user forgets password, their data is GONE forever. No "reset password" for encrypted data. |
+| **No server-side search** | Can't search tasks by title on the server. Search must be 100% client-side. |
+| **Password change = re-encrypt everything** | Changing password requires decrypting all data with old key, re-encrypting with new key. |
+| **Performance hit** | ~200ms key derivation on login. Decrypt all tasks on page load. |
+| **Complexity** | Significant engineering effort. Easy to make security mistakes. |
+| **Metrics limitations** | TopUser metrics currently show names/emails - these would be encrypted. |
+
+---
+
+## The Password Change Problem
+
+This is the hardest part:
+
+```
+Current password: "hunter2"
+     ↓ derives →  Key A
+
+User changes to: "newpassword123"
+     ↓ derives →  Key B
+
+Problem: All data was encrypted with Key A!
+```
+
+### Solution: Re-encryption on password change
+1. User enters old password → derive Key A
+2. Decrypt all user data with Key A
+3. User enters new password → derive Key B
+4. Re-encrypt all data with Key B
+5. Upload new ciphertext to server
+
+**Risk:** If this process is interrupted, data corruption is possible.
+
+---
+
+## The "Forgot Password" Reality
+
+With true zero-knowledge encryption:
+
+> "If user forgets their password, their data is permanently inaccessible."
+
+This is by design. It's the same reason 1Password, Bitwarden, etc. cannot recover your vault.
+
+### Mitigation Options
+1. **Recovery key**: Generate a random recovery key at signup, user saves it offline
+2. **Trusted contact**: Allow designating someone who can help recover (complex)
+3. **Accept the trade-off**: Many users prefer this for true privacy
+
+---
+
+## Implementation Scope
+
+### Files to Create
+- `frontend/src/utils/encryption.ts` - Web Crypto encryption/decryption functions
+- `frontend/src/utils/keyDerivation.ts` - PBKDF2 key derivation
+- `frontend/src/context/EncryptionContext.tsx` - Store derived key in memory
+
+### Files to Modify
+- `frontend/src/services/taskApi.ts` - Encrypt before POST/PATCH, decrypt after GET
+- `frontend/src/services/projectApi.ts` - Same encryption wrapping
+- `frontend/src/context/AuthContext.tsx` - Derive key on login, clear on logout
+- `backend/internal/models/task.go` - Change title/project/tags to encrypted blob fields
+- `backend/internal/handlers/tasks.go` - Remove any text processing (just store blobs)
+- `backend/internal/handlers/metrics.go` - Handle encrypted user names in TopUser
+
+### Database Migration
+- Add `salt` column to users table (for key derivation)
+- Rename text columns or add `_encrypted` suffix
+- Data migration: Would need a one-time encryption of existing data
+
+---
+
+## Decided Requirements
+
+1. **True zero-knowledge encryption** - Accept that forgotten password = lost data
+2. **Mandatory for all users** - Not opt-in, all data encrypted by default
+3. **Hybrid approach for identity** - Keep email unencrypted for password reset and admin metrics
+
+### What Gets Encrypted
+| Encrypt | Don't Encrypt |
+|---------|---------------|
+| Task titles | User email |
+| Project names | Numeric durations |
+| Tags | Timestamps |
+| User display name | Status flags |
+| Actionbar preferences | IDs and relationships |
+
+---
+
+## Concrete Implementation Plan
+
+### Phase 1: Encryption Infrastructure
+
+**Create `frontend/src/utils/crypto.ts`:**
+```typescript
+// Key derivation from password
+export async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
+
+// Encrypt text to base64 string
+export async function encrypt(text: string, key: CryptoKey): Promise<string>
+
+// Decrypt base64 string back to text
+export async function decrypt(ciphertext: string, key: CryptoKey): Promise<string>
+
+// Encrypt array of strings (for tags)
+export async function encryptArray(items: string[], key: CryptoKey): Promise<string>
+export async function decryptArray(ciphertext: string, key: CryptoKey): Promise<string[]>
+```
+
+**Create `frontend/src/context/EncryptionContext.tsx`:**
+- Store derived CryptoKey in React context (memory only)
+- Provide `encrypt()` and `decrypt()` functions to components
+- Clear key on logout
+
+### Phase 2: Auth Flow Changes
+
+**Modify `frontend/src/context/AuthContext.tsx`:**
+1. On login: Derive encryption key from password before clearing it
+2. Store key in EncryptionContext
+3. On logout: Clear encryption key
+
+**Modify `backend/internal/models/user.go`:**
+- Add `encryption_salt` column (32 bytes, generated on signup)
+
+**Modify `backend/internal/handlers/auth.go`:**
+- Generate and store salt on signup
+- Return salt in login response (client needs it for key derivation)
+
+### Phase 3: API Layer Encryption
+
+**Modify `frontend/src/services/taskApi.ts`:**
+```typescript
+// Before sending to server
+const encryptedTask = {
+  ...task,
+  title: await encrypt(task.title, key),
+  project: await encrypt(task.project, key),
+  tags: await encryptArray(task.tags, key),
+};
+
+// After receiving from server
+const decryptedTask = {
+  ...task,
+  title: await decrypt(task.title, key),
+  project: await decrypt(task.project, key),
+  tags: await decryptArray(task.tags, key),
+};
+```
+
+**Same pattern for:**
+- `frontend/src/services/projectApi.ts` - encrypt project names
+- User profile updates - encrypt display name
+
+### Phase 4: Password Change Handling
+
+**Modify settings page password change flow:**
+1. User enters current password → derive old key
+2. Fetch ALL user tasks and projects from server
+3. Decrypt all data with old key (in memory)
+4. User enters new password → derive new key
+5. Re-encrypt all data with new key
+6. Send batch update to server
+7. Update salt in database
+
+**New backend endpoint:**
+```
+PATCH /api/v1/user/reencrypt
+Body: { tasks: [...], projects: [...], new_salt: "..." }
+```
+
+### Phase 5: Migration for Existing Users
+
+For users with existing unencrypted data:
+1. First login after update → detect no salt on user record
+2. Prompt: "We've added encryption. Enter your password to encrypt your existing data."
+3. Derive key, encrypt all existing data, store salt
+4. Save encrypted data back to server
+
+---
+
+## File Changes Summary
+
+### New Files
+- `frontend/src/utils/crypto.ts`
+- `frontend/src/context/EncryptionContext.tsx`
+
+### Modified Files
+- `frontend/src/context/AuthContext.tsx` - key derivation on login
+- `frontend/src/services/taskApi.ts` - encrypt/decrypt wrapper
+- `frontend/src/services/projectApi.ts` - encrypt/decrypt wrapper
+- `frontend/src/app/settings/page.tsx` - re-encryption on password change
+- `backend/internal/models/user.go` - add encryption_salt column
+- `backend/internal/handlers/auth.go` - return salt, handle reencrypt
+- `backend/cmd/server/main.go` - add reencrypt endpoint
+
+### Database Migration
+```sql
+ALTER TABLE users ADD COLUMN encryption_salt BYTEA;
+```
+
+---
+
+## UX Considerations
+
+### Warning on Settings Page
+Add a prominent notice:
+> "Your task data is encrypted with your password. If you forget your password, your task data cannot be recovered."
+
+### Login Failure
+When login fails, show clear message:
+> "If you forgot your password, you can reset it, but your encrypted task data will be lost."
+
+### Password Reset Flow
+When resetting password:
+> "Warning: Resetting your password will delete all your encrypted task data. This cannot be undone."
+
+After reset, user starts fresh with empty task list.

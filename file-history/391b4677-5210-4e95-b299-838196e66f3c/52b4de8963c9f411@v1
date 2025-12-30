@@ -1,0 +1,42 @@
+package models
+
+import (
+	"time"
+	"gorm.io/gorm"
+	"github.com/lib/pq"
+)
+
+type Task struct {
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	UserID      uint           `json:"user_id" gorm:"not null"`
+	Title       string         `json:"title" gorm:"not null"`
+	Project     string         `json:"project" gorm:"default:''"` // Project name as string
+	StartTime   time.Time      `json:"start_time" gorm:"not null"` // When task was first created
+	EndTime     *time.Time     `json:"end_time"` // When task was marked complete
+	Duration    int            `json:"duration"` // Total accumulated duration from all sessions in seconds
+	SessionCount int           `json:"session_count" gorm:"default:0"` // Number of sessions
+    Tags        pq.StringArray `json:"tags" gorm:"type:text[]"`
+    // Integer-based column position (0 = leftmost)
+    ColumnIndex int            `json:"column_index" gorm:"default:0"`
+	Status      string         `json:"status" gorm:"default:'uncompleted'"`      // Task status: uncompleted, completed
+	Position    int            `json:"position" gorm:"default:0"`                // Position within column
+	IsActive    bool           `json:"is_active" gorm:"default:false"`           // For tracking active timer
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`                           // Soft delete support
+
+	User     User      `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	Sessions []Session `json:"sessions,omitempty" gorm:"foreignKey:TaskID;constraint:OnDelete:CASCADE"`
+}
+
+// TableName overrides the table name to 'tasks'
+func (Task) TableName() string {
+	return "tasks"
+}
+
+func (t *Task) BeforeSave(tx *gorm.DB) error {
+	if t.EndTime != nil {
+		t.Duration = int(t.EndTime.Sub(t.StartTime).Seconds())
+	}
+	return nil
+}

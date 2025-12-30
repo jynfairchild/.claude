@@ -1,0 +1,43 @@
+## v0.7.4 – Zero-Knowledge Encryption for User Data
+**Date:** December 23, 2024
+
+### Changes Made:
+- Implemented client-side zero-knowledge encryption using Web Crypto API (AES-256-GCM)
+- Created `crypto.ts` utilities for key derivation (PBKDF2-SHA256, 600K iterations), encrypt/decrypt, and array encryption
+- Added `EncryptionContext` to manage derived encryption keys in memory with sessionStorage persistence
+- Encrypted task titles, projects, and tags before sending to backend API
+- Encrypted kanban column names with full encrypt/decrypt flow
+- Added encryption salt generation on user signup and login (for existing users)
+- Implemented password change re-encryption flow: decrypt all data with old key, re-encrypt with new key
+- Added `POST /auth/reencrypt` backend endpoint for atomic password + data updates
+- Fixed race condition: TaskContext now waits for encryption to be ready before loading tasks
+- Fixed TaskCreationModal to use TaskContext's `createTask` function (was bypassing encryption)
+- Added hard page refresh after password change to clear cached encrypted data
+- Updated encryption warning message to accurately list what's encrypted: "Column names, task titles, projects, and tags"
+- Removed forgot-password and reset-password pages (incompatible with ZKE - will refactor later)
+- Created comprehensive test suites: 23 crypto utility tests + 10 encryption simulation tests
+
+### Current Status:
+- Zero-knowledge encryption is fully working for all sensitive text fields
+- Task titles, projects, tags, and column names are encrypted client-side before reaching the server
+- Server stores only ciphertext - cannot read user's task content
+- Numeric data (duration, session counts, timestamps) remains unencrypted for metrics aggregation
+- Password change properly re-encrypts all user data with new key
+- 33 tests passing for encryption functionality
+
+### Unresolved Issues:
+- Password reset flow needs refactoring (currently removed - resetting password would lose encrypted data)
+- No recovery key mechanism if user forgets password (by design for true ZKE)
+
+### Commit Message:
+Add zero-knowledge encryption for user data with client-side AES-256-GCM
+
+- Implement Web Crypto API encryption utilities (PBKDF2 key derivation, AES-256-GCM)
+- Create EncryptionContext for key management with sessionStorage persistence
+- Encrypt task titles, projects, tags, and column names before API calls
+- Add encryption salt generation on signup/login for key derivation
+- Implement password change re-encryption flow with atomic backend updates
+- Fix race condition between auth and task loading for encryption readiness
+- Add 33 comprehensive tests for crypto utilities and encryption simulation
+- Update encryption warning messaging for accuracy
+- Remove incompatible forgot/reset-password pages (ZKE prevents password recovery)

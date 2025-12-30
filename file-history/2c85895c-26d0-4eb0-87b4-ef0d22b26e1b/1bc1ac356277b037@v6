@@ -1,0 +1,83 @@
+# Add Backend Tests for Signup, Login, and Request-Invite
+
+## Summary
+Add comprehensive Go tests for authentication endpoints that are currently untested. The existing `auth_test.go` covers basic signup/login but is missing edge cases and the entire request-invite flow.
+
+## File to Modify
+- `backend/internal/handlers/auth_test.go`
+
+## Current Coverage (Already Tested)
+- ✅ `TestSignup_CreatesUser_AndReturnsTokens`
+- ✅ `TestSignup_DuplicateEmail_Conflict`
+- ✅ `TestLogin_WithBcrypt_RehashesToArgon2`
+- ✅ `TestLogin_ReturnsActionbar`
+- ✅ Refresh, Logout, LogoutAll, VerifyEmail, PasswordReset, ChangePassword
+- ✅ Actionbar tests (6 tests)
+
+## New Tests to Add
+
+### 1. Login Edge Cases
+```go
+TestLogin_InvalidPassword_Returns401
+TestLogin_NonExistentEmail_Returns401
+```
+
+### 2. Signup with Invitation Flow
+```go
+TestSignup_WithValidInvite_CreatesUserAndConsumesToken
+TestSignup_WithExpiredInvite_Returns409
+TestSignup_WithUsedInvite_Returns409
+TestSignup_WithInvite_EmailMismatch_Returns409
+TestSignup_RequireInvite_NoToken_Returns403
+```
+
+### 3. RequestInvite Endpoint
+```go
+TestRequestInvite_ValidEmail_Returns200
+TestRequestInvite_InvalidEmail_Returns400
+TestRequestInvite_EmptyBody_Returns400
+```
+
+## Implementation Details
+
+### Setup Changes Required
+1. Add `models.Invitation` to `setupAuthTestDB` AutoMigrate:
+   ```go
+   db.AutoMigrate(&models.User{}, &models.RefreshToken{},
+     &models.EmailVerificationToken{}, &models.PasswordResetToken{},
+     &models.Invitation{})  // Add this
+   ```
+
+2. Add `RequestInvite` route to `setupAuthRouter`:
+   ```go
+   api.POST("/auth/request-invite", h.RequestInvite)
+   ```
+
+### Test Implementation Pattern
+Follow existing patterns in `auth_test.go`:
+- Use `setupAuthTestDB(t)` for in-memory SQLite
+- Use `setupAuthRouter(h)` for Gin test router
+- Use `httptest.NewRequest` and `httptest.NewRecorder`
+- Assert with `t.Fatalf` for failures
+- Use `json.Unmarshal` for response parsing
+
+### Helper Needed
+Add a helper to create invitation tokens for testing:
+```go
+func createTestInvitation(t *testing.T, db *gorm.DB, email string, expired bool) string {
+    t.Helper()
+    token, _, err := a.CreateInvitationToken(db, email, nil)
+    if err != nil {
+        t.Fatalf("failed to create invitation: %v", err)
+    }
+    if expired {
+        // Update expiry to past
+        db.Model(&models.Invitation{}).Where("email = ?", email).
+            Update("expires_at", time.Now().Add(-24*time.Hour))
+    }
+    return token
+}
+```
+
+## Test Count
+Adding 10 new tests to `auth_test.go`

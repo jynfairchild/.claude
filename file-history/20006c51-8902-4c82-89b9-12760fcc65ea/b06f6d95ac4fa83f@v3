@@ -1,0 +1,208 @@
+import React from 'react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import type { AuthUser } from '@/services/authApi';
+
+const mockUpdateActionbar = vi.fn();
+let mockUser: AuthUser | null = null;
+
+// Mock AuthContext
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: mockUser,
+    updateActionbar: mockUpdateActionbar,
+  }),
+}));
+
+// Must import after mocks
+import { ActionBar } from './ActionBar';
+
+describe('ActionBar', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    mockUser = null;
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  describe('loading settings', () => {
+    it('loads actionbar settings from user when logged in', () => {
+      mockUser = {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test User',
+        actionbar: ['pomodoro', 'meeting'],
+      };
+
+      render(<ActionBar />);
+
+      // Pomodoro and Meeting should be visible (enabled)
+      expect(screen.getByText('Pomodoro')).toBeInTheDocument();
+      expect(screen.getByText('Meeting')).toBeInTheDocument();
+      // Break should NOT be visible (not in actionbar array)
+      expect(screen.queryByText('Break')).not.toBeInTheDocument();
+    });
+
+    it('treats null actionbar as empty (all toggle buttons hidden)', () => {
+      mockUser = {
+        id: 2,
+        email: 'new@example.com',
+        name: 'New User',
+        actionbar: undefined,
+      };
+
+      render(<ActionBar />);
+
+      // Toggle buttons should not be visible
+      expect(screen.queryByText('Pomodoro')).not.toBeInTheDocument();
+      expect(screen.queryByText('Break')).not.toBeInTheDocument();
+      expect(screen.queryByText('Meeting')).not.toBeInTheDocument();
+      // Non-toggle buttons should still be visible
+      expect(screen.getByLabelText('Add new')).toBeInTheDocument();
+    });
+
+    it('treats empty actionbar array as all toggle buttons hidden', () => {
+      mockUser = {
+        id: 3,
+        email: 'empty@example.com',
+        name: 'Empty User',
+        actionbar: [],
+      };
+
+      render(<ActionBar />);
+
+      expect(screen.queryByText('Pomodoro')).not.toBeInTheDocument();
+      expect(screen.queryByText('Break')).not.toBeInTheDocument();
+      expect(screen.queryByText('Meeting')).not.toBeInTheDocument();
+    });
+
+    it('falls back to localStorage when user is null', () => {
+      mockUser = null;
+      localStorage.setItem('kk_actionbar_enabled', JSON.stringify(['break']));
+
+      render(<ActionBar />);
+
+      expect(screen.queryByText('Pomodoro')).not.toBeInTheDocument();
+      expect(screen.getByText('Break')).toBeInTheDocument();
+      expect(screen.queryByText('Meeting')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('user switching', () => {
+    it('loads new settings when user changes', () => {
+      // Start with user 1
+      mockUser = {
+        id: 1,
+        email: 'user1@example.com',
+        name: 'User 1',
+        actionbar: ['pomodoro'],
+      };
+
+      const { rerender } = render(<ActionBar />);
+      expect(screen.getByText('Pomodoro')).toBeInTheDocument();
+      expect(screen.queryByText('Meeting')).not.toBeInTheDocument();
+
+      // Switch to user 2 with different settings
+      mockUser = {
+        id: 2,
+        email: 'user2@example.com',
+        name: 'User 2',
+        actionbar: ['meeting', 'break'],
+      };
+
+      rerender(<ActionBar />);
+
+      expect(screen.queryByText('Pomodoro')).not.toBeInTheDocument();
+      expect(screen.getByText('Meeting')).toBeInTheDocument();
+      expect(screen.getByText('Break')).toBeInTheDocument();
+    });
+
+    it('does not use localStorage from previous user when new user logs in', () => {
+      // Set localStorage from "previous session"
+      localStorage.setItem('kk_actionbar_enabled', JSON.stringify(['pomodoro', 'break', 'meeting']));
+
+      // New user logs in with empty actionbar
+      mockUser = {
+        id: 99,
+        email: 'new@example.com',
+        name: 'New User',
+        actionbar: [],
+      };
+
+      render(<ActionBar />);
+
+      // Should NOT use localStorage, should use user's empty actionbar
+      expect(screen.queryByText('Pomodoro')).not.toBeInTheDocument();
+      expect(screen.queryByText('Break')).not.toBeInTheDocument();
+      expect(screen.queryByText('Meeting')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('locked toggle buttons', () => {
+    it('displays toggle buttons as disabled with lock icon', () => {
+      mockUser = {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test',
+        actionbar: [],
+      };
+
+      render(<ActionBar />);
+
+      // Open dropdown menu (hover to open since hoverOpen={true})
+      const moreButton = screen.getByLabelText('More actions');
+      fireEvent.mouseEnter(moreButton.closest('.kk-dropdown-root')!);
+
+      // All toggle buttons should be disabled
+      const pomodoroToggle = screen.getByText('Pomodoro Timer').closest('button');
+      const breakToggle = screen.getByText('Break Timer').closest('button');
+      const meetingToggle = screen.getByText('Meeting Timer').closest('button');
+
+      expect(pomodoroToggle).toBeDisabled();
+      expect(breakToggle).toBeDisabled();
+      expect(meetingToggle).toBeDisabled();
+    });
+
+    it('does not call updateActionbar when clicking disabled toggles', () => {
+      mockUser = {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test',
+        actionbar: [],
+      };
+      mockUpdateActionbar.mockResolvedValue(undefined);
+
+      render(<ActionBar />);
+
+      // Open dropdown menu
+      const moreButton = screen.getByLabelText('More actions');
+      fireEvent.mouseEnter(moreButton.closest('.kk-dropdown-root')!);
+
+      // Try to click on disabled Pomodoro toggle
+      const pomodoroToggle = screen.getByText('Pomodoro Timer').closest('button');
+      fireEvent.click(pomodoroToggle!);
+
+      // Should NOT call updateActionbar since buttons are disabled
+      expect(mockUpdateActionbar).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('syncing to localStorage', () => {
+    it('caches user actionbar to localStorage on load', () => {
+      mockUser = {
+        id: 1,
+        email: 'test@example.com',
+        name: 'Test',
+        actionbar: ['pomodoro', 'break'],
+      };
+
+      render(<ActionBar />);
+
+      const stored = JSON.parse(localStorage.getItem('kk_actionbar_enabled') || '[]');
+      expect(stored).toEqual(['pomodoro', 'break']);
+    });
+  });
+});

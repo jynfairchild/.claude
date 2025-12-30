@@ -1,0 +1,683 @@
+import { useState, useEffect, useRef, useContext } from 'react';
+import { timerLog } from '@/utils/debug';
+import { Task, Session } from '@/services/api';
+import type { WorkerMessage } from '@/types/worker.types';
+import {
+  saveTimerState,
+  loadTimerState,
+  clearTimerState,
+  validateTimerState
+} from '@/utils/timerPersistence';
+import { TimerWorkerContext } from '@/contexts/TimerWorkerContext';
+
+// Helper to find the active session from the sessions array
+function findActiveSession(sessions?: Session[]): Session | null {
+  if (!sessions || sessions.length === 0) return null;
+  // Active session has no end_time
+  return sessions.find(s => s.end_time === null) ?? null;
+}
+
+// Helper to get session start time as timestamp
+function getSessionStartTimestamp(session: Session): number {
+  return new Date(session.start_time).getTime();
+}
+
+interface UseTaskTimerProps {
+  activeTask: Task | null;
+  updateTaskTimer: (duration: number, sessionDuration: number) => Promise<void>;
+}
+
+interface UseTaskTimerReturn {
+  liveSeconds: number;
+  sessionSeconds: number;
+  sessionStartTime: number | null;
+  hasRecoveredTimer: boolean;
+  recoveredTask: Task | null;
+}
+
+export function useTaskTimer({ activeTask, updateTaskTimer }: UseTaskTimerProps): UseTaskTimerReturn {
+  // Always call useContext unconditionally
+  const timerContext = useContext(TimerWorkerContext);
+  
+  const [liveSeconds, setLiveSeconds] = useState(0);
+  const [sessionSeconds, setSessionSeconds] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const [recoveredTask, setRecoveredTask] = useState<Task | null>(null);
+  const lastSyncedSeconds = useRef<number>(0);
+  const lastSavedSeconds = useRef<number>(-1);
+  const lastPersistedAtRef = useRef<number>(0);
+  const workerRef = useRef<Worker | null>(null);
+  const fallbackIntervalRef = useRef<number | null>(null);
+  const hasRecovered = useRef(false);
+  const recoveredSessionStart = useRef<number | null>(null);
+  const isCreatingWorker = useRef(false);
+  // Base duration from completed sessions at the moment this session started
+  const baseCompletedDurationRef = useRef<number | null>(null);
+  const lastInitializedTaskRef = useRef<number | null>(null);
+  const lastInitializedDurationRef = useRef<number | null>(null);
+  const lastInitializedSessionRef = useRef<number | null>(null);
+  const lastInitializedIsActiveRef = useRef<boolean | null>(null);
+  
+  // Track the base duration when we start using shared timer
+  const sharedTimerBaseDuration = useRef<number | null>(null);
+  const prevActiveTaskIdRef = useRef<number | null>(null);
+  const prevWorkerStartRef = useRef<number | null>(null);
+
+  // Reset persistence trackers whenever the active session stops
+  useEffect(() => {
+    if (!activeTask?.is_active) {
+      lastPersistedAtRef.current = 0;
+      lastSavedSeconds.current = -1;
+    }
+  }, [activeTask?.is_active]);
+  
+  // If timer context exists and is running, use it as the source
+  useEffect(() => {
+    const usingShared = !!(timerContext && timerContext.isRunning && activeTask?.is_active);
+    if (!usingShared) {
+      // Reset when timer stops or when not using shared context
+      sharedTimerBaseDuration.current = null;
+      prevWorkerStartRef.current = null;
+      // Also reset prevActiveTaskIdRef so we recapture base when timer resumes
+      prevActiveTaskIdRef.current = null;
+      return;
+    }
+
+    const workerSeconds = Number(timerContext?.seconds || 0);
+
+    // If switched active task while shared timer runs, recapture base
+    if (prevActiveTaskIdRef.current !== (activeTask?.id ?? null)) {
+      // When task ID changes (including from null after re-auth), recalculate base
+      // Base should be: what the total SHOULD be minus what the worker has counted
+      // This handles the case where worker continued running through re-auth
+      const expectedTotal = Math.max(0, activeTask?.duration ?? 0);
+
+      // If worker has accumulated more than expected, something is off - use duration directly
+      // Otherwise, calculate base so that base + workerSeconds = expectedTotal (initially)
+      if (workerSeconds > 0 && workerSeconds <= expectedTotal) {
+        // Worker was running - adjust base so current total matches backend
+        sharedTimerBaseDuration.current = expectedTotal - workerSeconds;
+        timerLog('[useTaskTimer] Task changed; adjusting base for running worker', {
+          taskId: activeTask?.id,
+          expectedTotal,
+          workerSeconds,
+          adjustedBase: sharedTimerBaseDuration.current,
+        });
+      } else {
+        // Fresh start or worker reset - use duration as base
+        sharedTimerBaseDuration.current = expectedTotal;
+        timerLog('[useTaskTimer] Task changed; using fresh base', {
+          taskId: activeTask?.id,
+          base: sharedTimerBaseDuration.current,
+          workerSeconds,
+        });
+      }
+      prevActiveTaskIdRef.current = activeTask?.id ?? null;
+    }
+
+    // On first run with this task, capture base
+    if (sharedTimerBaseDuration.current === null) {
+      // Same logic as task change - coordinate with worker's current count
+      const expectedTotal = Math.max(0, activeTask?.duration ?? 0);
+      if (workerSeconds > 0 && workerSeconds <= expectedTotal) {
+        sharedTimerBaseDuration.current = expectedTotal - workerSeconds;
+        timerLog('[useTaskTimer] Captured adjusted base for running worker:', {
+          base: sharedTimerBaseDuration.current,
+          workerSeconds,
+          expectedTotal,
+        });
+      } else {
+        sharedTimerBaseDuration.current = expectedTotal;
+        timerLog('[useTaskTimer] Captured base duration (completed at start):', { base: sharedTimerBaseDuration.current });
+      }
+    }
+
+    // If the worker restarted (new startTime), recapture base
+    if (timerContext?.startTime && prevWorkerStartRef.current !== timerContext.startTime) {
+      prevWorkerStartRef.current = timerContext.startTime;
+      // Worker restarted = seconds reset to 0, so use duration directly as base
+      sharedTimerBaseDuration.current = Math.max(0, activeTask?.duration ?? 0);
+      setSessionStartTime(timerContext.startTime);
+      timerLog('[useTaskTimer] Worker startTime changed; resetting base', {
+        startTime: timerContext.startTime,
+        base: sharedTimerBaseDuration.current,
+      });
+    }
+
+    // Calculate totals each tick: base (completed) + current shared session seconds
+    const totalDuration = (sharedTimerBaseDuration.current ?? 0) + workerSeconds;
+    setLiveSeconds(totalDuration);
+    setSessionSeconds(workerSeconds);
+  }, [
+    timerContext?.seconds,
+    timerContext?.startTime,
+    timerContext?.isRunning,
+    activeTask?.id,
+    activeTask?.duration,
+    activeTask?.is_active,
+  ]);
+
+  // Check for timer recovery on mount only
+  useEffect(() => {
+    if (!hasRecovered.current && !activeTask) {
+      timerLog('[useTaskTimer] Checking for timer recovery...');
+      const savedState = loadTimerState();
+      if (savedState) {
+        const validation = validateTimerState(savedState);
+        if (validation.isValid && savedState.activeTask && validation.sessionStartTime) {
+          timerLog('[useTaskTimer] Auto-recovering timer state:', {
+            taskId: savedState.activeTask.id,
+            recoveredDuration: validation.recoveredDuration,
+            sessionStartTime: savedState.sessionStartTime
+          });
+          
+          // Directly restore timer state
+          setLiveSeconds(validation.recoveredDuration || 0);
+          
+          // Calculate current session time
+          const currentSessionSeconds = Math.floor((Date.now() - validation.sessionStartTime) / 1000);
+          setSessionSeconds(currentSessionSeconds);
+          setSessionStartTime(validation.sessionStartTime);
+          
+          // Store recovered task for parent to handle
+          setRecoveredTask(savedState.activeTask);
+          hasRecovered.current = true;
+          recoveredSessionStart.current = validation.sessionStartTime;
+          
+          timerLog('[useTaskTimer] Timer auto-resumed:', {
+            liveSeconds: validation.recoveredDuration,
+            currentSessionSeconds,
+            recoveredSessionStart: validation.sessionStartTime
+          });
+        } else {
+          timerLog('[useTaskTimer] Timer state invalid:', { reason: String(validation.reason) });
+          clearTimerState();
+        }
+      }
+    }
+  }, []); // Empty dependency array - only run on mount
+
+  // Initialize active task on mount or when critical activeTask fields change
+  useEffect(() => {
+    const activeSession = activeTask ? findActiveSession(activeTask.sessions) : null;
+    timerLog('[useTaskTimer] Task initialization effect triggered:', {
+      activeTaskId: activeTask?.id,
+      activeTaskIsActive: activeTask?.is_active,
+      activeTaskDuration: activeTask?.duration,
+      activeTaskSessionDuration: activeTask?.session_duration,
+      activeSessionId: activeSession?.id,
+      activeSessionStartTime: activeSession?.start_time,
+      hasRecoveredTimer: hasRecovered.current,
+      recoveredTaskId: recoveredTask?.id,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (!activeTask) {
+      timerLog('[useTaskTimer] No active task, skipping initialization');
+      lastInitializedTaskRef.current = null;
+      return;
+    }
+
+    const sameTask = lastInitializedTaskRef.current === activeTask.id;
+    const durationUnchanged = sameTask && lastInitializedDurationRef.current === activeTask.duration;
+    const sessionUnchanged = sameTask && lastInitializedSessionRef.current === (activeTask.session_duration ?? 0);
+    const statusUnchanged = sameTask && lastInitializedIsActiveRef.current === activeTask.is_active;
+    const activeSessionInProgress = sameTask && activeTask.is_active && !!sessionStartTime && (!activeTask.session_duration || activeTask.session_duration <= 0);
+
+    if (sameTask && durationUnchanged && sessionUnchanged && statusUnchanged) {
+      timerLog('[useTaskTimer] Initialization skipped – state unchanged', {
+        taskId: activeTask.id,
+        duration: activeTask.duration,
+        sessionDuration: activeTask.session_duration,
+      });
+      return;
+    }
+
+    if (activeSessionInProgress) {
+      timerLog('[useTaskTimer] Initialization skipped – active session already running', {
+        taskId: activeTask.id,
+        backendDuration: activeTask.duration,
+        sessionStartTime,
+      });
+      lastInitializedTaskRef.current = activeTask.id;
+      lastInitializedDurationRef.current = activeTask.duration;
+      lastInitializedSessionRef.current = activeTask.session_duration ?? 0;
+      lastInitializedIsActiveRef.current = activeTask.is_active;
+      return;
+    }
+
+    const usingSharedTimer = !!(timerContext?.isRunning && activeTask.is_active);
+    
+    // Skip initialization if we just recovered this same task
+    if (hasRecovered.current && recoveredTask && recoveredTask.id === activeTask.id && recoveredSessionStart.current) {
+      timerLog('[useTaskTimer] Skipping initialization - using recovered state for task:', { taskId: activeTask.id });
+      // Make sure we're using the recovered session start time
+      if (sessionStartTime !== recoveredSessionStart.current) {
+        timerLog('[useTaskTimer] Restoring recovered session start time');
+        setSessionStartTime(recoveredSessionStart.current);
+      }
+      return;
+    }
+    
+    if (usingSharedTimer) {
+      timerLog('[useTaskTimer] Shared timer is active; deferring to worker state', {
+        timerSeconds: timerContext?.seconds,
+        timerStart: timerContext?.startTime,
+      });
+      // Keep base duration aligned with backend snapshot so the worker effect can build on it
+      sharedTimerBaseDuration.current = Math.max(0, activeTask.duration ?? 0);
+      if (timerContext?.startTime && sessionStartTime !== timerContext.startTime) {
+        setSessionStartTime(timerContext.startTime);
+      }
+      lastInitializedTaskRef.current = activeTask.id;
+      lastInitializedDurationRef.current = activeTask.duration;
+      lastInitializedSessionRef.current = activeTask.session_duration ?? 0;
+      lastInitializedIsActiveRef.current = activeTask.is_active;
+      return;
+    }
+    
+    
+    // Normal initialization for all other cases
+    timerLog('[useTaskTimer] Normal task initialization');
+    setLiveSeconds(activeTask.duration);
+    
+    // Initialize session if task is active
+    if (activeTask.is_active) {
+      // First, try to get the actual session start_time from the sessions array (source of truth)
+      const activeSession = findActiveSession(activeTask.sessions);
+
+      if (activeSession) {
+        // Use the backend's session start_time as the source of truth
+        const backendStartTime = getSessionStartTimestamp(activeSession);
+        const elapsed = Math.floor((Date.now() - backendStartTime) / 1000);
+
+        // IMPORTANT: task.duration now includes the current session time (as of last sync)
+        // session_duration tells us how much session time is included in that duration
+        // So: base (completed sessions only) = duration - session_duration
+        const syncedSessionTime = activeTask.session_duration ?? 0;
+        const base = Math.max(0, (activeTask.duration ?? 0) - syncedSessionTime);
+
+        timerLog('[useTaskTimer] Using backend session start_time:', {
+          sessionId: activeSession.id,
+          startTime: activeSession.start_time,
+          backendStartTime,
+          elapsed,
+          taskDuration: activeTask.duration,
+          syncedSessionTime,
+          base,
+        });
+        setSessionStartTime(backendStartTime);
+        setSessionSeconds(elapsed);
+        baseCompletedDurationRef.current = base;
+        // Seed total: completed sessions + current session elapsed
+        setLiveSeconds(base + elapsed);
+        // Clear recovery state now that we have backend data
+        hasRecovered.current = false;
+        recoveredSessionStart.current = null;
+      } else if (activeTask.session_duration && activeTask.session_duration > 0) {
+        // Fallback: use session_duration to estimate start time (less accurate)
+        // IMPORTANT: task.duration now includes the current session time (as of last sync)
+        // So: base (completed sessions) = duration - session_duration
+        const base = Math.max(0, (activeTask.duration ?? 0) - activeTask.session_duration);
+        timerLog('[useTaskTimer] Fallback: Using backend session duration:', {
+          sessionDuration: activeTask.session_duration,
+          taskDuration: activeTask.duration,
+          base,
+        });
+        const startTime = Date.now() - (activeTask.session_duration * 1000);
+        setSessionStartTime(startTime);
+        setSessionSeconds(activeTask.session_duration);
+        baseCompletedDurationRef.current = base;
+        // Seed total: base + session_duration = duration (as expected)
+        setLiveSeconds(base + activeTask.session_duration);
+        // Clear recovery state now that we have backend data
+        hasRecovered.current = false;
+        recoveredSessionStart.current = null;
+      } else {
+        // No backend session duration yet; attempt to recover from persisted state for smoother UX
+        const persisted = loadTimerState();
+        const persistedMatches =
+          persisted &&
+          persisted.activeTask &&
+          persisted.activeTask.id === activeTask.id &&
+          typeof persisted.sessionStartTime === 'number';
+
+        const persistedBehindBackend =
+          persistedMatches &&
+          typeof activeTask.duration === 'number' &&
+          persisted.liveSeconds <= (activeTask.duration ?? 0);
+
+        if (persistedMatches && !persistedBehindBackend) {
+          timerLog('[useTaskTimer] Recovering session from persisted state');
+          const elapsed = Math.floor((Date.now() - persisted.sessionStartTime) / 1000);
+          setSessionStartTime(persisted.sessionStartTime);
+          setSessionSeconds(elapsed);
+          // Base = persisted live total at save time minus elapsed then; guards negative
+          const base = Math.max(
+            0,
+            persisted.liveSeconds - Math.max(0, Math.floor((persisted.lastSaveTime - persisted.sessionStartTime) / 1000))
+          );
+          // If base computed above seems off (e.g., NaN), fall back to activeTask.duration
+          baseCompletedDurationRef.current = Number.isFinite(base) ? base : activeTask.duration;
+          setLiveSeconds((baseCompletedDurationRef.current ?? 0) + elapsed);
+        } else {
+          if (persistedMatches && persistedBehindBackend) {
+            timerLog('[useTaskTimer] Skipping persisted recovery; backend duration already ahead', {
+              persistedLive: persisted?.liveSeconds,
+              backendDuration: activeTask.duration,
+            });
+          } else {
+            timerLog('[useTaskTimer] Starting fresh session (no backend session duration and no persisted match)');
+          }
+          // Start fresh session
+          const startTime = Date.now();
+          setSessionStartTime(startTime);
+          setSessionSeconds(0);
+          baseCompletedDurationRef.current = activeTask.duration;
+        }
+      }
+    } else {
+      timerLog('[useTaskTimer] Task is not active, clearing session state');
+      // Task is not active
+      setSessionStartTime(null);
+      setSessionSeconds(0);
+      baseCompletedDurationRef.current = null;
+    }
+    lastInitializedTaskRef.current = activeTask.id;
+    lastInitializedDurationRef.current = activeTask.duration;
+    lastInitializedSessionRef.current = activeTask.session_duration ?? 0;
+    lastInitializedIsActiveRef.current = activeTask.is_active;
+    
+  }, [
+    activeTask?.id,
+    activeTask?.is_active,
+    activeTask?.duration,
+    activeTask?.session_duration,
+    recoveredTask
+  ]);
+  
+  // Handle timer with Web Worker for active tasks
+  useEffect(() => {
+    timerLog('[useTaskTimer] Timer effect running:', {
+      activeTaskId: activeTask?.id,
+      isActive: activeTask?.is_active,
+      sessionStartTime,
+      hasWorker: !!workerRef.current,
+      hasFallback: !!fallbackIntervalRef.current
+    });
+    
+    // Skip creating our own worker if using shared TimerWorkerContext
+    if (timerContext && timerContext.isRunning) {
+      timerLog('[useTaskTimer] Skipping worker creation - using shared TimerWorkerContext');
+      return;
+    }
+    
+    if (!activeTask?.is_active) {
+      // Clean up worker if task becomes inactive
+      if (workerRef.current) {
+        timerLog('[useTaskTimer] Cleaning up worker - task inactive');
+        workerRef.current.postMessage({ type: 'stop' });
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+      if (fallbackIntervalRef.current) {
+        timerLog('[useTaskTimer] Cleaning up fallback timer - task inactive');
+        clearInterval(fallbackIntervalRef.current);
+        fallbackIntervalRef.current = null;
+      }
+      // Clear persisted state when timer stops
+      // Clear if no active task OR if task is not active
+      if (!activeTask || !activeTask.is_active) {
+        clearTimerState();
+        // Also clear the recovery flags so it can recover again later
+        hasRecovered.current = false;
+        recoveredSessionStart.current = null;
+      }
+      return;
+    }
+
+    // If task is active but sessionStartTime is not yet set, wait for initialization effect
+    // The initialization effect (lines 141-230) handles setting sessionStartTime in all cases
+    if (!sessionStartTime) {
+      timerLog('[useTaskTimer] Waiting for sessionStartTime to be initialized by task initialization effect');
+      return;
+    }
+
+    // Only create worker if NOT using shared TimerWorkerContext
+    try {
+      // Prevent re-entrant worker creation
+      if (isCreatingWorker.current) {
+        timerLog('[useTaskTimer] Worker creation already in progress, skipping');
+        return;
+      }
+
+      // Make sure we don't have an existing worker
+      if (workerRef.current) {
+        timerLog('[useTaskTimer] Worker already exists, cleaning up first');
+        workerRef.current.postMessage({ type: 'stop' });
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+
+      timerLog('[useTaskTimer] Creating Web Worker for timer', {
+        taskId: activeTask.id,
+        sessionStartTime,
+        timestamp: Date.now()
+      });
+
+      isCreatingWorker.current = true;
+      const worker = new Worker(new URL('../workers/timer.worker.js', import.meta.url));
+      
+      worker.onmessage = (e: MessageEvent<WorkerMessage>) => {
+        if (e.data.type === 'tick') {
+          const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+          timerLog('[useTaskTimer] Worker tick received', { sessionSeconds: elapsed });
+          // Calculate session time from start time
+          setSessionSeconds(elapsed);
+          // Derive total = baseCompleted + current session elapsed
+          const base = baseCompletedDurationRef.current ?? (activeTask?.duration ?? 0);
+          setLiveSeconds(base + elapsed);
+        } else if (e.data.type === 'stopped') {
+          timerLog('[useTaskTimer] Worker stopped');
+        }
+      };
+      
+      worker.onerror = (error) => {
+        timerLog('[useTaskTimer] Worker error:', { error: String(error) });
+        // Fall back to setInterval if worker fails
+        setupFallbackTimer();
+      };
+      
+      workerRef.current = worker;
+      worker.postMessage({ type: 'start' });
+      isCreatingWorker.current = false;
+
+    } catch (error) {
+      timerLog('[useTaskTimer] Failed to create Web Worker, using fallback:', { error: String(error) });
+      isCreatingWorker.current = false;
+      setupFallbackTimer();
+    }
+    
+    // Fallback function using regular setInterval
+    function setupFallbackTimer() {
+      if (fallbackIntervalRef.current) {
+        timerLog('[useTaskTimer] Fallback timer already running, skipping');
+        return;
+      }
+      
+      timerLog('[useTaskTimer] Using setInterval fallback for timer');
+      const interval = setInterval(() => {
+        // Calculate session time from start time
+        if (sessionStartTime) {
+          const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+          setSessionSeconds(elapsed);
+          const base = baseCompletedDurationRef.current ?? (activeTask?.duration ?? 0);
+          setLiveSeconds(base + elapsed);
+        }
+      }, 1000) as unknown as number;
+      
+      fallbackIntervalRef.current = interval;
+    }
+    
+    // Cleanup function
+    return () => {
+      timerLog('[useTaskTimer] Cleaning up timer effect');
+      isCreatingWorker.current = false;
+      if (workerRef.current) {
+        workerRef.current.postMessage({ type: 'stop' });
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+      if (fallbackIntervalRef.current) {
+        clearInterval(fallbackIntervalRef.current);
+        fallbackIntervalRef.current = null;
+      }
+    };
+  }, [activeTask?.id, activeTask?.is_active, sessionStartTime, timerContext]);
+  
+  // Save timer state to localStorage when liveSeconds changes
+  // Guard against duplicate saves when unrelated state (e.g., activeTask ref) changes
+  useEffect(() => {
+    const canSave = activeTask?.is_active && !!sessionStartTime && liveSeconds > 0;
+    if (!canSave) return;
+
+    if (lastSavedSeconds.current === liveSeconds) return;
+
+    const now = Date.now();
+    const firstWrite = lastPersistedAtRef.current === 0;
+    const intervalReached = now - lastPersistedAtRef.current >= 30000;
+
+    if (!firstWrite && !intervalReached) return;
+
+    lastSavedSeconds.current = liveSeconds;
+    lastPersistedAtRef.current = now;
+
+    saveTimerState({
+      activeTask,
+      sessionStartTime,
+      liveSeconds,
+      lastSyncTime: lastSyncedSeconds.current * 1000,
+    });
+  }, [liveSeconds, activeTask?.is_active, sessionStartTime]);
+  
+  // Update backend every 5 seconds while timer is running
+  useEffect(() => {
+    if (!activeTask?.is_active) return;
+    if (liveSeconds <= 0 || liveSeconds % 30 !== 0) return;
+
+    // Check if we've already synced at this second value
+    if (liveSeconds === lastSyncedSeconds.current) return;
+    lastSyncedSeconds.current = liveSeconds;
+
+    const usingSharedTimer = !!(timerContext?.isRunning && activeTask.is_active);
+    let actualSessionDuration: number | null = null;
+    let derivedTotal: number | null = null;
+
+    if (usingSharedTimer) {
+      const workerSeconds = Number(timerContext?.seconds || 0);
+      const base = sharedTimerBaseDuration.current ?? Math.max(0, activeTask.duration ?? 0);
+      actualSessionDuration = workerSeconds;
+      derivedTotal = base + workerSeconds;
+      // Keep our session start aligned with the worker start for downstream code
+      if (timerContext?.startTime && sessionStartTime !== timerContext.startTime) {
+        setSessionStartTime(timerContext.startTime);
+      }
+    } else if (sessionStartTime) {
+      actualSessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+      const base = baseCompletedDurationRef.current ?? (activeTask?.duration ?? 0);
+      derivedTotal = base + actualSessionDuration;
+    }
+
+    if (derivedTotal === null || actualSessionDuration === null) return;
+
+    timerLog('[useTaskTimer] Periodic backend sync (30s):', {
+      derivedTotal,
+      actualSessionDuration,
+      sessionStartTime: usingSharedTimer ? timerContext?.startTime ?? sessionStartTime : sessionStartTime,
+      timestamp: new Date().toISOString(),
+      source: usingSharedTimer ? 'shared-worker' : 'standalone',
+    });
+
+    // Fire-and-forget sync; persistence handled by liveSeconds effect
+    updateTaskTimer(derivedTotal, actualSessionDuration);
+  }, [liveSeconds, activeTask, sessionStartTime, timerContext?.seconds, timerContext?.startTime, timerContext?.isRunning, updateTaskTimer]);
+  
+  // Save timer state when page visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // Save when user switches tabs or minimizes window
+      if (document.hidden && activeTask?.is_active && sessionStartTime) {
+        const actualSessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+        const base = baseCompletedDurationRef.current ?? (activeTask?.duration ?? 0);
+        const derivedTotal = base + actualSessionDuration;
+        updateTaskTimer(derivedTotal, actualSessionDuration);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [activeTask?.is_active, liveSeconds, sessionStartTime, updateTaskTimer]);
+
+  // Add beforeunload handler for crash detection
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (activeTask?.is_active) {
+        // Try to send a final sync. Prefer fetch with keepalive so we can include Authorization.
+        if (sessionStartTime) {
+          const actualSessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+          const base = baseCompletedDurationRef.current ?? (activeTask?.duration ?? 0);
+          const derivedTotal = base + actualSessionDuration;
+          const payload = JSON.stringify({
+            duration: derivedTotal,
+            session_duration: actualSessionDuration
+          });
+
+          // Use the same base URL convention as services
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+          const url = `${API_BASE_URL}/tasks/${activeTask.id}`;
+
+          try {
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            try {
+              const at = (typeof window !== 'undefined') ? localStorage.getItem('kk_access_token') : null;
+              if (at) headers['Authorization'] = `Bearer ${at}`;
+            } catch {}
+            // Fire-and-forget with keepalive; browsers will try to finish this as the page unloads
+            fetch(url, {
+              method: 'PATCH',
+              headers,
+              body: payload,
+              keepalive: true,
+            }).catch(() => {});
+            timerLog('[useTaskTimer] Sent final sync via fetch keepalive');
+          } catch (e) {
+            // Fallback to sendBeacon (no custom headers) if needed
+            try {
+              if (navigator.sendBeacon) {
+                navigator.sendBeacon(url, payload);
+                timerLog('[useTaskTimer] Sent final sync via sendBeacon (fallback)');
+              }
+            } catch {}
+          }
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [activeTask, liveSeconds, sessionStartTime]);
+
+  return {
+    liveSeconds,
+    sessionSeconds,
+    sessionStartTime,
+    hasRecoveredTimer: hasRecovered.current,
+    recoveredTask
+  };
+}

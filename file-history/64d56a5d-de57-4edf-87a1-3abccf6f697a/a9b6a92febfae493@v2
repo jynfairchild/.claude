@@ -1,0 +1,1049 @@
+package handlers
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"sort"
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"simple_task_tracker/backend/internal/models"
+)
+
+func setupTaskRouter(h *TaskHandler) (*gin.Engine, *httptest.ResponseRecorder) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
+	// Simulate auth middleware for tests: userID=1
+	r.Use(func(c *gin.Context) { c.Set("userID", uint(1)); c.Next() })
+	r.POST("/api/v1/tasks", h.CreateTask)
+	r.PATCH("/api/v1/tasks/:id", h.UpdateTask)
+	r.DELETE("/api/v1/tasks/:id", h.DeleteTask)
+	r.GET("/api/v1/tasks", h.GetTasks)
+	r.GET("/api/v1/tasks/:id", h.GetTaskWithSessions)
+	r.GET("/api/v1/active", h.GetActiveTask)
+	return r, httptest.NewRecorder()
+}
+
+func TestCreateTask_Defaults_TodoNoSession(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	body := bytes.NewBufferString(`{}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
+	}
+	var task models.Task
+	if err := json.Unmarshal(w.Body.Bytes(), &task); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+	if task.Title != "Untitled Task" {
+		t.Fatalf("expected default title, got %q", task.Title)
+	}
+	if task.ColumnIndex != 0 || task.IsActive {
+		t.Fatalf("expected column_index=0 and inactive; got idx=%d active=%v", task.ColumnIndex, task.IsActive)
+	}
+	if task.Position != 0 {
+		t.Fatalf("expected position 0, got %d", task.Position)
+	}
+	if len(task.Sessions) != 0 || task.SessionCount != 0 {
+		t.Fatalf("expected no sessions; got len=%d count=%d", len(task.Sessions), task.SessionCount)
+	}
+}
+
+func TestCreateTask_IsActiveTrue_CreatesSession_InProgress(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	payload := map[string]any{"title": "Active", "is_active": true}
+	b, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewReader(b))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
+	}
+	var task models.Task
+	if err := json.Unmarshal(w.Body.Bytes(), &task); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+	if !task.IsActive || task.ColumnIndex != 1 {
+		t.Fatalf("expected column_index=1 and active, got idx=%d active=%v", task.ColumnIndex, task.IsActive)
+	}
+	if task.Position != 0 {
+		t.Fatalf("expected position 0 in empty column, got %d", task.Position)
+	}
+	if task.SessionCount != 1 || len(task.Sessions) != 1 || task.Sessions[0].EndTime != nil || task.Sessions[0].SessionNum != 1 {
+		t.Fatalf("expected one active session with num=1; got count=%d len=%d", task.SessionCount, len(task.Sessions))
+	}
+}
+
+func TestUpdateTask_StartSession_CreatesSession_NoAutoColumnMove(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create default inactive task
+	createReq := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"X"}`))
+	createReq.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, createReq)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create expected 201, got %d: %s", w.Code, w.Body.String())
+	}
+	var task models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &task)
+
+	// Start session via UpdateTask
+	w = httptest.NewRecorder()
+	upd := map[string]any{"is_active": true}
+	b, _ := json.Marshal(upd)
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), bytes.NewReader(b))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if !updated.IsActive {
+		t.Fatalf("expected task active")
+	}
+	if updated.ColumnIndex != 0 { // UpdateTask does not auto-move columns
+		t.Fatalf("expected column_index to remain 0, got %d", updated.ColumnIndex)
+	}
+	if updated.SessionCount != 1 || len(updated.Sessions) != 1 || updated.Sessions[0].EndTime != nil {
+		t.Fatalf("expected one active session created")
+	}
+}
+
+func TestUpdateTask_StopSession_ComputesDurations(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create and start
+	createReq := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"X"}`))
+	createReq.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, createReq)
+	var task models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &task)
+
+	// Start via update
+	w = httptest.NewRecorder()
+	startBody := bytes.NewBufferString(`{"is_active":true}`)
+	req1 := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), startBody)
+	req1.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req1)
+
+	// Wait enough to ensure computed duration rounds to >= 1 second
+	time.Sleep(1100 * time.Millisecond)
+
+	// Stop via update without explicit durations -> sums sessions
+	w = httptest.NewRecorder()
+	stopBody := bytes.NewBufferString(`{"is_active":false}`)
+	req2 := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), stopBody)
+	req2.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req2)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if updated.IsActive {
+		t.Fatalf("expected inactive after stop")
+	}
+	if updated.Duration <= 0 {
+		t.Fatalf("expected positive duration from summed sessions, got %d", updated.Duration)
+	}
+	// Active session should now have EndTime
+	var s models.Session
+	if err := db.Where("task_id = ? AND end_time IS NOT NULL", updated.ID).First(&s).Error; err != nil {
+		t.Fatalf("expected ended session in DB: %v", err)
+	}
+}
+
+func TestUpdateTask_MoveBetweenColumns_WithPosition(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create two tasks in In Progress to occupy positions 0 and 1
+	a := createTestTask(t, db, "A")
+	a.ColumnIndex = 1
+	a.Position = 0
+	if err := db.Save(&a).Error; err != nil {
+		t.Fatal(err)
+	}
+	b := createTestTask(t, db, "B")
+	b.ColumnIndex = 1
+	b.Position = 1
+	if err := db.Save(&b).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a Todo task C
+	createReq := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"C"}`))
+	createReq.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, createReq)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create C failed: %d %s", w.Code, w.Body.String())
+	}
+	var cTask models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &cTask)
+
+	// Move C to In Progress at position 1
+	w = httptest.NewRecorder()
+	payload := map[string]any{"column_index": 1, "position": 1}
+	bts, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(cTask.ID)), bytes.NewReader(bts))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("update failed: %d %s", w.Code, w.Body.String())
+	}
+
+	// Verify final positions in In Progress are sequential and C at index 1
+	var inprog []models.Task
+	if err := db.Where("column_index = ? AND status = ?", 1, "uncompleted").Find(&inprog).Error; err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(inprog, func(i, j int) bool { return inprog[i].Position < inprog[j].Position })
+	if len(inprog) != 3 {
+		t.Fatalf("expected 3 in In Progress, got %d", len(inprog))
+	}
+	if inprog[1].ID != cTask.ID {
+		t.Fatalf("expected moved task at position 1, got id=%d", inprog[1].ID)
+	}
+}
+
+func TestUpdateTask_ReorderWithinSameColumn(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create three Todo tasks in order A(0),B(1),C(2)
+	// Use API so normalize runs consistently
+	mk := func(title string) models.Task {
+		w = httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"`+title+`"}`))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+		var tsk models.Task
+		_ = json.Unmarshal(w.Body.Bytes(), &tsk)
+		return tsk
+	}
+	a := mk("A")
+	_ = mk("B")
+	_ = mk("C")
+
+	// Move A from position 0 to 2 within Todo
+	w = httptest.NewRecorder()
+	payload := map[string]any{"position": 2}
+	bts, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(a.ID)), bytes.NewReader(bts))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("reorder update failed: %d %s", w.Code, w.Body.String())
+	}
+
+	// Order should be B(0), C(1), A(2)
+	var todos []models.Task
+	if err := db.Where("column_index = ? AND status = ?", 0, "uncompleted").Find(&todos).Error; err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(todos, func(i, j int) bool { return todos[i].Position < todos[j].Position })
+	if len(todos) != 3 {
+		t.Fatalf("expected 3 todos, got %d", len(todos))
+	}
+	// fetch titles to compare order
+	titles := []string{todos[0].Title, todos[1].Title, todos[2].Title}
+	want := []string{"B", "C", "A"}
+	for i := range want {
+		if titles[i] != want[i] {
+			t.Fatalf("unexpected order at %d: got %q want %q (positions: %d,%d,%d)", i, titles[i], want[i], todos[0].Position, todos[1].Position, todos[2].Position)
+		}
+	}
+}
+
+func TestGetTaskWithSessions_OrdersBySessionNumAsc(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create a task
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T"}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var task models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &task)
+
+	// Insert sessions out of order
+	s2 := models.Session{TaskID: task.ID, StartTime: time.Now(), SessionNum: 2}
+	s1 := models.Session{TaskID: task.ID, StartTime: time.Now().Add(-10 * time.Second), SessionNum: 1}
+	s3 := models.Session{TaskID: task.ID, StartTime: time.Now().Add(10 * time.Second), SessionNum: 3}
+	if err := db.Create(&s2).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Create(&s1).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Create(&s3).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	// Fetch with sessions
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var got models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &got)
+	if len(got.Sessions) != 3 {
+		t.Fatalf("expected 3 sessions, got %d", len(got.Sessions))
+	}
+	if got.Sessions[0].SessionNum != 1 || got.Sessions[1].SessionNum != 2 || got.Sessions[2].SessionNum != 3 {
+		t.Fatalf("expected sessions ordered 1,2,3; got %d,%d,%d", got.Sessions[0].SessionNum, got.Sessions[1].SessionNum, got.Sessions[2].SessionNum)
+	}
+}
+
+func TestUpdateTask_MoveToEmptyColumn_AppendsAtZero(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create Todo task
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T"}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var task models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &task)
+
+	// Move to empty column 1 without position
+	w = httptest.NewRecorder()
+	upd := bytes.NewBufferString(`{"column_index":1}`)
+	req = httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), upd)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if updated.ColumnIndex != 1 || updated.Position != 0 {
+		t.Fatalf("expected position 0 in empty column 1, got idx=%d pos=%d", updated.ColumnIndex, updated.Position)
+	}
+}
+
+func TestUpdateTask_ReorderSamePosition_NoOp(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create three Todo tasks via API: A,B,C with positions 0,1,2
+	titles := []string{"A", "B", "C"}
+	ids := make([]uint, 0, 3)
+	for _, tt := range titles {
+		w = httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"`+tt+`"}`))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+		var tsk models.Task
+		_ = json.Unmarshal(w.Body.Bytes(), &tsk)
+		ids = append(ids, tsk.ID)
+	}
+
+	// Capture initial order by position
+	var before []models.Task
+	if err := db.Where("column_index = ? AND status = ?", 0, "uncompleted").Find(&before).Error; err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(before, func(i, j int) bool { return before[i].Position < before[j].Position })
+	bTitles := []string{before[0].Title, before[1].Title, before[2].Title}
+
+	// No-op: set B (ids[1]) to its current position
+	w = httptest.NewRecorder()
+	payload := bytes.NewBufferString(`{"position":1}`)
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(ids[1])), payload)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+
+	var after []models.Task
+	if err := db.Where("column_index = ? AND status = ?", 0, "uncompleted").Find(&after).Error; err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(after, func(i, j int) bool { return after[i].Position < after[j].Position })
+	aTitles := []string{after[0].Title, after[1].Title, after[2].Title}
+	for i := 0; i < 3; i++ {
+		if aTitles[i] != bTitles[i] {
+			t.Fatalf("expected no-op reorder; before=%v after=%v", bTitles, aTitles)
+		}
+	}
+}
+
+func TestUpdateTask_StopWhenNoActive_SetsInactive_NoError(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create inactive Todo
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"X"}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var task models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &task)
+
+	// Stop (is_active=false) when no active session exists
+	w = httptest.NewRecorder()
+	upd := bytes.NewBufferString(`{"is_active":false}`)
+	req = httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), upd)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if updated.IsActive {
+		t.Fatalf("expected inactive after stop request with no active session")
+	}
+}
+
+func TestUpdateTask_MoveWithLargePosition_NormalizedToEnd(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// One existing in-progress task at pos 0
+	a := createTestTask(t, db, "A")
+	a.ColumnIndex = 1
+	a.Position = 0
+	if err := db.Save(&a).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	// Create Todo task C
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"C"}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var cTask models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &cTask)
+
+	// Move C to In Progress with very large position
+	w = httptest.NewRecorder()
+	payload := bytes.NewBufferString(`{"column_index":1,"position":99}`)
+	req = httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(cTask.ID)), payload)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+
+	// After normalization, should be appended to end -> position 1
+	var inprog []models.Task
+	if err := db.Where("column_index = ? AND status = ?", 1, "uncompleted").Find(&inprog).Error; err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(inprog, func(i, j int) bool { return inprog[i].Position < inprog[j].Position })
+	if len(inprog) != 2 {
+		t.Fatalf("expected 2 tasks, got %d", len(inprog))
+	}
+	if inprog[1].ID != cTask.ID || inprog[1].Position != 1 {
+		t.Fatalf("expected moved task at end position 1, got id=%d pos=%d", inprog[1].ID, inprog[1].Position)
+	}
+}
+
+func TestUpdateTask_TagsEmpty_NoChange(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create with tags via DB
+	task := createTestTask(t, db, "Tagged")
+	task.Tags = []string{"a", "b"}
+	if err := db.Save(&task).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	// Update with empty tags array -> handler ignores (len==0), so tags persist
+	w = httptest.NewRecorder()
+	payload := bytes.NewBufferString(`{"tags":[]}`)
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), payload)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if len(updated.Tags) != 2 {
+		t.Fatalf("expected tags unchanged (2), got %d", len(updated.Tags))
+	}
+}
+
+func TestGetTasks_Defaults_UncompletedOnly(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create: one inactive Todo, one active In Progress, one completed
+	// Inactive Todo
+	w = httptest.NewRecorder()
+	req1 := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T1"}`))
+	req1.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req1)
+
+	// Active
+	w = httptest.NewRecorder()
+	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T2","is_active":true}`))
+	req2.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req2)
+
+	// Completed via update
+	var t1 models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &t1) // last created, but we don't need its id
+	// Create a third task to mark completed
+	w = httptest.NewRecorder()
+	req3 := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T3"}`))
+	req3.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req3)
+	var t3 models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &t3)
+	w = httptest.NewRecorder()
+	upd := bytes.NewBufferString(`{"status":"completed"}`)
+	req4 := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(t3.ID)), upd)
+	req4.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req4)
+
+	// Query default (status not provided -> uncompleted only)
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/tasks", nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var items []models.Task
+	if err := json.Unmarshal(w.Body.Bytes(), &items); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+	for _, it := range items {
+		if it.Status != "uncompleted" {
+			t.Fatalf("expected only uncompleted tasks, found status=%q", it.Status)
+		}
+	}
+}
+
+func TestGetTasks_Filter_IsActive(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// 2 active
+	for i := 0; i < 2; i++ {
+		w = httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"A","is_active":true}`))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+	}
+	// 3 inactive
+	for i := 0; i < 3; i++ {
+		w = httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"I"}`))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+	}
+
+	// is_active=true
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/tasks?is_active=true", nil)
+	r.ServeHTTP(w, req)
+	var actives []models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &actives)
+	if len(actives) != 2 {
+		t.Fatalf("expected 2 active, got %d", len(actives))
+	}
+	for _, it := range actives {
+		if !it.IsActive {
+			t.Fatalf("expected all active")
+		}
+	}
+
+	// is_active=false
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/tasks?is_active=false", nil)
+	r.ServeHTTP(w, req)
+	var inactives []models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &inactives)
+	if len(inactives) != 3 {
+		t.Fatalf("expected 3 inactive, got %d", len(inactives))
+	}
+	for _, it := range inactives {
+		if it.IsActive {
+			t.Fatalf("expected all inactive")
+		}
+	}
+}
+
+func TestGetTasks_Filter_StatusAndColumn(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create: Todo, In Progress, then mark one completed
+	// Todo
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T"}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var t1 models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &t1)
+
+	// In Progress (active)
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"P","is_active":true}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var t2 models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &t2)
+
+	// Completed t1
+	w = httptest.NewRecorder()
+	upd := bytes.NewBufferString(`{"status":"completed"}`)
+	req = httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(t1.ID)), upd)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	// status=completed -> returns only t1
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/tasks?status=completed", nil)
+	r.ServeHTTP(w, req)
+	var completed []models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &completed)
+	if len(completed) != 1 || completed[0].ID != t1.ID {
+		t.Fatalf("expected exactly completed t1, got %v", len(completed))
+	}
+
+	// column_index=1 -> returns only t2
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/tasks?column_index=1", nil)
+	r.ServeHTTP(w, req)
+	var inprog []models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &inprog)
+	if len(inprog) != 1 || inprog[0].ID != t2.ID || inprog[0].ColumnIndex != 1 {
+		t.Fatalf("expected only column_index=1 task t2")
+	}
+}
+
+func TestGetActiveTask_200NullAndSuccessWithSessionDuration(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// 200 with null when none active
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/active", nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+	if body := w.Body.String(); body != "null" {
+		t.Fatalf("expected body 'null', got %q", body)
+	}
+
+	// Create active task (creates session)
+	w = httptest.NewRecorder()
+	create := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"A","is_active":true}`))
+	create.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, create)
+
+	// Wait ~1s for a non-zero computed duration
+	time.Sleep(1100 * time.Millisecond)
+
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/active", nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var resp struct {
+		models.Task
+		SessionDuration int `json:"session_duration"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+	if !resp.IsActive || resp.ColumnIndex != 1 {
+		t.Fatalf("expected active task in column_index=1")
+	}
+	if resp.SessionDuration < 1 {
+		t.Fatalf("expected session_duration >= 1, got %d", resp.SessionDuration)
+	}
+}
+
+func TestUpdateTask_MoveBetweenColumns_AppendToEndWhenNoPosition(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create two In Progress tasks via direct DB insert to set positions 0 and 1
+	a := createTestTask(t, db, "A")
+	a.ColumnIndex = 1
+	a.Position = 0
+	if err := db.Save(&a).Error; err != nil {
+		t.Fatal(err)
+	}
+	b := createTestTask(t, db, "B")
+	b.ColumnIndex = 1
+	b.Position = 1
+	if err := db.Save(&b).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	// Create Todo task C via API
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"C"}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var cTask models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &cTask)
+
+	// Move C to In Progress without specifying position -> should append at end (position 2)
+	w = httptest.NewRecorder()
+	payload := bytes.NewBufferString(`{"column_index":1}`)
+	req = httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(cTask.ID)), payload)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("update failed: %d %s", w.Code, w.Body.String())
+	}
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if updated.ColumnIndex != 1 || updated.Position != 2 {
+		t.Fatalf("expected appended position 2 in column 1, got idx=%d pos=%d", updated.ColumnIndex, updated.Position)
+	}
+}
+
+func TestUpdateTask_UpdateFields_TitleProjectTagsDurations(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create active task with session
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"Old","is_active":true}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	var task models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &task)
+
+	// Update title, project, tags while staying active.
+	// Note: when active and session_duration is provided, we trust frontend's duration.
+	w = httptest.NewRecorder()
+	payload := map[string]any{
+		"title":            "NewTitle",
+		"project":          "Proj",
+		"tags":             []string{"x", "y"},
+		"duration":         123,
+		"session_duration": 45,
+		"is_active":        true,
+	}
+	bts, _ := json.Marshal(payload)
+	req = httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), bytes.NewReader(bts))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if updated.Title != "NewTitle" || updated.Project != "Proj" {
+		t.Fatalf("expected updated title/project, got %q/%q", updated.Title, updated.Project)
+	}
+	// While active, we trust frontend's provided duration (not derived from sessions)
+	if updated.Duration != 123 {
+		t.Fatalf("expected frontend duration (123), got %d", updated.Duration)
+	}
+	if len(updated.Tags) != 2 {
+		t.Fatalf("expected 2 tags, got %d", len(updated.Tags))
+	}
+	// verify session duration persisted on active session
+	var s models.Session
+	if err := db.Where("task_id = ? AND end_time IS NULL", updated.ID).First(&s).Error; err != nil {
+		t.Fatalf("expected active session: %v", err)
+	}
+	if s.Duration != 45 {
+		t.Fatalf("expected active session duration 45, got %d", s.Duration)
+	}
+}
+
+// New behavior: while active, periodic syncs trust frontend's duration
+// (frontend calculates: completedSessionsTotal + currentSessionElapsed)
+func TestUpdateTask_Active_PeriodicSync_TrustsFrontendDuration(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Seed a baseline task via DB
+	task := createTestTask(t, db, "TrustFrontend")
+
+	// Add one ended session of 30s
+	start1 := time.Now().Add(-40 * time.Second)
+	end1 := start1.Add(30 * time.Second)
+	s1 := models.Session{TaskID: task.ID, StartTime: start1, EndTime: &end1, Duration: 30, SessionNum: 1}
+	if err := db.Create(&s1).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	// Make task active and create an open session (SessionNum=2)
+	task.IsActive = true
+	task.ColumnIndex = 1
+	task.SessionCount = 2
+	if err := db.Save(&task).Error; err != nil {
+		t.Fatal(err)
+	}
+	s2 := models.Session{TaskID: task.ID, StartTime: time.Now().Add(-20 * time.Second), SessionNum: 2}
+	if err := db.Create(&s2).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	// PATCH with session_duration=20 and frontend-calculated total duration=50
+	// (frontend knows: 30s completed + 20s current = 50s total)
+	w = httptest.NewRecorder()
+	payload := map[string]any{"session_duration": 20, "is_active": true, "duration": 50}
+	bts, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), bytes.NewReader(bts))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+
+	var updated models.Task
+	if err := json.Unmarshal(w.Body.Bytes(), &updated); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+	// Backend trusts frontend's duration (50)
+	if updated.Duration != 50 {
+		t.Fatalf("expected frontend duration 50, got %d", updated.Duration)
+	}
+	if !updated.IsActive {
+		t.Fatalf("expected task to remain active")
+	}
+	// Active session should have duration 20 and no EndTime
+	var active models.Session
+	if err := db.Where("task_id = ? AND end_time IS NULL", updated.ID).First(&active).Error; err != nil {
+		t.Fatalf("expected one active session: %v", err)
+	}
+	if active.Duration != 20 {
+		t.Fatalf("expected active session duration 20, got %d", active.Duration)
+	}
+}
+
+// When task is inactive and no active session is being updated, direct duration updates are allowed
+func TestUpdateTask_Inactive_AllowsDirectDurationUpdate(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create an inactive task via API
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T"}`))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create failed: %d %s", w.Code, w.Body.String())
+	}
+	var task models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &task)
+
+	if task.IsActive {
+		t.Fatalf("expected new task inactive")
+	}
+
+	// Now update duration directly
+	w = httptest.NewRecorder()
+	upd := map[string]any{"duration": 123}
+	b, _ := json.Marshal(upd)
+	req = httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), bytes.NewReader(b))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("update failed: %d %s", w.Code, w.Body.String())
+	}
+	var updated models.Task
+	_ = json.Unmarshal(w.Body.Bytes(), &updated)
+	if updated.Duration != 123 {
+		t.Fatalf("expected direct duration 123, got %d", updated.Duration)
+	}
+}
+
+// After stopping a task (is_active=false), a subsequent periodic update that omits
+// is_active must NOT reactivate the task.
+func TestUpdateTask_AfterStop_PeriodicUpdate_DoesNotReactivate(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	// Create active task via API (so it has an open session)
+	w = httptest.NewRecorder()
+	reqCreate := httptest.NewRequest(http.MethodPost, "/api/v1/tasks", bytes.NewBufferString(`{"title":"T","is_active":true}`))
+	reqCreate.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, reqCreate)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("create failed: %d %s", w.Code, w.Body.String())
+	}
+	var task models.Task
+	if err := json.Unmarshal(w.Body.Bytes(), &task); err != nil {
+		t.Fatal(err)
+	}
+
+	// Stop the task
+	w = httptest.NewRecorder()
+	reqStop := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), bytes.NewBufferString(`{"is_active":false}`))
+	reqStop.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, reqStop)
+	if w.Code != http.StatusOK {
+		t.Fatalf("stop failed: %d %s", w.Code, w.Body.String())
+	}
+
+	// Now send a periodic update WITHOUT is_active, only durations
+	w = httptest.NewRecorder()
+	payload := map[string]any{"duration": 123, "session_duration": 0}
+	bts, _ := json.Marshal(payload)
+	reqUpd := httptest.NewRequest(http.MethodPatch, "/api/v1/tasks/"+strconv.Itoa(int(task.ID)), bytes.NewReader(bts))
+	reqUpd.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, reqUpd)
+	if w.Code != http.StatusOK {
+		t.Fatalf("update failed: %d %s", w.Code, w.Body.String())
+	}
+
+	var updated models.Task
+	if err := json.Unmarshal(w.Body.Bytes(), &updated); err != nil {
+		t.Fatal(err)
+	}
+	if updated.IsActive {
+		t.Fatalf("expected task to remain inactive after periodic update without is_active")
+	}
+	if updated.Duration != 123 {
+		t.Fatalf("expected duration to update to 123, got %d", updated.Duration)
+	}
+}
+
+func TestDeleteTask_RemovesTaskAndNormalizesPositions(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	a := createTestTask(t, db, "A")
+	b := createTestTask(t, db, "B")
+	c := createTestTask(t, db, "C")
+
+	must := func(err error) {
+		if err != nil {
+			t.Fatalf("unexpected setup error: %v", err)
+		}
+	}
+
+	must(db.Model(&models.Task{}).Where("id = ?", a.ID).Update("position", 0).Error)
+	must(db.Model(&models.Task{}).Where("id = ?", b.ID).Update("position", 1).Error)
+	must(db.Model(&models.Task{}).Where("id = ?", c.ID).Update("position", 2).Error)
+
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/tasks/"+strconv.Itoa(int(b.ID)), nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d: %s", w.Code, w.Body.String())
+	}
+
+	var resp struct {
+		Deleted     uint `json:"deleted"`
+		ColumnIndex int  `json:"column_index"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("invalid delete response: %v", err)
+	}
+	if resp.Deleted != b.ID {
+		t.Fatalf("expected deleted id %d, got %d", b.ID, resp.Deleted)
+	}
+
+	var removed models.Task
+	err := db.First(&removed, b.ID).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		t.Fatalf("expected task %d to be deleted, got err=%v", b.ID, err)
+	}
+
+	var remaining []models.Task
+	if err := db.Where("user_id = ?", uint(1)).
+		Order("column_index ASC, position ASC, id ASC").
+		Find(&remaining).Error; err != nil {
+		t.Fatalf("failed to fetch remaining tasks: %v", err)
+	}
+	if len(remaining) != 2 {
+		t.Fatalf("expected 2 remaining tasks, got %d", len(remaining))
+	}
+	if remaining[0].ID != a.ID || remaining[0].Position != 0 {
+		t.Fatalf("expected task A at position 0, got id=%d pos=%d", remaining[0].ID, remaining[0].Position)
+	}
+	if remaining[1].ID != c.ID || remaining[1].Position != 1 {
+		t.Fatalf("expected task C at position 1, got id=%d pos=%d", remaining[1].ID, remaining[1].Position)
+	}
+}
+
+func TestDeleteTask_OtherUserNotFound(t *testing.T) {
+	db := setupTestDB(t)
+	h := NewTaskHandler(db)
+	r, w := setupTaskRouter(h)
+
+	other := models.Task{
+		UserID:      2,
+		Title:       "Other User Task",
+		Project:     "",
+		StartTime:   time.Now(),
+		ColumnIndex: 0,
+		Status:      "uncompleted",
+		Position:    0,
+		IsActive:    false,
+	}
+	if err := db.Create(&other).Error; err != nil {
+		t.Fatalf("failed to seed other user task: %v", err)
+	}
+
+	w = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/tasks/"+strconv.Itoa(int(other.ID)), nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("expected 404 when deleting other user's task, got %d: %s", w.Code, w.Body.String())
+	}
+
+	var still models.Task
+	if err := db.First(&still, other.ID).Error; err != nil {
+		t.Fatalf("expected other user's task to remain, got error: %v", err)
+	}
+}

@@ -1,0 +1,594 @@
+package handlers
+
+import (
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
+	"gorm.io/gorm"
+
+	"simple_task_tracker/backend/internal/models"
+)
+
+// TaskHandler handles simplified task operations for development
+type TaskHandler struct {
+	db *gorm.DB
+}
+
+func NewTaskHandler(db *gorm.DB) *TaskHandler {
+	return &TaskHandler{db: db}
+}
+
+// normalizeTaskPositions ensures all tasks have unique sequential positions within their column
+func (h *TaskHandler) normalizeTaskPositions(userID uint) {
+	// Fetch all uncompleted tasks for this user ordered by column then position
+	var tasks []models.Task
+	h.db.Where("user_id = ? AND status = ?", userID, "uncompleted").
+		Order("column_index ASC, position ASC, created_at ASC").
+		Find(&tasks)
+
+	currentCol := -1
+	nextPos := 0
+	for _, task := range tasks {
+		if task.ColumnIndex != currentCol {
+			currentCol = task.ColumnIndex
+			nextPos = 0
+		}
+		if task.Position != nextPos {
+			h.db.Model(&task).Update("position", nextPos)
+		}
+		nextPos++
+	}
+}
+
+// CreateTaskRequest represents the request to create a new task
+type CreateTaskRequest struct {
+	Title    string   `json:"title"`
+	Project  string   `json:"project"`
+	Tags     []string `json:"tags"`
+	IsActive *bool    `json:"is_active,omitempty"`
+}
+
+// UpdateTaskRequest represents the request to update a task
+type UpdateTaskRequest struct {
+	Title       string   `json:"title,omitempty"`
+	Project     *string  `json:"project,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+	ColumnIndex *int     `json:"column_index,omitempty"`
+	Status      string   `json:"status,omitempty"`
+	Position    *int     `json:"position,omitempty"`
+	Duration        int   `json:"duration,omitempty"`
+	SessionDuration int   `json:"session_duration,omitempty"`
+	IsActive        *bool `json:"is_active,omitempty"`
+}
+
+// CreateTask creates a new task (simplified version without auth)
+func (h *TaskHandler) CreateTask(c *gin.Context) {
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	var req CreateTaskRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Set defaults for empty fields
+	if req.Title == "" {
+		req.Title = "Untitled Task"
+	}
+	// Keep project empty if not provided (no default)
+
+	// Set defaults for boolean fields if not provided
+	isActive := false
+	if req.IsActive != nil {
+		isActive = *req.IsActive
+	}
+
+	// Start a transaction
+	tx := h.db.Begin()
+
+	// Determine column based on is_active
+	columnIndex := 0
+	if isActive {
+		columnIndex = 1
+	}
+
+	// Get max position for the target column for this user
+	var maxPosition int
+	tx.Model(&models.Task{}).
+		Where("user_id = ? AND column_index = ? AND status = ?", userID, columnIndex, "uncompleted").
+		Select("COALESCE(MAX(position), -1)").
+		Scan(&maxPosition)
+
+	// Create task for this user
+	task := models.Task{
+		UserID:       userID,
+		Title:        req.Title,
+		Project:      req.Project,
+		StartTime:    time.Now(),
+		Tags:         pq.StringArray(req.Tags),
+		ColumnIndex:  columnIndex,
+		Status:       "uncompleted",
+		Position:     maxPosition + 1,
+		IsActive:     isActive,
+		SessionCount: 0, // Will be set to 1 if active
+	}
+
+	if err := tx.Select("*").Create(&task).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create task"})
+		return
+	}
+
+	// Only create a session if the task is active
+	if isActive {
+		task.SessionCount = 1
+		// Update the task with session count
+		if err := tx.Model(&task).Update("session_count", 1).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update session count"})
+			return
+		}
+
+		// Create the first session
+		session := models.Session{
+			TaskID:     task.ID,
+			StartTime:  time.Now(),
+			SessionNum: 1,
+		}
+
+		if err := tx.Create(&session).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+			return
+		}
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save task"})
+		return
+	}
+
+	// Normalize positions for the affected user's columns after creating the task
+	h.normalizeTaskPositions(userID)
+
+	// Load sessions for response
+	h.db.Preload("Sessions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("session_num ASC")
+	}).First(&task, task.ID)
+
+	// Build response with session_duration (same pattern as GetActiveTask)
+	type TaskWithSession struct {
+		models.Task
+		SessionDuration int `json:"session_duration"`
+	}
+	response := TaskWithSession{Task: task}
+
+	// Calculate current session duration if task is active
+	if task.IsActive {
+		for _, s := range task.Sessions {
+			if s.EndTime == nil {
+				response.SessionDuration = int(time.Since(s.StartTime).Seconds())
+				break
+			}
+		}
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
+// UpdateTask updates an existing task
+func (h *TaskHandler) UpdateTask(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		return
+	}
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var req UpdateTaskRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tx := h.db.Begin()
+
+	var task models.Task
+	if err := tx.Preload("Sessions").Where("id = ? AND user_id = ?", id, userID).First(&task).Error; err != nil {
+		tx.Rollback()
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch task"})
+		return
+	}
+
+	// Determine intended post-update active state up-front
+	intendedActive := task.IsActive
+	if req.IsActive != nil {
+		intendedActive = *req.IsActive
+	}
+
+	// Handle timer state changes (starting/stopping sessions)
+	if req.IsActive != nil && task.IsActive != *req.IsActive {
+		if *req.IsActive {
+			// Starting a new session
+			task.SessionCount++
+			session := models.Session{
+				TaskID:     task.ID,
+				StartTime:  time.Now(),
+				SessionNum: task.SessionCount,
+			}
+			if err := tx.Create(&session).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+				return
+			}
+		} else {
+			// Stopping current session
+			var activeSession models.Session
+			if err := tx.Where("task_id = ? AND end_time IS NULL", task.ID).First(&activeSession).Error; err == nil {
+				now := time.Now()
+				activeSession.EndTime = &now
+				// Use session duration from request if provided, otherwise calculate from time
+				if req.SessionDuration > 0 {
+					activeSession.Duration = req.SessionDuration
+				} else {
+					activeSession.Duration = int(now.Sub(activeSession.StartTime).Seconds())
+				}
+				if err := tx.Save(&activeSession).Error; err != nil {
+					tx.Rollback()
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to end session"})
+					return
+				}
+
+				// Update task's total duration from sessions (single source of truth)
+				var totalDuration int
+				tx.Model(&models.Session{}).Where("task_id = ?", task.ID).Select("COALESCE(SUM(duration), 0)").Scan(&totalDuration)
+				task.Duration = totalDuration
+			}
+		}
+	}
+
+	// Update other fields if provided
+	if req.Title != "" {
+		task.Title = req.Title
+	}
+	// Allow clearing project if provided (even if empty string)
+	if req.Project != nil {
+		task.Project = *req.Project
+	}
+	// Update tags only if non-empty array provided; empty slice means 'no change'
+	if req.Tags != nil && len(req.Tags) > 0 {
+		task.Tags = pq.StringArray(req.Tags)
+	}
+	// Determine requested column index if provided (prefer column_index over column_name)
+	var requestedColIdx *int
+	if req.ColumnIndex != nil {
+		requestedColIdx = req.ColumnIndex
+	}
+
+	// Check if this is a column change (move between columns)
+	columnChanged := requestedColIdx != nil && *requestedColIdx != task.ColumnIndex
+
+	if columnChanged {
+		// Moving to a different column
+		oldColumnIdx := task.ColumnIndex
+		oldPosition := task.Position
+
+		// First, remove the task from the old column by shifting tasks down
+		tx.Model(&models.Task{}).
+			Where("user_id = ? AND column_index = ? AND status = ? AND position > ?", userID, oldColumnIdx, "uncompleted", oldPosition).
+			Update("position", gorm.Expr("position - 1"))
+
+		if req.Position != nil {
+			// Insert at specific position in new column
+			newPosition := *req.Position
+
+			// Shift tasks in the NEW column at and after the target position
+			tx.Model(&models.Task{}).
+				Where("user_id = ? AND column_index = ? AND status = ? AND position >= ?", userID, *requestedColIdx, "uncompleted", newPosition).
+				Update("position", gorm.Expr("position + 1"))
+
+			task.Position = newPosition
+		} else {
+			// No position specified, add to end of new column
+			var maxPosition int
+			tx.Model(&models.Task{}).
+				Where("user_id = ? AND column_index = ? AND status = ?", userID, *requestedColIdx, "uncompleted").
+				Select("COALESCE(MAX(position), -1)").Scan(&maxPosition)
+			task.Position = maxPosition + 1
+		}
+		task.ColumnIndex = *requestedColIdx
+	} else if req.Position != nil {
+		// Reordering within the same column
+		oldPosition := task.Position
+		newPosition := *req.Position
+
+		if oldPosition != newPosition {
+			if newPosition > oldPosition {
+				// Moving down: shift items up
+				tx.Model(&models.Task{}).
+					Where("user_id = ? AND column_index = ? AND status = ? AND position > ? AND position <= ?", userID, task.ColumnIndex, "uncompleted", oldPosition, newPosition).
+					Update("position", gorm.Expr("position - 1"))
+			} else {
+				// Moving up: shift items down
+				tx.Model(&models.Task{}).
+					Where("user_id = ? AND column_index = ? AND status = ? AND position >= ? AND position < ?", userID, task.ColumnIndex, "uncompleted", newPosition, oldPosition).
+					Update("position", gorm.Expr("position + 1"))
+			}
+			task.Position = newPosition
+		}
+	}
+	// Handle status change (completed/uncompleted)
+	if req.Status != "" && req.Status != task.Status {
+		task.Status = req.Status
+	}
+	// Periodic timer updates while active: trust frontend's derived total
+	if intendedActive && req.SessionDuration > 0 {
+		// Update the active session's current elapsed time (for recovery purposes)
+		var activeSession models.Session
+		if err := tx.Where("task_id = ? AND end_time IS NULL", task.ID).First(&activeSession).Error; err == nil {
+			activeSession.Duration = req.SessionDuration
+			tx.Save(&activeSession)
+		}
+		// Calculate task.Duration from sessions (single source of truth)
+		var totalDuration int
+		tx.Model(&models.Session{}).Where("task_id = ?", task.ID).Select("COALESCE(SUM(duration), 0)").Scan(&totalDuration)
+		task.Duration = totalDuration
+	}
+	// Only update IsActive if explicitly provided
+	if req.IsActive != nil {
+		task.IsActive = *req.IsActive
+	}
+
+	// Update the UpdatedAt timestamp
+	task.UpdatedAt = time.Now()
+
+	if err := tx.Save(&task).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save changes"})
+		return
+	}
+
+	// Normalize positions if task was moved or position changed
+	if requestedColIdx != nil || req.Position != nil {
+		h.normalizeTaskPositions(userID)
+	}
+
+	// Reload with sessions ordered by session_num
+	h.db.Preload("Sessions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("session_num ASC")
+	}).First(&task, task.ID)
+
+	// Build response with session_duration (same pattern as GetActiveTask)
+	type TaskWithSession struct {
+		models.Task
+		SessionDuration int `json:"session_duration"`
+	}
+	response := TaskWithSession{Task: task}
+
+	// Calculate current session duration if task is active
+	if task.IsActive {
+		for _, s := range task.Sessions {
+			if s.EndTime == nil {
+				response.SessionDuration = int(time.Since(s.StartTime).Seconds())
+				break
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// DeleteTask deletes a task owned by the authenticated user
+func (h *TaskHandler) DeleteTask(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		return
+	}
+
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	tx := h.db.Begin()
+
+	var task models.Task
+	if err := tx.Where("id = ? AND user_id = ?", id, userID).First(&task).Error; err != nil {
+		tx.Rollback()
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch task"})
+		return
+	}
+
+	// Remove the task
+	if err := tx.Delete(&task).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete task"})
+		return
+	}
+
+	// Shift positions for remaining uncompleted tasks in the same column
+	if err := tx.Model(&models.Task{}).
+		Where("user_id = ? AND column_index = ? AND status = ? AND position > ?", userID, task.ColumnIndex, "uncompleted", task.Position).
+		Update("position", gorm.Expr("position - 1")).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to normalize task positions"})
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to finalize task deletion"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"deleted":      task.ID,
+		"column_index": task.ColumnIndex,
+	})
+}
+
+// GetTasks retrieves tasks with optional filtering
+func (h *TaskHandler) GetTasks(c *gin.Context) {
+	var tasks []models.Task
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Build query with filters
+	query := h.db.Where("user_id = ?", userID).Preload("Sessions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("session_num DESC")
+	})
+
+	// Apply filters based on query parameters
+	if isActive := c.Query("is_active"); isActive != "" {
+		if isActive == "true" {
+			query = query.Where("is_active = ?", true)
+		} else if isActive == "false" {
+			query = query.Where("is_active = ?", false)
+		}
+	}
+
+	// Filter by status (default to uncompleted if not specified)
+	if status := c.Query("status"); status != "" {
+		query = query.Where("status = ?", status)
+	} else {
+		query = query.Where("status = ?", "uncompleted")
+	}
+
+	// Filter by column index
+	if colIdxStr := c.Query("column_index"); colIdxStr != "" {
+		if n, err := strconv.Atoi(colIdxStr); err == nil {
+			query = query.Where("column_index = ?", n)
+		}
+	}
+
+	// Execute query with ordering
+	if err := query.Order("column_index ASC, position ASC, created_at DESC").Find(&tasks).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tasks"})
+		return
+	}
+
+	c.JSON(http.StatusOK, tasks)
+}
+
+// GetActiveTask retrieves the currently active task
+func (h *TaskHandler) GetActiveTask(c *gin.Context) {
+	var task models.Task
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if err := h.db.Where("user_id = ? AND is_active = ?", userID, true).Preload("Sessions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("session_num ASC")
+	}).First(&task).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// No active task is not an error; return 200 with null JSON body
+			c.JSON(http.StatusOK, nil)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch active task"})
+		return
+	}
+
+	// Add current session duration to response
+	type TaskWithSession struct {
+		models.Task
+		SessionDuration int `json:"session_duration"`
+	}
+
+	response := TaskWithSession{
+		Task: task,
+	}
+
+	// If there's an active session, calculate its current duration
+	if len(task.Sessions) > 0 && task.Sessions[0].EndTime == nil {
+		// For active sessions, calculate duration from start time
+		response.SessionDuration = int(time.Since(task.Sessions[0].StartTime).Seconds())
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// GetTaskSessions retrieves all sessions for a specific task
+func (h *TaskHandler) GetTaskSessions(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		return
+	}
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	var task models.Task
+	if err := h.db.Where("id = ? AND user_id = ?", id, userID).First(&task).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		return
+	}
+
+	var sessions []models.Session
+	if err := h.db.Where("task_id = ?", id).Order("session_num ASC").Find(&sessions).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch sessions"})
+		return
+	}
+
+	c.JSON(http.StatusOK, sessions)
+}
+
+// GetTaskWithSessions retrieves a task with all its sessions
+func (h *TaskHandler) GetTaskWithSessions(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		return
+	}
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var task models.Task
+	if err := h.db.Where("id = ? AND user_id = ?", id, userID).Preload("Sessions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("session_num ASC")
+	}).First(&task).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch task"})
+		return
+	}
+
+	c.JSON(http.StatusOK, task)
+}

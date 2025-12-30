@@ -1,0 +1,467 @@
+import React from 'react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+
+// Mock navigation
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
+// Mock auth state
+let mockUser: { id: number; email: string; name: string; role: string } | null = null;
+let mockIsAuthenticated = false;
+let mockLoading = false;
+
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: mockUser,
+    isAuthenticated: mockIsAuthenticated,
+    loading: mockLoading,
+  }),
+}));
+
+// Mock metrics API
+const mockGetOverview = vi.fn();
+const mockGetChartData = vi.fn();
+
+vi.mock('@/services/metricsApi', () => ({
+  metricsApi: {
+    getOverview: () => mockGetOverview(),
+    getChartData: (period: string, metric: string) => mockGetChartData(period, metric),
+  },
+}));
+
+// Mock Recharts to avoid rendering issues in tests
+vi.mock('recharts', () => ({
+  LineChart: ({ children }: { children: React.ReactNode }) => <div data-testid="line-chart">{children}</div>,
+  Line: () => <div data-testid="line" />,
+  XAxis: () => <div data-testid="x-axis" />,
+  YAxis: () => <div data-testid="y-axis" />,
+  CartesianGrid: () => <div data-testid="cartesian-grid" />,
+  Tooltip: () => <div data-testid="tooltip" />,
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
+}));
+
+// Import after mocks
+import MetricsPage from './page';
+
+function makeOverviewResponse() {
+  return {
+    users: {
+      total: 100,
+      verified: 80,
+      unverified: 20,
+      admins: 5,
+      today: 3,
+      this_week: 15,
+      this_month: 40,
+      this_year: 100,
+    },
+    tasks: {
+      total: 500,
+      active: 10,
+      completed: 350,
+      uncompleted: 140,
+      avg_duration: 3600,
+      today: 20,
+      this_week: 100,
+    },
+    sessions: {
+      total: 1000,
+      active_now: 5,
+      total_time_tracked: 7200, // 2 hours
+      today_time: 1800,
+      this_week_time: 3600,
+      this_month_time: 14400,
+    },
+    top_users: [
+      {
+        user_id: 1,
+        name: 'Top User',
+        email: 'top@test.com',
+        time_tracked: 3600,
+        task_count: 50,
+        session_count: 100,
+      },
+    ],
+  };
+}
+
+function makeChartResponse() {
+  return {
+    period: 'week',
+    metric: 'signups',
+    data: [
+      { date: '2025-01-15', value: 5 },
+      { date: '2025-01-16', value: 8 },
+    ],
+  };
+}
+
+describe('MetricsPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    mockUser = null;
+    mockIsAuthenticated = false;
+    mockLoading = false;
+    mockGetOverview.mockResolvedValue(makeOverviewResponse());
+    mockGetChartData.mockResolvedValue(makeChartResponse());
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe('access control', () => {
+    it('redirects to login when not authenticated', async () => {
+      mockLoading = false;
+      mockIsAuthenticated = false;
+      mockUser = null;
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/login');
+      });
+    });
+
+    it('redirects non-admin to dashboard', async () => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'user@test.com', name: 'User', role: 'user' };
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/dashboard');
+      });
+    });
+
+    it('renders for admin users', async () => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'admin@test.com', name: 'Admin', role: 'admin' };
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Admin Metrics')).toBeInTheDocument();
+      });
+    });
+
+    it('shows nothing while loading auth', () => {
+      mockLoading = true;
+      mockIsAuthenticated = false;
+      mockUser = null;
+
+      const { container } = render(<MetricsPage />);
+
+      expect(container.firstChild).toBeNull();
+    });
+  });
+
+  describe('data display', () => {
+    beforeEach(() => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'admin@test.com', name: 'Admin', role: 'admin' };
+    });
+
+    it('displays user stats', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('100')).toBeInTheDocument(); // total users
+      });
+
+      expect(screen.getByText('Users')).toBeInTheDocument();
+    });
+
+    it('displays task stats', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('500')).toBeInTheDocument(); // total tasks
+      });
+
+      expect(screen.getByText('Tasks')).toBeInTheDocument();
+    });
+
+    it('displays session stats and formats time', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Time Tracked')).toBeInTheDocument();
+      });
+
+      // Total time tracked: 7200 seconds = 2h 0m
+      expect(screen.getByText('2h 0m')).toBeInTheDocument();
+    });
+
+    it('displays top users table', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Most Active Users')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('Top User')).toBeInTheDocument();
+      expect(screen.getByText('top@test.com')).toBeInTheDocument();
+    });
+
+    it('displays loading state initially', () => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'admin@test.com', name: 'Admin', role: 'admin' };
+      mockGetOverview.mockImplementation(() => new Promise(() => {})); // Never resolves
+
+      render(<MetricsPage />);
+
+      expect(screen.getByText('Loading metrics...')).toBeInTheDocument();
+    });
+
+    it('displays error message on API failure', async () => {
+      mockGetOverview.mockRejectedValue(new Error('API failed'));
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('API failed')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('chart controls', () => {
+    beforeEach(() => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'admin@test.com', name: 'Admin', role: 'admin' };
+    });
+
+    it('renders chart section', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Trends')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    });
+
+    it('has period selector with options', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Trends')).toBeInTheDocument();
+      });
+
+      const periodSelect = screen.getByDisplayValue('Last 7 days');
+      expect(periodSelect).toBeInTheDocument();
+
+      // Check options exist
+      expect(screen.getByText('Last 7 days')).toBeInTheDocument();
+      expect(screen.getByText('Last 30 days')).toBeInTheDocument();
+      expect(screen.getByText('Last 365 days')).toBeInTheDocument();
+    });
+
+    it('has metric selector with options', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Trends')).toBeInTheDocument();
+      });
+
+      const metricSelect = screen.getByDisplayValue('Signups');
+      expect(metricSelect).toBeInTheDocument();
+
+      expect(screen.getByText('Signups')).toBeInTheDocument();
+      expect(screen.getByText('Tasks Created')).toBeInTheDocument();
+      expect(screen.getByText('Sessions')).toBeInTheDocument();
+      expect(screen.getByText('Time Tracked')).toBeInTheDocument();
+    });
+
+    it('fetches new chart data when period changes', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Trends')).toBeInTheDocument();
+      });
+
+      const periodSelect = screen.getByDisplayValue('Last 7 days');
+      fireEvent.change(periodSelect, { target: { value: 'month' } });
+
+      await waitFor(() => {
+        expect(mockGetChartData).toHaveBeenCalledWith('month', 'signups');
+      });
+    });
+
+    it('fetches new chart data when metric changes', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Trends')).toBeInTheDocument();
+      });
+
+      const metricSelect = screen.getByDisplayValue('Signups');
+      fireEvent.change(metricSelect, { target: { value: 'tasks' } });
+
+      await waitFor(() => {
+        expect(mockGetChartData).toHaveBeenCalledWith('week', 'tasks');
+      });
+    });
+  });
+
+  describe('fail-safe behavior - metrics errors do not block user actions', () => {
+    beforeEach(() => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'admin@test.com', name: 'Admin', role: 'admin' };
+    });
+
+    it('overview API failure shows error but page still renders', async () => {
+      mockGetOverview.mockRejectedValue(new Error('Database connection failed'));
+      mockGetChartData.mockResolvedValue(makeChartResponse());
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Database connection failed')).toBeInTheDocument();
+      });
+
+      // Page should still be rendered
+      expect(screen.getByText('Admin Metrics')).toBeInTheDocument();
+    });
+
+    it('chart API failure is logged but does not crash page', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      mockGetOverview.mockResolvedValue(makeOverviewResponse());
+      mockGetChartData.mockRejectedValue(new Error('Chart data unavailable'));
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Users')).toBeInTheDocument();
+      });
+
+      // Overview should still display
+      expect(screen.getByText('100')).toBeInTheDocument();
+
+      consoleSpy.mockRestore();
+    });
+
+    it('partial API success still displays available data', async () => {
+      mockGetOverview.mockResolvedValue(makeOverviewResponse());
+      mockGetChartData.mockResolvedValue({ period: 'week', metric: 'signups', data: [] });
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Users')).toBeInTheDocument();
+      });
+
+      // Overview data should display
+      expect(screen.getByText('100')).toBeInTheDocument();
+      expect(screen.getByText('Tasks')).toBeInTheDocument();
+      expect(screen.getByText('Time Tracked')).toBeInTheDocument();
+
+      // Empty chart should show message
+      expect(screen.getByText('No data for selected period')).toBeInTheDocument();
+    });
+  });
+
+  describe('time formatting', () => {
+    beforeEach(() => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'admin@test.com', name: 'Admin', role: 'admin' };
+    });
+
+    it('formats zero duration correctly', async () => {
+      mockGetOverview.mockResolvedValue({
+        ...makeOverviewResponse(),
+        sessions: {
+          ...makeOverviewResponse().sessions,
+          total_time_tracked: 0,
+        },
+      });
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Time Tracked')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('0m')).toBeInTheDocument();
+    });
+
+    it('formats minutes-only correctly', async () => {
+      mockGetOverview.mockResolvedValue({
+        ...makeOverviewResponse(),
+        sessions: {
+          ...makeOverviewResponse().sessions,
+          total_time_tracked: 1800, // 30 minutes
+        },
+      });
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Time Tracked')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('30m')).toBeInTheDocument();
+    });
+
+    it('formats hours and minutes correctly', async () => {
+      mockGetOverview.mockResolvedValue({
+        ...makeOverviewResponse(),
+        sessions: {
+          ...makeOverviewResponse().sessions,
+          total_time_tracked: 5400, // 1h 30m
+        },
+      });
+
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Time Tracked')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('1h 30m')).toBeInTheDocument();
+    });
+  });
+
+  describe('polling behavior', () => {
+    beforeEach(() => {
+      mockLoading = false;
+      mockIsAuthenticated = true;
+      mockUser = { id: 1, email: 'admin@test.com', name: 'Admin', role: 'admin' };
+    });
+
+    it('polls overview data every 30 seconds', async () => {
+      render(<MetricsPage />);
+
+      await waitFor(() => {
+        expect(mockGetOverview).toHaveBeenCalledTimes(1);
+      });
+
+      // Advance timer by 30 seconds
+      vi.advanceTimersByTime(30000);
+
+      await waitFor(() => {
+        expect(mockGetOverview).toHaveBeenCalledTimes(2);
+      });
+
+      // Advance another 30 seconds
+      vi.advanceTimersByTime(30000);
+
+      await waitFor(() => {
+        expect(mockGetOverview).toHaveBeenCalledTimes(3);
+      });
+    });
+  });
+});

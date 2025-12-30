@@ -1,0 +1,202 @@
+# AWS Deployment Session Notes
+
+**Date:** December 26, 2025
+
+## What Was Deployed
+
+- **Architecture:** ECS Fargate with Aurora Serverless v2
+- **Domain:** astrotask.io (single domain, /api for backend)
+- **AWS Account ID:** 651504807386
+- **Region:** us-east-1
+
+---
+
+## Completed Steps
+
+### Phase 1: ECR Repositories ✅
+- Created `astrotask-backend` and `astrotask-frontend` repositories
+- No namespace needed, just the repo name
+
+### Phase 2: Aurora Serverless v2 ✅
+- Used **Full configuration** (not Easy create)
+- Engine: Aurora PostgreSQL (latest version compatible with 16/17)
+- Template: Production
+- **Serverless v2** selected with:
+  - Min ACUs: 0.5
+  - Max ACUs: 8 (handles thousands of users)
+- Cluster identifier: `astrotask-db`
+- Database name: `astrotask_db` (underscore, not hyphen)
+- Security group: `astrotask-db-sg`
+- **Don't connect to EC2** (we use ECS Fargate)
+- **Writer endpoint** saved for DATABASE_URL
+
+### Phase 3: Secrets Manager ✅
+- Secret name: `astrotask/production`
+- Contains all env vars as JSON
+- ARN has a random suffix (e.g., `-AbC123`)
+
+### Phase 4: ACM Certificate ✅
+- Requested for `astrotask.io` and `*.astrotask.io`
+- Both domains use the **same CNAME record** for validation
+- Added CNAME to Namecheap → Advanced DNS
+- Status: Issued
+
+### Phase 5: ECS Cluster ✅
+- Cluster name: `astrotask-cluster`
+- Infrastructure: AWS Fargate
+
+### Phase 6: Target Groups ✅
+- `astrotask-backend-tg` - Port 8080, health check `/health`
+- `astrotask-frontend-tg` - Port 3000, health check `/`
+- Target type: IP addresses
+
+### Phase 7: Application Load Balancer ✅
+- Name: `astrotask-alb`
+- Security group: `astrotask-alb-sg` (HTTP 80 + HTTPS 443 from anywhere)
+- Listeners:
+  - HTTP:80 → Redirect to HTTPS:443
+  - HTTPS:443 → Default to frontend-tg
+- Routing rule: `/api/*` → backend-tg (priority 1)
+- ALB DNS name saved for Namecheap
+
+### Phase 8: Security Groups ✅
+- `astrotask-alb-sg` - Attached to ALB only (not db-sg!)
+- `astrotask-ecs-sg` - Allows 8080 and 3000 from ALB
+- `astrotask-db-sg` - Updated to allow PostgreSQL 5432 from ECS-sg
+  - Removed old custom IP rule, added ecs-sg rule
+
+### Phase 9: IAM Role ✅
+- `ecsTaskExecutionRole` already existed
+- Added inline policy `astrotask-secrets-access` for Secrets Manager
+
+### Phase 10: Docker Images ✅
+- **IMPORTANT:** Must use `--platform linux/amd64` on M1/M2/M3 Macs!
+- AWS CLI installed via `brew install awscli`
+- Configured with `aws configure` (access key + secret)
+
+**Build commands:**
+```bash
+export AWS_ACCOUNT_ID=651504807386
+export AWS_REGION=us-east-1
+
+# Login to ECR
+aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+# Backend
+cd /Users/dangercat/Documents/GitHub/astrotask/backend
+docker build --platform linux/amd64 -t astrotask-backend .
+docker tag astrotask-backend:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-backend:latest
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-backend:latest
+
+# Frontend
+cd /Users/dangercat/Documents/GitHub/astrotask
+docker build --platform linux/amd64 --build-arg NEXT_PUBLIC_API_URL=https://astrotask.io/api/v1 -f frontend/Dockerfile -t astrotask-frontend .
+docker tag astrotask-frontend:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-frontend:latest
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-frontend:latest
+```
+
+### Phase 11: ECS Task Definitions ✅
+- `astrotask-backend`:
+  - CPU: 0.5 vCPU, Memory: 1 GB
+  - Container: backend, port 8080
+  - Environment variables from Secrets Manager (ValueFrom)
+  - ARN format: `{SECRET_ARN}:{KEY_NAME}::` (double colon at end!)
+- `astrotask-frontend`:
+  - CPU: 0.25 vCPU, Memory: 0.5 GB
+  - Container: frontend, port 3000
+  - No env vars needed (API URL baked in at build)
+- Logging: Amazon CloudWatch, log groups `/ecs/astrotask-backend` and `/ecs/astrotask-frontend`
+
+### Phase 12: ECS Services ✅
+- **Use existing** load balancer (not create new)
+- Listener: **HTTPS:443** for both services
+- Services created:
+  - `astrotask-backend-service` → target group `astrotask-backend-tg`
+  - `astrotask-frontend-service` → target group `astrotask-frontend-tg`
+
+### Phase 13: DNS (Namecheap) ✅
+- CNAME record: `www` → ALB DNS name
+- URL redirect: `@` → `https://www.astrotask.io` (301)
+
+---
+
+## Issues Encountered & Solutions
+
+### 1. "aws command not found"
+**Solution:** `brew install awscli` then `aws configure`
+
+### 2. "unable to locate credentials"
+**Solution:** Run `aws configure` and enter Access Key ID + Secret from IAM
+
+### 3. Image manifest doesn't match platform 'linux/amd64'
+**Cause:** Built on M1/M2/M3 Mac which defaults to ARM
+**Solution:** Add `--platform linux/amd64` to docker build commands
+
+### 4. Circuit breaker threshold exceeded (rollback)
+**Cause:** Tasks failing to start - check logs in CloudWatch
+**Solution:** Fixed the platform issue above, then redeployed
+
+---
+
+## Useful Commands
+
+### Redeploy after code changes
+```bash
+export AWS_ACCOUNT_ID=651504807386
+export AWS_REGION=us-east-1
+
+# Backend
+cd /Users/dangercat/Documents/GitHub/astrotask/backend
+docker build --platform linux/amd64 -t astrotask-backend .
+docker tag astrotask-backend:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-backend:latest
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-backend:latest
+aws ecs update-service --cluster astrotask-cluster --service astrotask-backend-service --force-new-deployment
+
+# Frontend
+cd /Users/dangercat/Documents/GitHub/astrotask
+docker build --platform linux/amd64 --build-arg NEXT_PUBLIC_API_URL=https://astrotask.io/api/v1 -f frontend/Dockerfile -t astrotask-frontend .
+docker tag astrotask-frontend:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-frontend:latest
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/astrotask-frontend:latest
+aws ecs update-service --cluster astrotask-cluster --service astrotask-frontend-service --force-new-deployment
+```
+
+### Check logs
+```bash
+aws logs tail /ecs/astrotask-backend --follow
+aws logs tail /ecs/astrotask-frontend --follow
+```
+
+### Or in Console
+- **CloudWatch** → Log groups → `/ecs/astrotask-backend` or `/ecs/astrotask-frontend`
+
+---
+
+## Current Status
+
+- Services redeploying with correct platform images
+- Waiting for tasks to reach RUNNING status
+- DNS configured on Namecheap
+
+## Next Steps
+
+1. Wait for ECS tasks to start (2-3 min)
+2. Check task status in ECS → Clusters → astrotask-cluster → Tasks
+3. Test site at `https://www.astrotask.io`
+4. Check CloudWatch logs for admin invite URL
+5. Create admin account via invite link
+
+---
+
+## Key Resources
+
+| Resource | Name/Value |
+|----------|------------|
+| AWS Account | 651504807386 |
+| Region | us-east-1 |
+| ECS Cluster | astrotask-cluster |
+| ALB | astrotask-alb |
+| Aurora Cluster | astrotask-db |
+| ECR Backend | 651504807386.dkr.ecr.us-east-1.amazonaws.com/astrotask-backend |
+| ECR Frontend | 651504807386.dkr.ecr.us-east-1.amazonaws.com/astrotask-frontend |
+| Secret | astrotask/production |
+| Domain | astrotask.io / www.astrotask.io |

@@ -1,0 +1,178 @@
+# Admin Metrics Dashboard Implementation Plan
+
+**User Choices:** Real-time triggers (fail-safe) | Full analytics | Numbers + Charts
+
+---
+
+## Overview
+
+Add an admin-only `/metrics` page with real-time stats and trend charts for users, tasks, sessions, and time tracked.
+
+---
+
+## Phase 1: Backend Types
+
+### Create `backend/internal/models/metrics.go`
+
+Response types for API (computed on-demand, no new DB table needed):
+
+```go
+type AggregateStats struct {
+    Users    UserStats    `json:"users"`
+    Tasks    TaskStats    `json:"tasks"`
+    Sessions SessionStats `json:"sessions"`
+    TopUsers []TopUser    `json:"top_users"`
+}
+
+type UserStats struct {
+    Total, Verified, Unverified, Admins int64
+    Today, ThisWeek, ThisMonth, ThisYear int64
+}
+
+type TaskStats struct {
+    Total, Active, Completed, Uncompleted int64
+    AvgDuration float64 // seconds
+    Today, ThisWeek int64
+}
+
+type SessionStats struct {
+    Total, ActiveNow int64
+    TotalTimeTracked, Today, ThisWeek, ThisMonth int64 // seconds
+}
+
+type TopUser struct {
+    UserID uint; Name, Email string
+    TimeTracked, TaskCount, SessionCount int64
+}
+```
+
+---
+
+## Phase 2: Backend Handler
+
+### Create `backend/internal/handlers/metrics.go`
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /admin/metrics/overview` | Aggregate stats (computed via COUNT/SUM queries) |
+| `GET /admin/metrics/charts?period=week&metric=signups` | Time-series data for charts |
+
+**GetOverview** queries:
+- User counts: total, verified, by role, by signup period
+- Task counts: total, by status, active timers, avg duration
+- Session counts: total, active, SUM(duration) by period
+- Top 10 users by time tracked (JOIN query)
+
+**GetChartData** params:
+- `period`: week (7d), month (30d), year (365d)
+- `metric`: signups, tasks, sessions, time
+- Returns: `[{date: "2025-01-15", value: 5}, ...]`
+
+---
+
+## Phase 3: Backend Routes
+
+### Modify `backend/cmd/server/main.go`
+
+Add to existing admin group (~line 117):
+
+```go
+metricsHandler := handlers.NewMetricsHandler(db)
+admin.GET("/metrics/overview", metricsHandler.GetOverview)
+admin.GET("/metrics/charts", metricsHandler.GetChartData)
+```
+
+---
+
+## Phase 4: Frontend Setup
+
+### Install Recharts
+
+```bash
+cd frontend && npm install recharts
+```
+
+Recharts: lightweight (~45KB), React 19 compatible, simple API.
+
+### Create `frontend/src/services/metricsApi.ts`
+
+```typescript
+export const metricsApi = {
+  getOverview(): Promise<MetricsOverview>,
+  getChartData(period, metric): Promise<ChartResponse>
+}
+```
+
+---
+
+## Phase 5: Frontend Metrics Page
+
+### Create `frontend/src/app/metrics/page.tsx`
+
+1. **Auth check**: Redirect non-admins to /dashboard
+2. **Stats cards**: Users, Tasks, Sessions (3-column grid)
+3. **Chart section**: Recharts LineChart with period/metric selectors
+4. **Top users table**: Name, email, time tracked, task count
+
+**Features:**
+- Poll every 30s for real-time updates
+- Format durations as "Xh Ym"
+- Responsive chart with tooltips
+
+### Create `frontend/src/app/metrics/metrics.css`
+
+- BEM naming: `.metrics-card`, `.metrics-chart-section`
+- Berkeley Mono font
+- Grid layout for cards
+- Table styling
+
+---
+
+## Phase 6: Optional GORM Hooks (Fail-safe)
+
+For future optimization, add non-blocking hooks:
+
+```go
+func (u *User) AfterCreate(tx *gorm.DB) error {
+    go func() {
+        defer func() { recover() }() // Never crash signup
+        // Update DailyMetrics table
+    }()
+    return nil
+}
+```
+
+**Note:** For alpha, on-demand queries are fast enough. Add hooks if needed later.
+
+---
+
+## Files Summary
+
+### New Files
+| File | Purpose |
+|------|---------|
+| `backend/internal/models/metrics.go` | Type definitions |
+| `backend/internal/handlers/metrics.go` | API handlers |
+| `backend/internal/handlers/metrics_test.go` | Tests |
+| `frontend/src/services/metricsApi.ts` | API client |
+| `frontend/src/app/metrics/page.tsx` | Admin page |
+| `frontend/src/app/metrics/metrics.css` | Styles |
+
+### Modified Files
+| File | Change |
+|------|--------|
+| `backend/cmd/server/main.go` | Add metrics routes |
+| `frontend/package.json` | Add recharts |
+
+---
+
+## Implementation Order
+
+1. Backend types (`models/metrics.go`)
+2. Backend handler (`handlers/metrics.go`)
+3. Backend routes (main.go)
+4. Backend tests
+5. Frontend API (`metricsApi.ts`)
+6. Frontend page (stats cards)
+7. Frontend charts (Recharts)
+8. Polish (loading states, styling)

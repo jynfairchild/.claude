@@ -1,0 +1,74 @@
+package auth
+
+import (
+    "errors"
+    "os"
+    "strconv"
+    "time"
+
+    "github.com/golang-jwt/jwt/v5"
+)
+
+type Claims struct {
+    UserID   uint   `json:"user_id"`
+    Email    string `json:"email"`
+    Name     string `json:"name"`
+    jwt.RegisteredClaims
+}
+
+func accessTTL() time.Duration {
+    if v := os.Getenv("ACCESS_TOKEN_TTL"); v != "" {
+        if d, err := time.ParseDuration(v); err == nil {
+            return d
+        }
+    }
+    return 45 * time.Minute
+}
+
+// AccessTTL returns the configured access token TTL (exported for cookie duration)
+func AccessTTL() time.Duration {
+    return accessTTL()
+}
+
+func issuer() string {
+    if v := os.Getenv("JWT_ISSUER"); v != "" {
+        return v
+    }
+    return "karrokan"
+}
+
+// GenerateToken creates a short-lived access token with standard registered claims.
+func GenerateToken(userID uint, email, name string) (string, error) {
+    now := time.Now()
+    sub := strconv.FormatUint(uint64(userID), 10)
+    claims := &Claims{
+        UserID:   userID,
+        Email:    email,
+        Name:     name,
+        RegisteredClaims: jwt.RegisteredClaims{
+            Subject:   sub,
+            Issuer:    issuer(),
+            IssuedAt:  jwt.NewNumericDate(now),
+            ExpiresAt: jwt.NewNumericDate(now.Add(accessTTL())),
+        },
+    }
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+}
+
+func ValidateToken(tokenString string) (*Claims, error) {
+    token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+        return []byte(os.Getenv("JWT_SECRET")), nil
+    })
+
+    if err != nil {
+        return nil, err
+    }
+
+    if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+        return claims, nil
+    }
+
+    return nil, errors.New("invalid token")
+}

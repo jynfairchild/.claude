@@ -1,0 +1,158 @@
+import React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
+import type { Task, UserColumn } from '@/services/api';
+import type { TaskContextType } from '@/contexts/TaskContext';
+import type { columnsApi as columnsApiExport } from '@/services/api';
+
+type ColumnsApi = typeof columnsApiExport;
+
+// Mock TaskContext to control tasks/state
+const mockUseTask: TaskContextType = {
+  activeTask: null,
+  tasks: [],
+  isLoading: false,
+  error: null,
+  startTask: vi.fn<Parameters<TaskContextType['startTask']>, ReturnType<TaskContextType['startTask']>>(),
+  updateTaskTimer: vi.fn<Parameters<TaskContextType['updateTaskTimer']>, ReturnType<TaskContextType['updateTaskTimer']>>(),
+  loadTasks: vi.fn<Parameters<TaskContextType['loadTasks']>, ReturnType<TaskContextType['loadTasks']>>(),
+  loadActiveTask: vi.fn<Parameters<TaskContextType['loadActiveTask']>, ReturnType<TaskContextType['loadActiveTask']>>(),
+  moveTask: vi.fn<Parameters<TaskContextType['moveTask']>, ReturnType<TaskContextType['moveTask']>>(),
+  reorderTask: vi.fn<Parameters<TaskContextType['reorderTask']>, ReturnType<TaskContextType['reorderTask']>>(),
+  updateTask: vi.fn<Parameters<TaskContextType['updateTask']>, ReturnType<TaskContextType['updateTask']>>(),
+  stopTask: vi.fn<Parameters<TaskContextType['stopTask']>, ReturnType<TaskContextType['stopTask']>>(),
+  resumeTask: vi.fn<Parameters<TaskContextType['resumeTask']>, ReturnType<TaskContextType['resumeTask']>>(),
+  completeTask: vi.fn<Parameters<TaskContextType['completeTask']>, ReturnType<TaskContextType['completeTask']>>(),
+  deleteTask: vi.fn<Parameters<TaskContextType['deleteTask']>, ReturnType<TaskContextType['deleteTask']>>(),
+};
+
+mockUseTask.loadTasks.mockResolvedValue();
+mockUseTask.loadActiveTask.mockResolvedValue(null);
+mockUseTask.moveTask.mockResolvedValue();
+mockUseTask.reorderTask.mockResolvedValue();
+mockUseTask.updateTask.mockResolvedValue();
+mockUseTask.updateTaskTimer.mockResolvedValue();
+mockUseTask.startTask.mockImplementation(async () => task(999, 'New', 0, 0));
+mockUseTask.stopTask.mockResolvedValue();
+mockUseTask.resumeTask.mockResolvedValue();
+mockUseTask.completeTask.mockResolvedValue();
+mockUseTask.deleteTask.mockResolvedValue();
+
+vi.mock('@/contexts/TaskContext', () => ({
+  useTask: () => mockUseTask,
+}));
+
+// Mock AuthContext (needed by ActionBar)
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 1, email: 'test@example.com', name: 'Test', actionbar: [] },
+    updateActionbar: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
+// Mock columns API used by Kanban
+const listSpy = vi.fn<Parameters<ColumnsApi['list']>, ReturnType<ColumnsApi['list']>>().mockResolvedValue([]);
+const createSpy = vi.fn<Parameters<ColumnsApi['create']>, ReturnType<ColumnsApi['create']>>();
+const updateSpy = vi.fn<Parameters<ColumnsApi['update']>, ReturnType<ColumnsApi['update']>>();
+const delSpy = vi.fn<Parameters<ColumnsApi['delete']>, ReturnType<ColumnsApi['delete']>>();
+
+vi.mock('@/services/api', async (orig) => {
+  // Forward other exports if ever needed; only columnsApi is used here.
+  const actual = await orig<typeof import('@/services/api')>();
+  return {
+    ...actual,
+    columnsApi: {
+      list: (...args: Parameters<ColumnsApi['list']>) => listSpy(...args),
+      create: (...args: Parameters<ColumnsApi['create']>) => createSpy(...args),
+      update: (...args: Parameters<ColumnsApi['update']>) => updateSpy(...args),
+      delete: (...args: Parameters<ColumnsApi['delete']>) => delSpy(...args),
+    },
+  };
+});
+
+import Kanban from './Kanban';
+
+function task(id: number, title: string, column_index: number, position: number): Task {
+  const now = new Date().toISOString();
+  return {
+    id,
+    user_id: 1,
+    title,
+    project: '',
+    start_time: now,
+    end_time: null,
+    duration: 0,
+    session_duration: 0,
+    session_count: 0,
+    tags: [],
+    column_index,
+    status: 'uncompleted' as const,
+    position,
+    is_active: false,
+    created_at: now,
+    updated_at: now,
+    sessions: [],
+  };
+}
+
+describe('Kanban integration (component-level)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseTask.tasks = [
+      task(1, 'A', 0, 1),
+      task(2, 'B', 0, 0),
+      task(3, 'C', 1, 0),
+    ];
+    listSpy.mockResolvedValue([]);
+  });
+
+  it('groups tasks by column and orders by position', async () => {
+    render(<Kanban />);
+
+    const todo = await screen.findByRole('heading', { level: 2, name: 'Todo' });
+    const todoCol = todo.closest('.kanban-column') as HTMLElement;
+    const titles = Array.from(todoCol.querySelectorAll('h3.card-title')).map(h => h.textContent?.trim());
+    expect(titles).toEqual(['B', 'A']);
+
+    const inprog = screen.getByRole('heading', { level: 2, name: 'In Progress' });
+    const inprogCol = inprog.closest('.kanban-column') as HTMLElement;
+    const inprogTitles = Array.from(inprogCol.querySelectorAll('h3.card-title')).map(h => h.textContent?.trim());
+    expect(inprogTitles).toEqual(['C']);
+  });
+
+  it('adds a new column via add button', async () => {
+    // Simulate backend creating next column at index 2
+    createSpy.mockResolvedValue({ id: 99, col_index: 2, name: 'Column 2', user_id: 1 });
+
+    render(<Kanban />);
+
+    const addBtn = screen.getByRole('button', { name: /add new column/i });
+    await act(async () => { fireEvent.click(addBtn); });
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 2, name: 'Column 2' })).toBeInTheDocument();
+    });
+  });
+
+  it('renames a column inline and persists via API', async () => {
+    // No existing user columns; will create a record for index 0
+    createSpy.mockImplementation(async ({ name, col_index }) => ({ id: 55, col_index, name, user_id: 1 } satisfies UserColumn));
+    listSpy.mockResolvedValue([]);
+
+    render(<Kanban />);
+
+    // Click the title to enter edit mode
+    const title = await screen.findByRole('heading', { level: 2, name: 'Todo' });
+    await act(async () => { fireEvent.click(title); });
+
+    const input = screen.getByRole('textbox');
+    await act(async () => { fireEvent.change(input, { target: { value: 'Doing' } }); });
+    await act(async () => { fireEvent.keyDown(input, { key: 'Enter' }); });
+
+    // Verify API was called and title updated
+    expect(createSpy).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 2, name: 'Doing' })).toBeInTheDocument();
+    });
+  });
+});

@@ -1,0 +1,144 @@
+.onboarding-overlay {
+  display: contents; /* This makes the overlay wrapper not affect layout */
+}
+
+/* Tooltip container - aligned with ticket */
+.onboarding-tooltip-container {
+  position: fixed;
+  top: calc(50% - 190px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px; /* Match ticket max-width */
+  max-width: 900px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+/* Tooltip text */
+.onboarding-tooltip {
+  position: relative;
+  left: 76px; /* Align with ticket text content (90px ticketLeft + 32px padding) */
+  color: var(--kkan-grey-900);
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 36px;
+  white-space: nowrap;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Container for arrow and text */
+.tooltip-with-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Line SVG styling */
+.tooltip-line {
+  width: 125px;
+  height: 71px;
+  margin-top: -10px; /* Overlap the background */
+}
+
+/* Left line SVG for hit play */
+.tooltip-left-line {
+  width: 66px;
+  height: 42px;
+}
+
+/* Hit play tooltip specific positioning */
+.hit-play-tooltip {
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  position: absolute;
+  left: -246px; /* Position further to the left of the ticket */
+  top: calc(50% + 80px); /* Move down 150px from center */
+  animation: slideRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hit-play-tooltip .tooltip-text {
+  order: 1; /* Put text before the line */
+}
+
+.hit-play-tooltip .tooltip-left-line {
+  order: 2; /* Put line after the text */
+  margin-left: -5px; /* Make line touch the text background */
+}
+
+/* Text above line */
+.tooltip-text {
+  display: block;
+}
+
+/* Text with background for "Add a title" */
+.tooltip-text-with-bg {
+  background: var(--kkan-grey-900);
+  color: white;
+  padding: 8px 16px;
+}
+
+
+/* Skip button */
+.skip-button {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 8px 16px;
+  background: var(--kkan-grey-700);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Berkeley Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10001;
+}
+
+.skip-button:hover {
+  background: var(--kkan-grey-800);
+}
+
+/* Hiding state */
+.hiding {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    transform: translateY(-32px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-32px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+

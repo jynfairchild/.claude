@@ -1,0 +1,2049 @@
+2025-12-22T00:55:37.179Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (17.7ms): security find-generic-password -a $USER -w -s "Claude Code"
+2025-12-22T00:55:37.204Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (23.3ms): security find-generic-password -a "dangercat" -w -s "Claude Code-credentials"
+2025-12-22T00:55:37.213Z [DEBUG] Watching for changes in setting files /Users/dangercat/.claude...
+2025-12-22T00:55:37.241Z [DEBUG] [LSP MANAGER] initializeLspServerManager() called
+2025-12-22T00:55:37.241Z [DEBUG] [LSP MANAGER] Created manager instance, state=pending
+2025-12-22T00:55:37.241Z [DEBUG] [LSP MANAGER] Starting async initialization (generation 1)
+2025-12-22T00:55:37.244Z [DEBUG] LSP server manager initialized successfully
+2025-12-22T00:55:37.244Z [DEBUG] LSP notification handlers registered successfully for all 0 server(s)
+2025-12-22T00:55:37.244Z [DEBUG] Found 0 plugins (0 enabled, 0 disabled)
+2025-12-22T00:55:37.247Z [DEBUG] Stats cache stale (2025-12-20), processing 2025-12-21 to 2025-12-21 in background
+2025-12-22T00:55:37.250Z [DEBUG] Loading skills from: managed=/Library/Application Support/ClaudeCode/.claude/skills, user=/Users/dangercat/.claude/skills, project=[]
+2025-12-22T00:55:37.250Z [DEBUG] Passes: Cache stale, returning cached data and refreshing in background
+2025-12-22T00:55:37.359Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (107.5ms): ps aux | grep -E "Visual Studio Code|Code Helper|Cursor Helper|Windsurf Helper|IntelliJ IDEA|PyCharm
+2025-12-22T00:55:37.359Z [DEBUG] installed_plugins.json doesn't exist, returning empty V2 object
+2025-12-22T00:55:37.383Z [DEBUG] Creating shell snapshot for zsh (/bin/zsh)
+2025-12-22T00:55:37.383Z [DEBUG] Looking for shell config file: /Users/dangercat/.zshrc
+2025-12-22T00:55:37.383Z [DEBUG] Snapshots directory: /Users/dangercat/.claude/shell-snapshots
+2025-12-22T00:55:37.383Z [DEBUG] Creating snapshot at: /Users/dangercat/.claude/shell-snapshots/snapshot-zsh-1766364937383-k2hars.sh
+2025-12-22T00:55:37.383Z [DEBUG] Shell binary exists: true
+2025-12-22T00:55:37.383Z [DEBUG] Execution timeout: 10000ms
+2025-12-22T00:55:37.384Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766364937384
+2025-12-22T00:55:37.391Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.6ms)
+2025-12-22T00:55:37.391Z [DEBUG] Temp file written successfully, size: 2 bytes
+2025-12-22T00:55:37.391Z [DEBUG] Renaming /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766364937384 to /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json
+2025-12-22T00:55:37.391Z [DEBUG] File /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json written atomically
+2025-12-22T00:55:37.401Z [DEBUG] getPluginSkills: Processing 0 enabled plugins
+2025-12-22T00:55:37.401Z [DEBUG] Total plugin skills loaded: 0
+2025-12-22T00:55:37.401Z [DEBUG] Total plugin commands loaded: 0
+2025-12-22T00:55:37.401Z [DEBUG] Registered 0 hooks from 0 plugins
+2025-12-22T00:55:37.413Z [DEBUG] Total plugin agents loaded: 0
+2025-12-22T00:55:37.420Z [DEBUG] Git remote URL: git@github.com:jynfairchild/astrotask.git
+2025-12-22T00:55:37.420Z [DEBUG] Parsed repository: jynfairchild/astrotask from git@github.com:jynfairchild/astrotask.git
+2025-12-22T00:55:37.420Z [DEBUG] Parsed repository: jynfairchild/astrotask from URL: git@github.com:jynfairchild/astrotask.git
+2025-12-22T00:55:37.420Z [DEBUG] Path /Users/dangercat/Documents/GitHub/astrotask already tracked for repo jynfairchild/astrotask
+2025-12-22T00:55:37.421Z [DEBUG] Ripgrep first use test: PASSED (mode=builtin, path=/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/arm64-darwin/rg)
+2025-12-22T00:55:37.436Z [DEBUG] Loaded 5 unique skills (managed: 0, user: 0, project: 0, legacy commands: 5)
+2025-12-22T00:55:37.436Z [DEBUG] getSkills returning: 5 skill dir commands, 0 plugin skills
+2025-12-22T00:55:37.518Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.0ms)
+2025-12-22T00:55:37.519Z [DEBUG] Stats cache saved successfully (lastComputedDate: 2025-12-21)
+2025-12-22T00:55:37.519Z [DEBUG] Stats cache updated with 1 new sessions
+2025-12-22T00:55:37.542Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364937542
+2025-12-22T00:55:37.542Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:55:37.548Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.8ms)
+2025-12-22T00:55:37.548Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:55:37.548Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:55:37.548Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364937542 to /Users/dangercat/.claude.json
+2025-12-22T00:55:37.549Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:55:37.720Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364937720
+2025-12-22T00:55:37.720Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:55:37.726Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.2ms)
+2025-12-22T00:55:37.726Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:55:37.726Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:55:37.726Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364937720 to /Users/dangercat/.claude.json
+2025-12-22T00:55:37.726Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:55:37.727Z [DEBUG] Passes eligibility cached for org 2717c564-7f1f-46eb-81ce-6a666967f62e: true
+2025-12-22T00:55:37.822Z [DEBUG] Passes: Using fresh cached eligibility data
+2025-12-22T00:55:37.829Z [DEBUG] Initialized versioned plugins system with 0 plugins
+2025-12-22T00:55:37.832Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364937832
+2025-12-22T00:55:37.832Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:55:37.838Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.6ms)
+2025-12-22T00:55:37.838Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:55:37.838Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:55:37.838Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364937832 to /Users/dangercat/.claude.json
+2025-12-22T00:55:37.838Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:55:37.841Z [DEBUG] Getting matching hook commands for SessionStart with query: startup
+2025-12-22T00:55:37.841Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:37.841Z [DEBUG] Matched 0 unique hooks for query "startup" (0 before deduplication)
+2025-12-22T00:55:37.846Z [DEBUG] Skills and commands included in Skill tool: commit, move_claude, wdiary, context, explore
+2025-12-22T00:55:37.888Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364937888
+2025-12-22T00:55:37.888Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:55:37.895Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.8ms)
+2025-12-22T00:55:37.895Z [DEBUG] Temp file written successfully, size: 75380 bytes
+2025-12-22T00:55:37.895Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:55:37.895Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364937888 to /Users/dangercat/.claude.json
+2025-12-22T00:55:37.895Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:55:37.900Z [DEBUG] Official marketplace auto-install skipped: already_attempted
+2025-12-22T00:55:37.900Z [DEBUG] performStartupChecks called
+2025-12-22T00:55:37.900Z [DEBUG] Trust not accepted for current directory - skipping plugin installations
+2025-12-22T00:55:37.906Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T00:55:37.908Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364937908
+2025-12-22T00:55:37.908Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:55:37.913Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.0ms)
+2025-12-22T00:55:37.913Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:55:37.913Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:55:37.913Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364937908 to /Users/dangercat/.claude.json
+2025-12-22T00:55:37.913Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:55:37.915Z [DEBUG] Loaded plugins - Enabled: 0, Disabled: 0, Commands: 0, Agents: 0, Errors: 0
+2025-12-22T00:55:37.920Z [DEBUG] Getting matching hook commands for SubagentStart with query: Explore
+2025-12-22T00:55:37.920Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:37.920Z [DEBUG] Matched 0 unique hooks for query "Explore" (0 before deduplication)
+2025-12-22T00:55:37.923Z [DEBUG] Getting matching hook commands for SubagentStart with query: Plan
+2025-12-22T00:55:37.923Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:37.923Z [DEBUG] Matched 0 unique hooks for query "Plan" (0 before deduplication)
+2025-12-22T00:55:37.940Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.2ms)
+2025-12-22T00:55:37.942Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364937942
+2025-12-22T00:55:37.942Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:55:37.947Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:55:37.947Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:55:37.947Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364937942 to /Users/dangercat/.claude.json
+2025-12-22T00:55:37.948Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:55:37.955Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.4ms)
+2025-12-22T00:55:37.980Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364937980
+2025-12-22T00:55:37.980Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:55:37.986Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.0ms)
+2025-12-22T00:55:37.986Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:55:37.986Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:55:37.986Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364937980 to /Users/dangercat/.claude.json
+2025-12-22T00:55:37.987Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:55:38.417Z [DEBUG] Shell snapshot created successfully (264452 bytes)
+2025-12-22T00:55:38.697Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.6ms)
+2025-12-22T00:55:38.697Z [DEBUG] Successfully refreshed marketplace: claude-plugins-official
+2025-12-22T00:55:38.698Z [DEBUG] Plugin autoupdate: checking installed plugins
+2025-12-22T00:55:38.703Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:55:39.384Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:55:40.178Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T00:55:40.178Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:40.178Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T00:55:41.403Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T00:55:41.403Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:41.403Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T00:55:54.916Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T00:55:54.916Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T00:55:54.916Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T00:55:54.916Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T00:55:54.939Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T00:55:54.939Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:54.939Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T00:55:54.940Z [DEBUG] FileHistory: Added snapshot for 6e4ebf13-cdac-490b-a50b-1ae827aec895, tracking 0 files
+2025-12-22T00:55:54.954Z [DEBUG] Total plugin output styles loaded: 0
+2025-12-22T00:55:55.800Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:55:56.333Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:55:58.387Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T00:55:58.391Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T00:55:58.391Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:58.391Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T00:55:58.412Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T00:55:58.412Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:55:58.412Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T00:55:58.418Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T00:55:58.418Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T00:55:58.418Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T00:55:58.418Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T00:56:02.741Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:56:11.615Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T00:56:11.615Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:56:11.615Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T00:56:11.630Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364971630
+2025-12-22T00:56:11.630Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:56:11.640Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.7ms)
+2025-12-22T00:56:11.640Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:56:11.640Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:56:11.640Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364971630 to /Users/dangercat/.claude.json
+2025-12-22T00:56:11.640Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:56:11.646Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766364971646
+2025-12-22T00:56:11.646Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T00:56:11.652Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.2ms)
+2025-12-22T00:56:11.652Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T00:56:11.652Z [DEBUG] Applied original permissions to temp file
+2025-12-22T00:56:11.652Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766364971646 to /Users/dangercat/.claude.json
+2025-12-22T00:56:11.652Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T00:56:13.396Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:56:19.320Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T00:56:19.320Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:56:19.320Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T00:57:11.644Z [DEBUG] Getting matching hook commands for Notification with query: idle_prompt
+2025-12-22T00:57:11.644Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:57:11.644Z [DEBUG] Matched 0 unique hooks for query "idle_prompt" (0 before deduplication)
+2025-12-22T00:59:10.848Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T00:59:10.848Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T00:59:10.848Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T00:59:10.848Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T00:59:10.859Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T00:59:10.859Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:10.859Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T00:59:10.860Z [DEBUG] FileHistory: Making snapshot for message cb576919-f431-41b8-9b62-b2ca9ce68ad0
+2025-12-22T00:59:10.860Z [DEBUG] FileHistory: Added snapshot for cb576919-f431-41b8-9b62-b2ca9ce68ad0, tracking 0 files
+2025-12-22T00:59:12.064Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:59:12.932Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:59:15.017Z [DEBUG] executePreToolHooks called for tool: Glob
+2025-12-22T00:59:15.024Z [DEBUG] Getting matching hook commands for PreToolUse with query: Glob
+2025-12-22T00:59:15.024Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:15.024Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T00:59:15.164Z [DEBUG] Getting matching hook commands for PostToolUse with query: Glob
+2025-12-22T00:59:15.164Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:15.164Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T00:59:15.170Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T00:59:15.170Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T00:59:15.170Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T00:59:15.170Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T00:59:17.271Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:59:18.473Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T00:59:18.477Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T00:59:18.477Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:18.477Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T00:59:18.505Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T00:59:18.505Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:18.505Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T00:59:18.515Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T00:59:18.515Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T00:59:18.515Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T00:59:18.515Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T00:59:24.987Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:59:28.174Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T00:59:28.178Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T00:59:28.178Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:28.178Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T00:59:28.200Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T00:59:28.200Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:28.200Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T00:59:28.206Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T00:59:28.206Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T00:59:28.206Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T00:59:28.206Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T00:59:30.240Z [DEBUG] Stream started - received first chunk
+2025-12-22T00:59:42.305Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T00:59:42.309Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T00:59:42.309Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:42.309Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T00:59:42.320Z [DEBUG] Permission suggestions for Edit: [
+  {
+    "type": "setMode",
+    "mode": "acceptEdits",
+    "destination": "session"
+  }
+]
+2025-12-22T00:59:42.343Z [DEBUG] executePermissionRequestHooks called for tool: Edit
+2025-12-22T00:59:42.353Z [DEBUG] Getting matching hook commands for PermissionRequest with query: Edit
+2025-12-22T00:59:42.353Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:42.353Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T00:59:48.348Z [DEBUG] Getting matching hook commands for Notification with query: permission_prompt
+2025-12-22T00:59:48.348Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T00:59:48.348Z [DEBUG] Matched 0 unique hooks for query "permission_prompt" (0 before deduplication)
+2025-12-22T01:00:00.100Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T01:00:00.101Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx.tmp.72033.1766365200101
+2025-12-22T01:00:00.101Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:00.112Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.3ms)
+2025-12-22T01:00:00.112Z [DEBUG] Temp file written successfully, size: 2205 bytes
+2025-12-22T01:00:00.112Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:00.112Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx.tmp.72033.1766365200101 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx
+2025-12-22T01:00:00.113Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx written atomically
+2025-12-22T01:00:00.128Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.0ms)
+2025-12-22T01:00:00.130Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx
+2025-12-22T01:00:00.139Z [DEBUG] [lspRecommendation] Looking for LSP plugins for .tsx
+2025-12-22T01:00:00.143Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:00:00.143Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:00.143Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:00.161Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:00:00.161Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:00:00.161Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:00:00.161Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:00:00.169Z [DEBUG] [binaryCheck] Binary 'typescript-language-server' found (exit code: 0)
+2025-12-22T01:00:00.169Z [DEBUG] [lspRecommendation] Binary 'typescript-language-server' found for typescript-lsp@claude-plugins-official
+2025-12-22T01:00:00.169Z [DEBUG] [useLspPluginRecommendation] Found match: typescript-lsp for frontend/src/components/ui/Dropdown.tsx
+2025-12-22T01:00:01.969Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:00:10.147Z [DEBUG] [useLspPluginRecommendation] User response: yes for typescript-lsp
+2025-12-22T01:00:10.147Z [DEBUG] [useLspPluginRecommendation] Installing plugin: typescript-lsp@claude-plugins-official
+2025-12-22T01:00:10.149Z [DEBUG] Caching plugin from source: "/Users/dangercat/.claude/plugins/marketplaces/claude-plugins-official/plugins/typescript-lsp" to temporary path /Users/dangercat/.claude/plugins/cache/temp_local_1766365210149_8foail
+2025-12-22T01:00:10.151Z [DEBUG] Successfully cached plugin typescript-lsp to /Users/dangercat/.claude/plugins/cache/typescript-lsp
+2025-12-22T01:00:10.155Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T01:00:10.172Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (12.3ms)
+2025-12-22T01:00:10.172Z [DEBUG] Saved 1 installed plugins to /Users/dangercat/.claude/plugins/installed_plugins.json
+2025-12-22T01:00:10.172Z [DEBUG] Added installed plugin: typescript-lsp@claude-plugins-official (scope: user)
+2025-12-22T01:00:10.173Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/settings.json.tmp.72033.1766365210173
+2025-12-22T01:00:10.173Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:10.178Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.8ms)
+2025-12-22T01:00:10.178Z [DEBUG] Temp file written successfully, size: 563 bytes
+2025-12-22T01:00:10.179Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:10.179Z [DEBUG] Renaming /Users/dangercat/.claude/settings.json.tmp.72033.1766365210173 to /Users/dangercat/.claude/settings.json
+2025-12-22T01:00:10.179Z [DEBUG] File /Users/dangercat/.claude/settings.json written atomically
+2025-12-22T01:00:10.179Z [DEBUG] [useLspPluginRecommendation] Plugin installed: typescript-lsp@claude-plugins-official
+2025-12-22T01:00:11.335Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:00:11.338Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:00:11.338Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:11.338Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:11.349Z [DEBUG] Permission suggestions for Edit: [
+  {
+    "type": "setMode",
+    "mode": "acceptEdits",
+    "destination": "session"
+  }
+]
+2025-12-22T01:00:11.381Z [DEBUG] executePermissionRequestHooks called for tool: Edit
+2025-12-22T01:00:11.414Z [DEBUG] Getting matching hook commands for PermissionRequest with query: Edit
+2025-12-22T01:00:11.414Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:11.414Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:14.841Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T01:00:14.842Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx.tmp.72033.1766365214842
+2025-12-22T01:00:14.842Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:14.851Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.5ms)
+2025-12-22T01:00:14.851Z [DEBUG] Temp file written successfully, size: 2958 bytes
+2025-12-22T01:00:14.851Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:14.851Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx.tmp.72033.1766365214842 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx
+2025-12-22T01:00:14.852Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx written atomically
+2025-12-22T01:00:14.867Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:00:14.867Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:14.867Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:14.892Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:00:14.892Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:00:14.892Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:00:14.892Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:00:16.936Z [DEBUG] Applying permission update: Setting mode to 'acceptEdits'
+2025-12-22T01:00:17.412Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:00:23.936Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:00:23.940Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:00:23.940Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:23.940Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:23.950Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx.tmp.72033.1766365223950
+2025-12-22T01:00:23.950Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:23.957Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.5ms)
+2025-12-22T01:00:23.957Z [DEBUG] Temp file written successfully, size: 3051 bytes
+2025-12-22T01:00:23.957Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:23.957Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx.tmp.72033.1766365223950 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx
+2025-12-22T01:00:23.957Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/ui/Dropdown.tsx written atomically
+2025-12-22T01:00:23.971Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:00:23.971Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:23.971Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:23.984Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:00:23.984Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:00:23.984Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:00:23.984Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:00:25.672Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:00:30.776Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:00:30.780Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:00:30.780Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:30.780Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:30.792Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx.tmp.72033.1766365230792
+2025-12-22T01:00:30.792Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:30.808Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (15.6ms)
+2025-12-22T01:00:30.808Z [DEBUG] Temp file written successfully, size: 8060 bytes
+2025-12-22T01:00:30.808Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:30.808Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx.tmp.72033.1766365230792 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx
+2025-12-22T01:00:30.808Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx written atomically
+2025-12-22T01:00:30.821Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx
+2025-12-22T01:00:30.831Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:00:30.831Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:30.831Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:30.843Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:00:30.843Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:00:30.843Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:00:30.843Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:00:32.659Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:00:37.206Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:00:37.210Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:00:37.210Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:37.210Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:37.222Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx.tmp.72033.1766365237222
+2025-12-22T01:00:37.222Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:37.229Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.2ms)
+2025-12-22T01:00:37.229Z [DEBUG] Temp file written successfully, size: 8024 bytes
+2025-12-22T01:00:37.229Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:37.229Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx.tmp.72033.1766365237222 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx
+2025-12-22T01:00:37.230Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx written atomically
+2025-12-22T01:00:37.251Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:00:37.251Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:37.251Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:00:37.266Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:00:37.266Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:00:37.266Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:00:37.266Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:00:39.393Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:00:41.315Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:00:41.319Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:00:41.319Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:41.319Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:00:41.340Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:00:41.340Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:41.340Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:00:41.348Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:00:41.348Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:00:41.348Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:00:41.348Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:00:43.409Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:00:50.631Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:00:50.631Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:50.631Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:00:50.648Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766365250648
+2025-12-22T01:00:50.648Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:50.657Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.1ms)
+2025-12-22T01:00:50.657Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T01:00:50.657Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:50.657Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766365250648 to /Users/dangercat/.claude.json
+2025-12-22T01:00:50.657Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T01:00:50.661Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766365250661
+2025-12-22T01:00:50.661Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:00:50.666Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.0ms)
+2025-12-22T01:00:50.666Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T01:00:50.666Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:00:50.666Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766365250661 to /Users/dangercat/.claude.json
+2025-12-22T01:00:50.667Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T01:00:52.363Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:00:57.269Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:00:57.269Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:00:57.269Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:04:54.973Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:04:54.973Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:04:54.973Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:04:54.973Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:04:54.992Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:04:54.992Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:04:54.992Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:04:54.994Z [DEBUG] FileHistory: Making snapshot for message f22299bd-c57f-40e3-b88b-f6f059120604
+2025-12-22T01:04:55.005Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.3ms)
+2025-12-22T01:04:55.012Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.7ms)
+2025-12-22T01:04:55.012Z [DEBUG] FileHistory: Added snapshot for f22299bd-c57f-40e3-b88b-f6f059120604, tracking 2 files
+2025-12-22T01:04:55.963Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:04:57.387Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:00.254Z [DEBUG] executePreToolHooks called for tool: Glob
+2025-12-22T01:05:00.254Z [DEBUG] executePreToolHooks called for tool: Glob
+2025-12-22T01:05:00.258Z [DEBUG] Getting matching hook commands for PreToolUse with query: Glob
+2025-12-22T01:05:00.258Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:00.258Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T01:05:00.258Z [DEBUG] Getting matching hook commands for PreToolUse with query: Glob
+2025-12-22T01:05:00.258Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:00.258Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T01:05:00.477Z [DEBUG] Getting matching hook commands for PostToolUse with query: Glob
+2025-12-22T01:05:00.477Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:00.477Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T01:05:00.482Z [DEBUG] Getting matching hook commands for PostToolUse with query: Glob
+2025-12-22T01:05:00.482Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:00.482Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T01:05:00.491Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:00.491Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:00.492Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:00.492Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:02.327Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:04.218Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:05:04.218Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:05:04.222Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:05:04.222Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:04.222Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:05:04.222Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:05:04.222Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:04.222Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:05:04.247Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:05:04.247Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:04.247Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:05:04.247Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:05:04.247Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:04.247Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:05:04.255Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:04.255Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:04.255Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:04.255Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:06.278Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:18.017Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:05:18.020Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:05:18.020Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:18.020Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:18.032Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365518032
+2025-12-22T01:05:18.032Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:05:18.050Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (18.4ms)
+2025-12-22T01:05:18.050Z [DEBUG] Temp file written successfully, size: 17937 bytes
+2025-12-22T01:05:18.050Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:05:18.050Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365518032 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:05:18.051Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:05:18.065Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.8ms)
+2025-12-22T01:05:18.065Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:05:18.074Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:05:18.074Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:18.074Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:18.089Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:18.089Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:18.089Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:18.089Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:20.436Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:26.702Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:05:26.705Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:05:26.705Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:26.705Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:26.717Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365526717
+2025-12-22T01:05:26.717Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:05:26.728Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (11.7ms)
+2025-12-22T01:05:26.728Z [DEBUG] Temp file written successfully, size: 18048 bytes
+2025-12-22T01:05:26.729Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:05:26.729Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365526717 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:05:26.729Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:05:26.743Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:05:26.743Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:26.743Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:26.757Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:26.757Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:26.757Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:26.757Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:28.567Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:31.727Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T01:05:31.731Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T01:05:31.731Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:31.731Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:05:31.760Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T01:05:31.760Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:31.760Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:05:31.767Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:31.767Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:31.767Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:31.767Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:33.361Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:35.951Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:05:35.954Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:05:35.955Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:35.955Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:05:35.978Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:05:35.978Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:35.978Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:05:35.985Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:35.985Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:35.985Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:35.985Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:38.234Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:43.701Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:05:43.704Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:05:43.704Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:43.704Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:43.715Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365543715
+2025-12-22T01:05:43.715Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:05:43.723Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.8ms)
+2025-12-22T01:05:43.723Z [DEBUG] Temp file written successfully, size: 18024 bytes
+2025-12-22T01:05:43.723Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:05:43.723Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365543715 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:05:43.723Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:05:43.735Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:05:43.735Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:43.735Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:43.749Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:43.749Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:43.749Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:43.749Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:47.203Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:52.159Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:05:52.164Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:05:52.164Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:52.164Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:52.175Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365552175
+2025-12-22T01:05:52.175Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:05:52.183Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.5ms)
+2025-12-22T01:05:52.183Z [DEBUG] Temp file written successfully, size: 18066 bytes
+2025-12-22T01:05:52.183Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:05:52.183Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365552175 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:05:52.184Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:05:52.198Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:05:52.198Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:52.198Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:05:52.208Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:05:52.208Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:05:52.208Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:05:52.208Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:05:54.991Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:05:59.620Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:05:59.620Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:05:59.620Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:06:01.604Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:06:06.972Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:06:06.972Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:06:06.972Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:07:38.597Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:07:38.597Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:07:38.597Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:07:38.597Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:07:38.613Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:07:38.613Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:07:38.613Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:07:38.614Z [DEBUG] FileHistory: Making snapshot for message 5b8aaca5-7831-468d-859c-b50ec71f2bbe
+2025-12-22T01:07:38.622Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.4ms)
+2025-12-22T01:07:38.622Z [DEBUG] FileHistory: Added snapshot for 5b8aaca5-7831-468d-859c-b50ec71f2bbe, tracking 3 files
+2025-12-22T01:07:39.900Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:07:40.310Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:07:45.720Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T01:07:45.724Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T01:07:45.724Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:07:45.724Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:07:45.752Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T01:07:45.752Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:07:45.752Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:07:45.759Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:07:45.759Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:07:45.759Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:07:45.759Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:07:47.753Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:07:51.355Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:07:51.358Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:07:51.358Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:07:51.358Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:07:51.384Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:07:51.384Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:07:51.384Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:07:51.390Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:07:51.390Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:07:51.390Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:07:51.390Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:07:53.436Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:08:05.894Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:08:05.898Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:08:05.898Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:08:05.898Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:08:05.910Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365685910
+2025-12-22T01:08:05.910Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:08:05.917Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.6ms)
+2025-12-22T01:08:05.917Z [DEBUG] Temp file written successfully, size: 18143 bytes
+2025-12-22T01:08:05.917Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:08:05.917Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365685910 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:08:05.918Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:08:05.932Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:08:05.932Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:08:05.932Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:08:05.948Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:08:05.948Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:08:05.948Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:08:05.948Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:08:07.766Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:08:13.084Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:08:13.088Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:08:13.088Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:08:13.088Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:08:13.101Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365693101
+2025-12-22T01:08:13.101Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:08:13.121Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (19.7ms)
+2025-12-22T01:08:13.121Z [DEBUG] Temp file written successfully, size: 18225 bytes
+2025-12-22T01:08:13.121Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:08:13.121Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365693101 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:08:13.121Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:08:13.134Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:08:13.134Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:08:13.134Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:08:13.145Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:08:13.145Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:08:13.145Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:08:13.145Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:08:15.217Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:08:19.353Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:08:19.353Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:08:19.353Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:08:21.606Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:08:27.304Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:08:27.304Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:08:27.304Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:09:09.239Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:09:09.239Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:09:09.239Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:09:09.239Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:09:09.255Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:09:09.255Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:09:09.255Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:09:09.256Z [DEBUG] FileHistory: Making snapshot for message 9711c2e6-4129-46ab-b870-0138c31bb058
+2025-12-22T01:09:09.268Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (11.4ms)
+2025-12-22T01:09:09.268Z [DEBUG] FileHistory: Added snapshot for 9711c2e6-4129-46ab-b870-0138c31bb058, tracking 3 files
+2025-12-22T01:09:10.032Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:09:11.129Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:09:28.385Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:09:28.389Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:09:28.389Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:09:28.389Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:09:28.403Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365768403
+2025-12-22T01:09:28.403Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:09:28.417Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (13.2ms)
+2025-12-22T01:09:28.417Z [DEBUG] Temp file written successfully, size: 18245 bytes
+2025-12-22T01:09:28.417Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:09:28.417Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365768403 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:09:28.417Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:09:28.430Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:09:28.430Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:09:28.430Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:09:28.444Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:09:28.444Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:09:28.444Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:09:28.444Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:09:31.074Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:09:37.152Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:09:37.156Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:09:37.156Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:09:37.156Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:09:37.171Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365777171
+2025-12-22T01:09:37.171Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:09:37.186Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (15.2ms)
+2025-12-22T01:09:37.186Z [DEBUG] Temp file written successfully, size: 18287 bytes
+2025-12-22T01:09:37.186Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:09:37.186Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365777171 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:09:37.186Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:09:37.203Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:09:37.203Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:09:37.203Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:09:37.216Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:09:37.216Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:09:37.216Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:09:37.216Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:09:39.166Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:09:43.448Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:09:43.448Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:09:43.448Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:09:45.261Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:09:51.580Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:09:51.580Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:09:51.580Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:10:51.718Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:10:51.718Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:10:51.718Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:10:51.718Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:10:51.732Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:10:51.732Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:10:51.732Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:10:51.732Z [DEBUG] FileHistory: Making snapshot for message 99bce48b-79c3-458a-9304-67e9b2202d1d
+2025-12-22T01:10:51.741Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.7ms)
+2025-12-22T01:10:51.742Z [DEBUG] FileHistory: Added snapshot for 99bce48b-79c3-458a-9304-67e9b2202d1d, tracking 3 files
+2025-12-22T01:10:52.573Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:10:55.479Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:11:03.408Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:11:03.412Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:11:03.412Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:11:03.412Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:11:03.423Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365863423
+2025-12-22T01:11:03.423Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:11:03.428Z [DEBUG] Temp file written successfully, size: 18287 bytes
+2025-12-22T01:11:03.428Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:11:03.428Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766365863423 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:11:03.428Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:11:03.442Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:11:03.442Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:11:03.442Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:11:03.457Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:11:03.457Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:11:03.457Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:11:03.457Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:11:05.567Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:11:08.009Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:11:08.009Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:11:08.009Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:11:10.641Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:11:16.453Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:11:16.453Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:11:16.453Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:14:42.657Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:14:42.658Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:14:42.658Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:14:42.658Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:14:42.667Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:14:42.667Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:14:42.667Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:14:42.668Z [DEBUG] FileHistory: Making snapshot for message 1b2f960b-6b12-4145-a974-982c011aa3ca
+2025-12-22T01:14:42.675Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.0ms)
+2025-12-22T01:14:42.675Z [DEBUG] FileHistory: Added snapshot for 1b2f960b-6b12-4145-a974-982c011aa3ca, tracking 3 files
+2025-12-22T01:14:43.713Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:14:44.862Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:14:52.691Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:14:52.695Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:14:52.695Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:14:52.695Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:14:52.715Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:14:52.715Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:14:52.715Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:14:52.725Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:14:52.725Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:14:52.725Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:14:52.725Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:14:55.320Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:15:00.402Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:15:00.406Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:15:00.406Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:15:00.406Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:15:00.417Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366100417
+2025-12-22T01:15:00.417Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:15:00.424Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.2ms)
+2025-12-22T01:15:00.424Z [DEBUG] Temp file written successfully, size: 18329 bytes
+2025-12-22T01:15:00.424Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:15:00.424Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366100417 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:15:00.425Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:15:00.440Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:15:00.440Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:15:00.440Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:15:00.451Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:15:00.451Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:15:00.451Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:15:00.451Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:15:03.335Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:15:05.240Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:15:05.240Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:15:05.240Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:15:07.982Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:15:14.577Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:15:14.577Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:15:14.577Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:16:23.837Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:16:23.838Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:16:23.838Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:16:23.838Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:16:23.854Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:16:23.854Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:23.854Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:16:23.856Z [DEBUG] FileHistory: Making snapshot for message e298746b-f3b3-48db-a04d-e05ae35125fe
+2025-12-22T01:16:23.867Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.6ms)
+2025-12-22T01:16:23.868Z [DEBUG] FileHistory: Added snapshot for e298746b-f3b3-48db-a04d-e05ae35125fe, tracking 3 files
+2025-12-22T01:16:25.224Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:16:25.671Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:16:32.261Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:16:32.265Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:16:32.265Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:32.265Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:16:32.279Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366192279
+2025-12-22T01:16:32.279Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:16:32.285Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.1ms)
+2025-12-22T01:16:32.285Z [DEBUG] Temp file written successfully, size: 18394 bytes
+2025-12-22T01:16:32.285Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:16:32.285Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366192279 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:16:32.285Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:16:32.298Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:16:32.298Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:32.298Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:16:32.311Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:16:32.311Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:16:32.311Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:16:32.311Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:16:34.809Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:16:37.908Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:16:37.913Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:16:37.913Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:37.913Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:16:37.930Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366197930
+2025-12-22T01:16:37.930Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:16:37.942Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (11.4ms)
+2025-12-22T01:16:37.942Z [DEBUG] Temp file written successfully, size: 18460 bytes
+2025-12-22T01:16:37.942Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:16:37.942Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366197930 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:16:37.943Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:16:37.960Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:16:37.960Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:37.960Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:16:37.972Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:16:37.972Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:16:37.972Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:16:37.972Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:16:39.873Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:16:43.109Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:16:43.114Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:16:43.114Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:43.114Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:16:43.126Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366203126
+2025-12-22T01:16:43.126Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:16:43.136Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.9ms)
+2025-12-22T01:16:43.136Z [DEBUG] Temp file written successfully, size: 18577 bytes
+2025-12-22T01:16:43.136Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:16:43.136Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766366203126 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:16:43.137Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:16:43.154Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:16:43.154Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:43.154Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:16:43.174Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:16:43.174Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:16:43.174Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:16:43.174Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:16:44.956Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:16:47.872Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:16:47.872Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:47.872Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:16:49.953Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:16:56.781Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:16:56.781Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:16:56.781Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:17:47.889Z [DEBUG] Getting matching hook commands for Notification with query: idle_prompt
+2025-12-22T01:17:47.889Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:17:47.889Z [DEBUG] Matched 0 unique hooks for query "idle_prompt" (0 before deduplication)
+2025-12-22T01:20:55.313Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:20:55.313Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:20:55.313Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:20:55.313Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:20:55.325Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:20:55.325Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:20:55.325Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:20:55.326Z [DEBUG] FileHistory: Making snapshot for message ef724a3e-00c8-4eb7-a574-30e002e29a0c
+2025-12-22T01:20:55.339Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (13.1ms)
+2025-12-22T01:20:55.339Z [DEBUG] FileHistory: Added snapshot for ef724a3e-00c8-4eb7-a574-30e002e29a0c, tracking 3 files
+2025-12-22T01:20:56.338Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:21:03.672Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:21:05.752Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:21:05.762Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:21:05.762Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:05.762Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:21:05.788Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:21:05.788Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:05.788Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:21:05.795Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:21:05.795Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:21:05.795Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:21:05.795Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:21:10.479Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:21:15.689Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:21:15.693Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:21:15.693Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:15.693Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:21:15.704Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx.tmp.72033.1766366475704
+2025-12-22T01:21:15.704Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:21:15.711Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.3ms)
+2025-12-22T01:21:15.711Z [DEBUG] Temp file written successfully, size: 8048 bytes
+2025-12-22T01:21:15.711Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:21:15.711Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx.tmp.72033.1766366475704 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx
+2025-12-22T01:21:15.711Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.tsx written atomically
+2025-12-22T01:21:15.730Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:21:15.730Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:15.730Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:21:15.746Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:21:15.746Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:21:15.746Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:21:15.746Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:21:20.346Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:21:22.760Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T01:21:22.763Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T01:21:22.763Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:22.763Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:21:22.793Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T01:21:22.793Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:22.793Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:21:22.799Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:21:22.799Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:21:22.799Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:21:22.799Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:21:27.493Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:21:33.798Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:21:33.798Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:21:33.798Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:21:33.798Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:21:38.665Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:21:39.537Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:21:39.541Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:21:39.541Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:39.541Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:21:39.561Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:21:39.561Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:39.561Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:21:39.570Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:21:39.570Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:21:39.570Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:21:39.570Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:21:42.477Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:21:52.815Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:21:52.819Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:21:52.819Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:52.819Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:21:52.830Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.css.tmp.72033.1766366512830
+2025-12-22T01:21:52.830Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:21:52.839Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.0ms)
+2025-12-22T01:21:52.839Z [DEBUG] Temp file written successfully, size: 4018 bytes
+2025-12-22T01:21:52.839Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:21:52.839Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.css.tmp.72033.1766366512830 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.css
+2025-12-22T01:21:52.839Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.css written atomically
+2025-12-22T01:21:52.852Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.8ms)
+2025-12-22T01:21:52.853Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/actionbar/ActionBar.css
+2025-12-22T01:21:52.863Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:21:52.863Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:21:52.863Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:21:52.886Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:21:52.886Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:21:52.886Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:21:52.886Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:21:55.306Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:22:00.910Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:22:00.910Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:22:00.910Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:22:03.551Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:22:09.560Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:22:09.560Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:22:09.560Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:23:00.933Z [DEBUG] Getting matching hook commands for Notification with query: idle_prompt
+2025-12-22T01:23:00.933Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:23:00.933Z [DEBUG] Matched 0 unique hooks for query "idle_prompt" (0 before deduplication)
+2025-12-22T01:42:39.030Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:42:39.030Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:42:39.030Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:42:39.030Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:42:39.048Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:42:39.048Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:42:39.048Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:42:39.050Z [DEBUG] FileHistory: Making snapshot for message d0333178-4569-4d93-9638-ee78242e20c8
+2025-12-22T01:42:39.061Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.1ms)
+2025-12-22T01:42:39.061Z [DEBUG] FileHistory: Added snapshot for d0333178-4569-4d93-9638-ee78242e20c8, tracking 4 files
+2025-12-22T01:42:39.872Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:42:42.170Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:42:45.759Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:42:45.762Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:42:45.762Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:42:45.762Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:42:45.776Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766367765776
+2025-12-22T01:42:45.776Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:42:45.786Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.1ms)
+2025-12-22T01:42:45.786Z [DEBUG] Temp file written successfully, size: 18557 bytes
+2025-12-22T01:42:45.786Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:42:45.786Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766367765776 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:42:45.787Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:42:45.803Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:42:45.803Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:42:45.803Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:42:45.812Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:42:45.812Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:42:45.812Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:42:45.812Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:42:47.765Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:42:48.682Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:42:48.682Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:42:48.682Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:42:50.638Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:42:56.257Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:42:56.257Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:42:56.257Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:45:15.920Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:45:15.920Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:45:15.920Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:45:15.920Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:45:15.942Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:45:15.942Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:45:15.942Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:45:15.945Z [DEBUG] FileHistory: Making snapshot for message fdfb8d30-2371-4d5a-86ff-978a1241aa59
+2025-12-22T01:45:15.956Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (11.2ms)
+2025-12-22T01:45:15.956Z [DEBUG] FileHistory: Added snapshot for fdfb8d30-2371-4d5a-86ff-978a1241aa59, tracking 4 files
+2025-12-22T01:45:16.978Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:45:18.220Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:45:26.948Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:45:26.953Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:45:26.953Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:45:26.953Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:45:26.969Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766367926969
+2025-12-22T01:45:26.969Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:45:26.976Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.6ms)
+2025-12-22T01:45:26.976Z [DEBUG] Temp file written successfully, size: 18535 bytes
+2025-12-22T01:45:26.976Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:45:26.976Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766367926969 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:45:26.977Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:45:26.988Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:45:26.988Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:45:26.988Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:45:27.012Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:45:27.012Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:45:27.012Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:45:27.012Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:45:29.688Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:45:34.828Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:45:34.835Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:45:34.835Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:45:34.835Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:45:34.852Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766367934852
+2025-12-22T01:45:34.852Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:45:34.860Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.7ms)
+2025-12-22T01:45:34.860Z [DEBUG] Temp file written successfully, size: 18535 bytes
+2025-12-22T01:45:34.860Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:45:34.860Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css.tmp.72033.1766367934852 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css
+2025-12-22T01:45:34.860Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/cards/Card.css written atomically
+2025-12-22T01:45:34.873Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:45:34.873Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:45:34.873Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:45:34.886Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:45:34.886Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:45:34.886Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:45:34.886Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:45:37.378Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:45:40.472Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:45:40.472Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:45:40.472Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:45:42.351Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:45:49.065Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:45:49.065Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:45:49.065Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:48:17.144Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:48:17.144Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:48:17.144Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:48:17.144Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:48:17.155Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T01:48:17.155Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:17.155Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:48:17.156Z [DEBUG] FileHistory: Making snapshot for message dd66dfdc-1ce1-475b-ad3a-462cb31197f1
+2025-12-22T01:48:17.167Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (10.5ms)
+2025-12-22T01:48:17.168Z [DEBUG] FileHistory: Added snapshot for dd66dfdc-1ce1-475b-ad3a-462cb31197f1, tracking 4 files
+2025-12-22T01:48:17.918Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:48:19.517Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:48:20.849Z [DEBUG] executePreToolHooks called for tool: Glob
+2025-12-22T01:48:20.853Z [DEBUG] Getting matching hook commands for PreToolUse with query: Glob
+2025-12-22T01:48:20.853Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:20.853Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T01:48:21.006Z [DEBUG] Getting matching hook commands for PostToolUse with query: Glob
+2025-12-22T01:48:21.006Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:21.006Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T01:48:21.014Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:48:21.014Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:48:21.014Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:48:21.014Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:48:23.056Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:48:25.659Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T01:48:25.663Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T01:48:25.663Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:25.663Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:48:25.696Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T01:48:25.696Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:25.697Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T01:48:25.704Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:48:25.704Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:48:25.704Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:48:25.704Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:48:28.056Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:48:30.556Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T01:48:30.561Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T01:48:30.561Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:30.561Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:48:30.585Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T01:48:30.585Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:30.585Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T01:48:30.594Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:48:30.594Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:48:30.594Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:48:30.594Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:48:32.989Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:48:38.323Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T01:48:38.327Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T01:48:38.327Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:38.327Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:48:38.341Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/header/Header.tsx.tmp.72033.1766368118341
+2025-12-22T01:48:38.341Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T01:48:38.348Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.5ms)
+2025-12-22T01:48:38.348Z [DEBUG] Temp file written successfully, size: 4457 bytes
+2025-12-22T01:48:38.348Z [DEBUG] Applied original permissions to temp file
+2025-12-22T01:48:38.348Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/header/Header.tsx.tmp.72033.1766368118341 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/header/Header.tsx
+2025-12-22T01:48:38.349Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/header/Header.tsx written atomically
+2025-12-22T01:48:38.365Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/components/header/Header.tsx
+2025-12-22T01:48:38.375Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T01:48:38.375Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:38.375Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T01:48:38.389Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T01:48:38.389Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T01:48:38.389Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T01:48:38.389Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T01:48:40.346Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:48:42.363Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T01:48:42.363Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:42.363Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:48:44.159Z [DEBUG] Stream started - received first chunk
+2025-12-22T01:48:52.200Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T01:48:52.200Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:48:52.200Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T01:49:42.387Z [DEBUG] Getting matching hook commands for Notification with query: idle_prompt
+2025-12-22T01:49:42.387Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T01:49:42.387Z [DEBUG] Matched 0 unique hooks for query "idle_prompt" (0 before deduplication)
+2025-12-22T09:45:46.470Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T09:45:51.525Z [DEBUG] Getting matching hook commands for PreCompact with query: manual
+2025-12-22T09:45:51.525Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:45:51.525Z [DEBUG] Matched 0 unique hooks for query "manual" (0 before deduplication)
+2025-12-22T09:45:51.552Z [DEBUG] [SLOW OPERATION DETECTED] execSyncWithDefaults_DEPRECATED (22.8ms): security find-generic-password -a "dangercat" -w -s "Claude Code-credentials"
+2025-12-22T09:45:51.562Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T09:45:56.286Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:46:59.416Z [DEBUG] Getting matching hook commands for SessionStart with query: compact
+2025-12-22T09:46:59.416Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:46:59.416Z [DEBUG] Matched 0 unique hooks for query "compact" (0 before deduplication)
+2025-12-22T09:46:59.418Z [DEBUG] FileHistory: Making snapshot for message 2ec924ce-9575-46a0-9e88-fb2337ebfec1
+2025-12-22T09:46:59.428Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.3ms)
+2025-12-22T09:46:59.429Z [DEBUG] FileHistory: Added snapshot for 2ec924ce-9575-46a0-9e88-fb2337ebfec1, tracking 5 files
+2025-12-22T09:46:59.431Z [DEBUG] FileHistory: Making snapshot for message bf8bf019-18f9-4ca3-b589-0e17fd2d52e3
+2025-12-22T09:46:59.432Z [DEBUG] FileHistory: Added snapshot for bf8bf019-18f9-4ca3-b589-0e17fd2d52e3, tracking 5 files
+2025-12-22T09:46:59.449Z [DEBUG] UserCommandMessage rendering: "compact" (args: "none")
+2025-12-22T09:46:59.449Z [DEBUG] isSkillFormat: false
+2025-12-22T09:46:59.461Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766396819461
+2025-12-22T09:46:59.461Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:46:59.466Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.2ms)
+2025-12-22T09:46:59.466Z [DEBUG] Temp file written successfully, size: 75380 bytes
+2025-12-22T09:46:59.466Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:46:59.466Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766396819461 to /Users/dangercat/.claude.json
+2025-12-22T09:46:59.468Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T09:46:59.474Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766396819474
+2025-12-22T09:46:59.474Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:46:59.480Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.4ms)
+2025-12-22T09:46:59.480Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T09:46:59.480Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:46:59.480Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766396819474 to /Users/dangercat/.claude.json
+2025-12-22T09:46:59.480Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T09:47:59.493Z [DEBUG] Getting matching hook commands for Notification with query: idle_prompt
+2025-12-22T09:47:59.493Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:47:59.493Z [DEBUG] Matched 0 unique hooks for query "idle_prompt" (0 before deduplication)
+2025-12-22T09:52:51.810Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:52:51.810Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:52:51.811Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:52:51.811Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:52:51.825Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T09:52:51.825Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:52:51.825Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T09:52:51.826Z [DEBUG] FileHistory: Making snapshot for message 669f9c85-1bda-45b1-80cd-4d77d516bad3
+2025-12-22T09:52:51.827Z [DEBUG] FileHistory: Added snapshot for 669f9c85-1bda-45b1-80cd-4d77d516bad3, tracking 5 files
+2025-12-22T09:52:52.669Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:52:56.329Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:02.094Z [DEBUG] executePreToolHooks called for tool: Task
+2025-12-22T09:53:02.098Z [DEBUG] Getting matching hook commands for PreToolUse with query: Task
+2025-12-22T09:53:02.098Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:02.098Z [DEBUG] Matched 0 unique hooks for query "Task" (0 before deduplication)
+2025-12-22T09:53:02.113Z [DEBUG] Getting matching hook commands for SubagentStart with query: Explore
+2025-12-22T09:53:02.113Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:02.113Z [DEBUG] Matched 0 unique hooks for query "Explore" (0 before deduplication)
+2025-12-22T09:53:02.133Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.5ms)
+2025-12-22T09:53:03.525Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:04.870Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T09:53:04.871Z [DEBUG] executePreToolHooks called for tool: Glob
+2025-12-22T09:53:04.871Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T09:53:04.871Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T09:53:04.875Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T09:53:04.875Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:04.875Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:04.875Z [DEBUG] Getting matching hook commands for PreToolUse with query: Glob
+2025-12-22T09:53:04.875Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:04.875Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T09:53:04.875Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T09:53:04.875Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:04.875Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:04.875Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T09:53:04.875Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:04.875Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:04.901Z [DEBUG] rg error (signal=null, code=2, stderr: rg: unrecognized file type: tsx
+), 0 results
+2025-12-22T09:53:04.918Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T09:53:04.918Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:04.918Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:04.930Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T09:53:04.930Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:04.930Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:04.940Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T09:53:04.940Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:04.940Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:05.042Z [DEBUG] Getting matching hook commands for PostToolUse with query: Glob
+2025-12-22T09:53:05.042Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:05.042Z [DEBUG] Matched 0 unique hooks for query "Glob" (0 before deduplication)
+2025-12-22T09:53:05.955Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:07.821Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:07.822Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:07.822Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:07.823Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:07.823Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:07.823Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:07.827Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:07.827Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.827Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.827Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:07.827Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.827Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.827Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:07.827Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.827Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.827Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:07.827Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.827Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.827Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:07.827Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.827Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.827Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:07.827Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.827Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.865Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:07.865Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.865Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.865Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:07.865Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.865Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.865Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:07.865Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.865Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.865Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:07.865Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.865Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.865Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:07.865Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.865Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:07.865Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:07.865Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:07.865Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:08.903Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:10.735Z [DEBUG] executePreToolHooks called for tool: Bash
+2025-12-22T09:53:10.741Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2025-12-22T09:53:10.741Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.741Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:53:10.741Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:10.741Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:10.741Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:10.745Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:10.745Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.745Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:10.745Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:10.745Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.745Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:10.745Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:10.745Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.745Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:10.754Z [DEBUG] tree-sitter: WASM files not found
+2025-12-22T09:53:10.770Z [DEBUG] No session environment scripts found
+2025-12-22T09:53:10.785Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:10.785Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.785Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:10.785Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:10.785Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.785Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:10.785Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:10.785Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.785Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:10.901Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2025-12-22T09:53:10.901Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:10.901Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:53:11.513Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:11.915Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:13.577Z [DEBUG] executePreToolHooks called for tool: Bash
+2025-12-22T09:53:13.577Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T09:53:13.582Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2025-12-22T09:53:13.582Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:13.582Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:53:13.582Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T09:53:13.582Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:13.582Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:13.630Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T09:53:13.630Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:13.630Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:53:13.759Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2025-12-22T09:53:13.759Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:13.759Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:53:14.460Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:14.627Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:15.356Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:15.357Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:15.362Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:15.362Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:15.362Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:15.362Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:15.362Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:15.362Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:15.391Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:15.391Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:15.391Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:15.391Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:15.391Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:15.391Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:16.253Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:17.615Z [DEBUG] executePreToolHooks called for tool: Bash
+2025-12-22T09:53:17.619Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2025-12-22T09:53:17.619Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:17.619Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:53:17.619Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:17.623Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:17.623Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:17.623Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:17.653Z [ERROR] Error: Error: EISDIR: illegal operation on a directory, read
+    at Module.readFileSync (node:fs:449:20)
+    at file:///opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js:9:429
+    at oI (file:///opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js:8:8084)
+    at Object.readFileSync (file:///opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js:9:404)
+    at $dB (file:///opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js:4739:22342)
+    at Object.call (file:///opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js:1027:942)
+    at tg5 (file:///opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js:2207:17446)
+2025-12-22T09:53:17.666Z [DEBUG] Getting matching hook commands for PostToolUseFailure with query: Read
+2025-12-22T09:53:17.666Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:17.666Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:17.784Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2025-12-22T09:53:17.784Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:17.784Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:53:18.248Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:18.622Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:19.423Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:19.424Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:19.428Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:19.428Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:19.428Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:19.428Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:19.428Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:19.428Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:19.453Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:19.453Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:19.453Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:19.453Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:19.453Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:19.453Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:20.125Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:43.354Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T09:53:43.354Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:43.354Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T09:53:43.366Z [DEBUG] Getting matching hook commands for PostToolUse with query: Task
+2025-12-22T09:53:43.366Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:43.366Z [DEBUG] Matched 0 unique hooks for query "Task" (0 before deduplication)
+2025-12-22T09:53:43.373Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:53:43.373Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:53:43.373Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:53:43.373Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:53:47.498Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:53:56.210Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:56.210Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:53:56.215Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:56.215Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:56.215Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:56.215Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:53:56.215Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:56.215Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:56.243Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:56.243Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:56.243Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:56.243Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:53:56.243Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:53:56.243Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:53:56.251Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:53:56.251Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:53:56.251Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:53:56.251Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:54:00.882Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:54:05.137Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T09:54:05.141Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T09:54:05.141Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:05.141Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:54:05.141Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:54:05.145Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:54:05.145Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:05.145Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:54:05.182Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:54:05.182Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:05.182Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:54:05.193Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T09:54:05.193Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:05.194Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:54:05.201Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:54:05.201Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:54:05.201Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:54:05.201Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:54:10.870Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:54:17.777Z [DEBUG] executePreToolHooks called for tool: Grep
+2025-12-22T09:54:17.781Z [DEBUG] Getting matching hook commands for PreToolUse with query: Grep
+2025-12-22T09:54:17.781Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:17.781Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:54:17.808Z [DEBUG] Getting matching hook commands for PostToolUse with query: Grep
+2025-12-22T09:54:17.808Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:17.808Z [DEBUG] Matched 0 unique hooks for query "Grep" (0 before deduplication)
+2025-12-22T09:54:17.822Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:54:17.822Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:54:17.822Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:54:17.822Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:54:21.583Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:54:31.725Z [DEBUG] executePreToolHooks called for tool: TodoWrite
+2025-12-22T09:54:31.730Z [DEBUG] Getting matching hook commands for PreToolUse with query: TodoWrite
+2025-12-22T09:54:31.730Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:31.730Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:54:31.742Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397271742
+2025-12-22T09:54:31.742Z [DEBUG] Preserving file permissions: 100600
+2025-12-22T09:54:31.748Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.6ms)
+2025-12-22T09:54:31.748Z [DEBUG] Temp file written successfully, size: 731 bytes
+2025-12-22T09:54:31.748Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:54:31.748Z [DEBUG] Renaming /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397271742 to /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json
+2025-12-22T09:54:31.749Z [DEBUG] File /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json written atomically
+2025-12-22T09:54:31.758Z [DEBUG] Getting matching hook commands for PostToolUse with query: TodoWrite
+2025-12-22T09:54:31.758Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:31.758Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:54:31.764Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:54:31.764Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:54:31.764Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:54:31.764Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:54:33.888Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:54:40.395Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:54:40.396Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:54:40.401Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:54:40.401Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:40.401Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:54:40.401Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:54:40.401Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:40.401Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:54:40.430Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:54:40.430Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:40.430Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:54:40.430Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:54:40.430Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:54:40.430Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:54:40.438Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:54:40.438Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:54:40.438Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:54:40.438Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:54:43.266Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:55:01.726Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:55:01.730Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:55:01.730Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:01.730Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:01.743Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/task.go.tmp.72033.1766397301743
+2025-12-22T09:55:01.743Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:55:01.750Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.5ms)
+2025-12-22T09:55:01.750Z [DEBUG] Temp file written successfully, size: 1858 bytes
+2025-12-22T09:55:01.750Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:55:01.750Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/task.go.tmp.72033.1766397301743 to /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/task.go
+2025-12-22T09:55:01.750Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/task.go written atomically
+2025-12-22T09:55:01.765Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.1ms)
+2025-12-22T09:55:01.766Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/task.go
+2025-12-22T09:55:01.774Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:55:01.774Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:01.774Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:01.788Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:55:01.788Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:55:01.788Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:55:01.788Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:55:05.093Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:55:09.901Z [DEBUG] executePreToolHooks called for tool: TodoWrite
+2025-12-22T09:55:09.904Z [DEBUG] Getting matching hook commands for PreToolUse with query: TodoWrite
+2025-12-22T09:55:09.904Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:09.904Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:55:09.917Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397309917
+2025-12-22T09:55:09.917Z [DEBUG] Preserving file permissions: 100600
+2025-12-22T09:55:09.943Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (25.8ms)
+2025-12-22T09:55:09.943Z [DEBUG] Temp file written successfully, size: 737 bytes
+2025-12-22T09:55:09.943Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:55:09.943Z [DEBUG] Renaming /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397309917 to /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json
+2025-12-22T09:55:09.943Z [DEBUG] File /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json written atomically
+2025-12-22T09:55:09.953Z [DEBUG] Getting matching hook commands for PostToolUse with query: TodoWrite
+2025-12-22T09:55:09.953Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:09.953Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:55:09.959Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:55:09.959Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:55:09.959Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:55:09.959Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:55:12.298Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:55:19.917Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:55:19.922Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:55:19.922Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:19.922Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:19.934Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/metrics.go.tmp.72033.1766397319934
+2025-12-22T09:55:19.934Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:55:19.944Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.7ms)
+2025-12-22T09:55:19.944Z [DEBUG] Temp file written successfully, size: 2665 bytes
+2025-12-22T09:55:19.944Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:55:19.944Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/metrics.go.tmp.72033.1766397319934 to /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/metrics.go
+2025-12-22T09:55:19.944Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/metrics.go written atomically
+2025-12-22T09:55:19.957Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.2ms)
+2025-12-22T09:55:19.957Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/backend/internal/models/metrics.go
+2025-12-22T09:55:19.968Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:55:19.968Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:19.968Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:19.999Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:55:19.999Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:55:19.999Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:55:19.999Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:55:22.496Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:55:30.436Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:55:30.442Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:55:30.442Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:30.442Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:30.453Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics.go.tmp.72033.1766397330453
+2025-12-22T09:55:30.453Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:55:30.463Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.9ms)
+2025-12-22T09:55:30.463Z [DEBUG] Temp file written successfully, size: 5439 bytes
+2025-12-22T09:55:30.463Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:55:30.463Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics.go.tmp.72033.1766397330453 to /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics.go
+2025-12-22T09:55:30.463Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics.go written atomically
+2025-12-22T09:55:30.476Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.3ms)
+2025-12-22T09:55:30.476Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics.go
+2025-12-22T09:55:30.485Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:55:30.485Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:30.485Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:30.497Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:55:30.497Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:55:30.497Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:55:30.497Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:55:34.431Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:55:39.503Z [DEBUG] executePreToolHooks called for tool: TodoWrite
+2025-12-22T09:55:39.508Z [DEBUG] Getting matching hook commands for PreToolUse with query: TodoWrite
+2025-12-22T09:55:39.508Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:39.508Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:55:39.521Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397339521
+2025-12-22T09:55:39.521Z [DEBUG] Preserving file permissions: 100600
+2025-12-22T09:55:39.537Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (16.3ms)
+2025-12-22T09:55:39.537Z [DEBUG] Temp file written successfully, size: 737 bytes
+2025-12-22T09:55:39.537Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:55:39.537Z [DEBUG] Renaming /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397339521 to /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json
+2025-12-22T09:55:39.538Z [DEBUG] File /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json written atomically
+2025-12-22T09:55:39.548Z [DEBUG] Getting matching hook commands for PostToolUse with query: TodoWrite
+2025-12-22T09:55:39.548Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:39.548Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:55:39.554Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:55:39.554Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:55:39.554Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:55:39.554Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:55:42.743Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:55:46.148Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:55:46.152Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:55:46.152Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:46.152Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:46.167Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.ts.tmp.72033.1766397346167
+2025-12-22T09:55:46.167Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:55:46.176Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.0ms)
+2025-12-22T09:55:46.176Z [DEBUG] Temp file written successfully, size: 1862 bytes
+2025-12-22T09:55:46.176Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:55:46.176Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.ts.tmp.72033.1766397346167 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.ts
+2025-12-22T09:55:46.176Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.ts written atomically
+2025-12-22T09:55:46.189Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.1ms)
+2025-12-22T09:55:46.189Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.ts
+2025-12-22T09:55:46.198Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:55:46.198Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:46.198Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:46.209Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:55:46.209Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:55:46.209Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:55:46.209Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:55:49.974Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:55:59.917Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:55:59.922Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:55:59.922Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:59.922Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:59.937Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766397359937
+2025-12-22T09:55:59.937Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:55:59.949Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (12.0ms)
+2025-12-22T09:55:59.949Z [DEBUG] Temp file written successfully, size: 9592 bytes
+2025-12-22T09:55:59.949Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:55:59.949Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766397359937 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx
+2025-12-22T09:55:59.950Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx written atomically
+2025-12-22T09:55:59.960Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.6ms)
+2025-12-22T09:55:59.961Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx
+2025-12-22T09:55:59.971Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:55:59.971Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:55:59.971Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:55:59.983Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:55:59.983Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:55:59.983Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:55:59.983Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:56:02.684Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:56:07.247Z [DEBUG] executePreToolHooks called for tool: TodoWrite
+2025-12-22T09:56:07.253Z [DEBUG] Getting matching hook commands for PreToolUse with query: TodoWrite
+2025-12-22T09:56:07.253Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:07.253Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:56:07.267Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397367267
+2025-12-22T09:56:07.267Z [DEBUG] Preserving file permissions: 100600
+2025-12-22T09:56:07.276Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.6ms)
+2025-12-22T09:56:07.276Z [DEBUG] Temp file written successfully, size: 739 bytes
+2025-12-22T09:56:07.276Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:56:07.276Z [DEBUG] Renaming /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397367267 to /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json
+2025-12-22T09:56:07.276Z [DEBUG] File /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json written atomically
+2025-12-22T09:56:07.285Z [DEBUG] Getting matching hook commands for PostToolUse with query: TodoWrite
+2025-12-22T09:56:07.285Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:07.285Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T09:56:07.290Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:56:07.290Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:56:07.290Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:56:07.290Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:56:10.841Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:56:13.039Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:56:13.042Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:56:13.042Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:13.042Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:56:13.063Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:56:13.063Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:13.063Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:56:13.070Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:56:13.070Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:56:13.070Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:56:13.070Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:56:16.666Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:56:38.915Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:56:38.919Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:56:38.919Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:38.919Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:56:38.932Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go.tmp.72033.1766397398932
+2025-12-22T09:56:38.932Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:56:38.941Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.3ms)
+2025-12-22T09:56:38.941Z [DEBUG] Temp file written successfully, size: 21466 bytes
+2025-12-22T09:56:38.941Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:56:38.941Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go.tmp.72033.1766397398932 to /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go
+2025-12-22T09:56:38.941Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go written atomically
+2025-12-22T09:56:38.958Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.2ms)
+2025-12-22T09:56:38.959Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go
+2025-12-22T09:56:38.967Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:56:38.967Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:38.967Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:56:39.005Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:56:39.005Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:56:39.005Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:56:39.005Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:56:42.054Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:56:48.631Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:56:48.635Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:56:48.635Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:48.635Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:56:48.649Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go.tmp.72033.1766397408649
+2025-12-22T09:56:48.649Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:56:48.661Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (12.3ms)
+2025-12-22T09:56:48.661Z [DEBUG] Temp file written successfully, size: 21682 bytes
+2025-12-22T09:56:48.661Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:56:48.661Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go.tmp.72033.1766397408649 to /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go
+2025-12-22T09:56:48.661Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/backend/internal/handlers/metrics_test.go written atomically
+2025-12-22T09:56:48.676Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:56:48.676Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:48.676Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:56:48.689Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:56:48.689Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:56:48.689Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:56:48.689Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:56:50.726Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:56:52.846Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:56:52.851Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:56:52.851Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:52.851Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:56:52.873Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:56:52.873Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:52.873Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:56:52.881Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:56:52.881Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:56:52.881Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:56:52.881Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:56:54.871Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:56:59.665Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:56:59.669Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:56:59.669Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:59.669Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:56:59.680Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.test.tsx.tmp.72033.1766397419680
+2025-12-22T09:56:59.680Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:56:59.688Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (7.4ms)
+2025-12-22T09:56:59.688Z [DEBUG] Temp file written successfully, size: 8978 bytes
+2025-12-22T09:56:59.688Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:56:59.688Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.test.tsx.tmp.72033.1766397419680 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.test.tsx
+2025-12-22T09:56:59.688Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.test.tsx written atomically
+2025-12-22T09:56:59.699Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.test.tsx
+2025-12-22T09:56:59.708Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:56:59.708Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:56:59.708Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:56:59.718Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:56:59.718Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:56:59.718Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:56:59.718Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:57:02.610Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:57:04.842Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T09:57:04.850Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T09:57:04.850Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:04.850Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:57:04.877Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T09:57:04.877Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:04.877Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T09:57:04.884Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:57:04.884Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:57:04.884Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:57:04.884Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:57:08.700Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:57:13.569Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:57:13.573Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:57:13.573Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:13.573Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:57:13.582Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts.tmp.72033.1766397433582
+2025-12-22T09:57:13.582Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:57:13.591Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.6ms)
+2025-12-22T09:57:13.591Z [DEBUG] Temp file written successfully, size: 10081 bytes
+2025-12-22T09:57:13.591Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:57:13.591Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts.tmp.72033.1766397433582 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts
+2025-12-22T09:57:13.591Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts written atomically
+2025-12-22T09:57:13.605Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.5ms)
+2025-12-22T09:57:13.605Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts
+2025-12-22T09:57:13.613Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:57:13.613Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:13.613Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:57:13.624Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:57:13.624Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:57:13.624Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:57:13.624Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:57:16.905Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:57:21.671Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T09:57:21.675Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T09:57:21.675Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:21.675Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:57:21.688Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts.tmp.72033.1766397441688
+2025-12-22T09:57:21.688Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T09:57:21.695Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.7ms)
+2025-12-22T09:57:21.695Z [DEBUG] Temp file written successfully, size: 10178 bytes
+2025-12-22T09:57:21.695Z [DEBUG] Applied original permissions to temp file
+2025-12-22T09:57:21.695Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts.tmp.72033.1766397441688 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts
+2025-12-22T09:57:21.695Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/services/metricsApi.test.ts written atomically
+2025-12-22T09:57:21.710Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T09:57:21.710Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:21.710Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T09:57:21.719Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T09:57:21.719Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T09:57:21.719Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T09:57:21.719Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T09:57:24.162Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:57:26.961Z [DEBUG] executePreToolHooks called for tool: Bash
+2025-12-22T09:57:26.964Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2025-12-22T09:57:26.964Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:26.964Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:57:27.377Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:57:27.609Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:57:27.858Z [DEBUG] Stream started - received first chunk
+2025-12-22T09:57:28.046Z [DEBUG] Permission suggestions for Bash: [
+  {
+    "type": "addRules",
+    "rules": [
+      {
+        "toolName": "Bash",
+        "ruleContent": "go test:*"
+      }
+    ],
+    "behavior": "allow",
+    "destination": "localSettings"
+  }
+]
+2025-12-22T09:57:28.059Z [DEBUG] executePermissionRequestHooks called for tool: Bash
+2025-12-22T09:57:28.069Z [DEBUG] Getting matching hook commands for PermissionRequest with query: Bash
+2025-12-22T09:57:28.069Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:28.069Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T09:57:34.066Z [DEBUG] Getting matching hook commands for Notification with query: permission_prompt
+2025-12-22T09:57:34.066Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T09:57:34.066Z [DEBUG] Matched 0 unique hooks for query "permission_prompt" (0 before deduplication)
+2025-12-22T10:00:38.655Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T10:00:40.439Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2025-12-22T10:00:40.439Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:00:40.439Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T10:00:40.448Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T10:00:40.448Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T10:00:40.448Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T10:00:40.448Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T10:00:40.466Z [DEBUG] Loading skills from: managed=/Library/Application Support/ClaudeCode/.claude/skills, user=/Users/dangercat/.claude/skills, project=[]
+2025-12-22T10:00:40.466Z [DEBUG] Passes: Cache stale, returning cached data and refreshing in background
+2025-12-22T10:00:40.478Z [DEBUG] Loaded 5 unique skills (managed: 0, user: 0, project: 0, legacy commands: 5)
+2025-12-22T10:00:40.478Z [DEBUG] getSkills returning: 5 skill dir commands, 0 plugin skills
+2025-12-22T10:00:40.479Z [DEBUG] Skills and commands included in Skill tool: commit, move_claude, wdiary, context, explore
+2025-12-22T10:00:40.631Z [DEBUG] Writing to temp file: /Users/dangercat/.claude.json.tmp.72033.1766397640631
+2025-12-22T10:00:40.631Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T10:00:40.657Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (26.8ms)
+2025-12-22T10:00:40.658Z [DEBUG] Temp file written successfully, size: 75453 bytes
+2025-12-22T10:00:40.658Z [DEBUG] Applied original permissions to temp file
+2025-12-22T10:00:40.658Z [DEBUG] Renaming /Users/dangercat/.claude.json.tmp.72033.1766397640631 to /Users/dangercat/.claude.json
+2025-12-22T10:00:40.658Z [DEBUG] File /Users/dangercat/.claude.json written atomically
+2025-12-22T10:00:40.658Z [DEBUG] Passes eligibility cached for org 2717c564-7f1f-46eb-81ce-6a666967f62e: true
+2025-12-22T10:00:41.798Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:00:45.124Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:00:48.457Z [DEBUG] executePreToolHooks called for tool: Bash
+2025-12-22T10:00:48.461Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2025-12-22T10:00:48.461Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:00:48.461Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T10:00:48.892Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:00:49.052Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:00:49.308Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:00:49.428Z [DEBUG] Permission suggestions for Bash: [
+  {
+    "type": "addRules",
+    "rules": [
+      {
+        "toolName": "Bash",
+        "ruleContent": "npm test:*"
+      }
+    ],
+    "behavior": "allow",
+    "destination": "localSettings"
+  }
+]
+2025-12-22T10:00:49.440Z [DEBUG] executePermissionRequestHooks called for tool: Bash
+2025-12-22T10:00:49.448Z [DEBUG] Getting matching hook commands for PermissionRequest with query: Bash
+2025-12-22T10:00:49.448Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:00:49.448Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T10:00:55.447Z [DEBUG] Getting matching hook commands for Notification with query: permission_prompt
+2025-12-22T10:00:55.447Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:00:55.447Z [DEBUG] Matched 0 unique hooks for query "permission_prompt" (0 before deduplication)
+2025-12-22T10:02:48.956Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T10:02:50.073Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2025-12-22T10:02:50.073Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:02:50.073Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T10:02:50.082Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T10:02:50.082Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T10:02:50.082Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T10:02:50.082Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T10:02:50.096Z [DEBUG] Loading skills from: managed=/Library/Application Support/ClaudeCode/.claude/skills, user=/Users/dangercat/.claude/skills, project=[]
+2025-12-22T10:02:50.096Z [DEBUG] Passes: Using fresh cached eligibility data
+2025-12-22T10:02:50.105Z [DEBUG] Loaded 5 unique skills (managed: 0, user: 0, project: 0, legacy commands: 5)
+2025-12-22T10:02:50.105Z [DEBUG] getSkills returning: 5 skill dir commands, 0 plugin skills
+2025-12-22T10:02:50.106Z [DEBUG] Skills and commands included in Skill tool: commit, move_claude, wdiary, context, explore
+2025-12-22T10:02:50.837Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:02:52.770Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:02:56.133Z [DEBUG] executePreToolHooks called for tool: TodoWrite
+2025-12-22T10:02:56.138Z [DEBUG] Getting matching hook commands for PreToolUse with query: TodoWrite
+2025-12-22T10:02:56.138Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:02:56.138Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T10:02:56.151Z [DEBUG] Writing to temp file: /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397776151
+2025-12-22T10:02:56.151Z [DEBUG] Preserving file permissions: 100600
+2025-12-22T10:02:56.160Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.0ms)
+2025-12-22T10:02:56.160Z [DEBUG] Temp file written successfully, size: 2 bytes
+2025-12-22T10:02:56.160Z [DEBUG] Applied original permissions to temp file
+2025-12-22T10:02:56.160Z [DEBUG] Renaming /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json.tmp.72033.1766397776151 to /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json
+2025-12-22T10:02:56.160Z [DEBUG] File /Users/dangercat/.claude/todos/391b4677-5210-4e95-b299-838196e66f3c-agent-391b4677-5210-4e95-b299-838196e66f3c.json written atomically
+2025-12-22T10:02:56.169Z [DEBUG] Getting matching hook commands for PostToolUse with query: TodoWrite
+2025-12-22T10:02:56.169Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:02:56.169Z [DEBUG] Matched 0 unique hooks for query "TodoWrite" (0 before deduplication)
+2025-12-22T10:02:56.175Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T10:02:56.175Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T10:02:56.175Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T10:02:56.175Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T10:02:58.521Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:03:09.063Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T10:03:09.063Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:03:09.063Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T10:03:11.563Z [DEBUG] Stream started - received first chunk
+2025-12-22T10:03:16.137Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T10:03:16.137Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T10:03:16.137Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T11:12:08.122Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:12:08.122Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:12:08.122Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:12:08.122Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:12:08.140Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2025-12-22T11:12:08.140Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:08.140Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T11:12:08.143Z [DEBUG] FileHistory: Making snapshot for message 68db470e-1a39-46aa-befc-0c9ad5a372f8
+2025-12-22T11:12:08.154Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.6ms)
+2025-12-22T11:12:08.160Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (5.9ms)
+2025-12-22T11:12:08.161Z [DEBUG] FileHistory: Added snapshot for 68db470e-1a39-46aa-befc-0c9ad5a372f8, tracking 13 files
+2025-12-22T11:12:09.268Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:12:12.890Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:12:14.513Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T11:12:14.516Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T11:12:14.516Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:14.516Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T11:12:14.539Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T11:12:14.539Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:14.539Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T11:12:14.547Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:12:14.547Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:12:14.547Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:12:14.547Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:12:17.476Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:12:20.718Z [DEBUG] executePreToolHooks called for tool: Read
+2025-12-22T11:12:20.721Z [DEBUG] Getting matching hook commands for PreToolUse with query: Read
+2025-12-22T11:12:20.721Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:20.721Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T11:12:20.745Z [DEBUG] Getting matching hook commands for PostToolUse with query: Read
+2025-12-22T11:12:20.745Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:20.745Z [DEBUG] Matched 0 unique hooks for query "Read" (0 before deduplication)
+2025-12-22T11:12:20.754Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:12:20.754Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:12:20.754Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:12:20.754Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:12:23.623Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:12:36.973Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T11:12:36.977Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T11:12:36.977Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:36.977Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:12:36.989Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766401956989
+2025-12-22T11:12:36.989Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T11:12:36.997Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.4ms)
+2025-12-22T11:12:36.997Z [DEBUG] Temp file written successfully, size: 9660 bytes
+2025-12-22T11:12:36.997Z [DEBUG] Applied original permissions to temp file
+2025-12-22T11:12:36.997Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766401956989 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx
+2025-12-22T11:12:36.999Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx written atomically
+2025-12-22T11:12:37.012Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T11:12:37.012Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:37.012Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:12:37.028Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:12:37.028Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:12:37.028Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:12:37.028Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:12:40.245Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:12:49.130Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T11:12:49.138Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T11:12:49.138Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:49.138Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:12:49.162Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766401969162
+2025-12-22T11:12:49.162Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T11:12:49.171Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (8.5ms)
+2025-12-22T11:12:49.171Z [DEBUG] Temp file written successfully, size: 10229 bytes
+2025-12-22T11:12:49.171Z [DEBUG] Applied original permissions to temp file
+2025-12-22T11:12:49.171Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766401969162 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx
+2025-12-22T11:12:49.171Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx written atomically
+2025-12-22T11:12:49.186Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T11:12:49.186Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:49.186Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:12:49.207Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:12:49.208Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:12:49.208Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:12:49.208Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:12:51.525Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:12:56.697Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T11:12:56.701Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T11:12:56.701Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:56.701Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:12:56.714Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766401976714
+2025-12-22T11:12:56.714Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T11:12:56.724Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (9.8ms)
+2025-12-22T11:12:56.724Z [DEBUG] Temp file written successfully, size: 10641 bytes
+2025-12-22T11:12:56.724Z [DEBUG] Applied original permissions to temp file
+2025-12-22T11:12:56.724Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx.tmp.72033.1766401976714 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx
+2025-12-22T11:12:56.724Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/page.tsx written atomically
+2025-12-22T11:12:56.740Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T11:12:56.740Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:12:56.740Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:12:56.756Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:12:56.756Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:12:56.756Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:12:56.756Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:12:58.767Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:08.638Z [DEBUG] executePreToolHooks called for tool: Edit
+2025-12-22T11:13:08.641Z [DEBUG] Getting matching hook commands for PreToolUse with query: Edit
+2025-12-22T11:13:08.641Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:08.641Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:13:08.655Z [DEBUG] Writing to temp file: /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.css.tmp.72033.1766401988655
+2025-12-22T11:13:08.655Z [DEBUG] Preserving file permissions: 100644
+2025-12-22T11:13:08.661Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.5ms)
+2025-12-22T11:13:08.661Z [DEBUG] Temp file written successfully, size: 5805 bytes
+2025-12-22T11:13:08.661Z [DEBUG] Applied original permissions to temp file
+2025-12-22T11:13:08.661Z [DEBUG] Renaming /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.css.tmp.72033.1766401988655 to /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.css
+2025-12-22T11:13:08.661Z [DEBUG] File /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.css written atomically
+2025-12-22T11:13:08.674Z [DEBUG] [SLOW OPERATION DETECTED] fs.writeFileSync (6.3ms)
+2025-12-22T11:13:08.675Z [DEBUG] FileHistory: Tracked file modification for /Users/dangercat/Documents/GitHub/astrotask/frontend/src/app/metrics/metrics.css
+2025-12-22T11:13:08.684Z [DEBUG] Getting matching hook commands for PostToolUse with query: Edit
+2025-12-22T11:13:08.684Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:08.684Z [DEBUG] Matched 0 unique hooks for query "Edit" (0 before deduplication)
+2025-12-22T11:13:08.722Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:13:08.722Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:13:08.722Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:13:08.722Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:13:10.917Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:13.662Z [DEBUG] executePreToolHooks called for tool: Bash
+2025-12-22T11:13:13.666Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2025-12-22T11:13:13.666Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:13.666Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T11:13:14.711Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:14.755Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:14.871Z [DEBUG] Permission suggestions for Bash: [
+  {
+    "type": "addRules",
+    "rules": [
+      {
+        "toolName": "Bash",
+        "ruleContent": "npm test:*"
+      }
+    ],
+    "behavior": "allow",
+    "destination": "localSettings"
+  }
+]
+2025-12-22T11:13:14.882Z [DEBUG] executePermissionRequestHooks called for tool: Bash
+2025-12-22T11:13:14.893Z [DEBUG] Getting matching hook commands for PermissionRequest with query: Bash
+2025-12-22T11:13:14.893Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:14.893Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T11:13:20.282Z [DEBUG] AutoUpdaterWrapper: Installation type: npm-global
+2025-12-22T11:13:21.445Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2025-12-22T11:13:21.445Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:21.445Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T11:13:21.453Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:13:21.453Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:13:21.453Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:13:21.453Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:13:22.191Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:24.292Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:26.998Z [DEBUG] executePreToolHooks called for tool: Bash
+2025-12-22T11:13:27.002Z [DEBUG] Getting matching hook commands for PreToolUse with query: Bash
+2025-12-22T11:13:27.002Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:27.002Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T11:13:27.152Z [DEBUG] Getting matching hook commands for PostToolUse with query: Bash
+2025-12-22T11:13:27.152Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:27.152Z [DEBUG] Matched 0 unique hooks for query "Bash" (0 before deduplication)
+2025-12-22T11:13:27.160Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2025-12-22T11:13:27.160Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2025-12-22T11:13:27.160Z [DEBUG] Hooks: Found 0 total hooks in registry
+2025-12-22T11:13:27.160Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2025-12-22T11:13:27.722Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:29.167Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:34.686Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2025-12-22T11:13:34.686Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:34.686Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T11:13:37.959Z [DEBUG] Stream started - received first chunk
+2025-12-22T11:13:44.850Z [DEBUG] Getting matching hook commands for SubagentStop with query: undefined
+2025-12-22T11:13:44.850Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:13:44.850Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2025-12-22T11:14:34.705Z [DEBUG] Getting matching hook commands for Notification with query: idle_prompt
+2025-12-22T11:14:34.705Z [DEBUG] Found 0 hook matchers in settings
+2025-12-22T11:14:34.705Z [DEBUG] Matched 0 unique hooks for query "idle_prompt" (0 before deduplication)

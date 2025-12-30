@@ -1,0 +1,83 @@
+import { fetchWithAuth } from './http';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+
+export interface UserStats {
+  total: number;
+  verified: number;
+  unverified: number;
+  admins: number;
+  today: number;
+  this_week: number;
+  this_month: number;
+  this_year: number;
+}
+
+export interface TaskStats {
+  total: number;
+  active: number;
+  completed: number;
+  uncompleted: number;
+  avg_duration: number;
+  today: number;
+  this_week: number;
+}
+
+export interface SessionStats {
+  total: number;
+  active_now: number;
+  total_time_tracked: number;
+  today_time: number;
+  this_week_time: number;
+  this_month_time: number;
+}
+
+export interface TopUser {
+  user_id: number;
+  name: string;
+  email: string;
+  time_tracked: number;
+  task_count: number;
+  session_count: number;
+}
+
+export interface MetricsOverview {
+  users: UserStats;
+  tasks: TaskStats;
+  sessions: SessionStats;
+  top_users: TopUser[];
+}
+
+export interface ChartDataPoint {
+  date: string;
+  value: number;
+}
+
+export interface ChartResponse {
+  period: string;
+  metric: string;
+  data: ChartDataPoint[];
+}
+
+export const metricsApi = {
+  async getOverview(): Promise<MetricsOverview> {
+    const res = await fetchWithAuth(`${API_BASE_URL}/admin/metrics/overview`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch metrics: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  async getChartData(
+    period: 'week' | 'month' | 'year' = 'week',
+    metric: 'signups' | 'tasks' | 'time' | 'sessions' = 'signups'
+  ): Promise<ChartResponse> {
+    const res = await fetchWithAuth(
+      `${API_BASE_URL}/admin/metrics/charts?period=${period}&metric=${metric}`
+    );
+    if (!res.ok) {
+      throw new Error(`Failed to fetch chart data: ${res.statusText}`);
+    }
+    return res.json();
+  },
+};

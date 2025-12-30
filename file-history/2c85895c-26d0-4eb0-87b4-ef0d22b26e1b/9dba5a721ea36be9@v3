@@ -1,0 +1,186 @@
+"use client";
+
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+import { authApi, type AuthUser } from "../services/authApi";
+import { authLog } from "@/utils/debug";
+import { useEncryption } from "./EncryptionContext";
+
+type AuthState = {
+  user: AuthUser | null;
+  loading: boolean;
+  needsReauth: boolean;
+  needsEncryptionMigration: boolean; // User has no salt, needs to set up encryption
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (data: { email: string; password: string; name: string; invite_token?: string }) => Promise<void>;
+  logout: () => Promise<void>;
+  refresh: () => Promise<boolean>;
+  clearReauthFlag: () => void;
+  updateActionbar: (actionbar: string[]) => Promise<void>;
+  checkAuth: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthState | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [needsReauth, setNeedsReauth] = useState<boolean>(false);
+  const [needsEncryptionMigration, setNeedsEncryptionMigration] = useState<boolean>(false);
+
+  // Access encryption context for key management
+  const { initializeKey, clearKey, isReady: encryptionReady } = useEncryption();
+
+  const isAuthenticated = useMemo(() => !!user && !needsReauth, [user, needsReauth]);
+
+  // Check authentication status by calling /auth/profile
+  const checkAuth = useCallback(async () => {
+    authLog('checkAuth() called');
+    try {
+      const resp = await authApi.me();
+      setUser(resp.user);
+      setNeedsReauth(false);
+      authLog('checkAuth() success', { userId: resp.user.id });
+    } catch (err) {
+      authLog('checkAuth() failed, attempting refresh');
+      // Try to refresh and check again
+      try {
+        await authApi.refresh();
+        const resp = await authApi.me();
+        setUser(resp.user);
+        setNeedsReauth(false);
+        authLog('checkAuth() recovered via refresh');
+      } catch {
+        // Not authenticated
+        authLog('checkAuth() not authenticated');
+        setUser(null);
+        setNeedsReauth(false);
+      }
+    }
+  }, []);
+
+  // Check auth on mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await checkAuth();
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [checkAuth]);
+
+  // Refresh on visibility change (when user returns to tab)
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (!user) return;
+      authLog('visibility: checking auth on return to tab');
+      refresh().catch(() => {});
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [user]);
+
+  const login = async (email: string, password: string) => {
+    authLog('login() called');
+    const resp = await authApi.login({ email, password });
+    setUser(resp.user);
+    setNeedsReauth(false);
+
+    // Initialize encryption key if user has salt
+    if (resp.user.encryption_salt) {
+      authLog('login() initializing encryption key');
+      await initializeKey(password, resp.user.encryption_salt);
+      setNeedsEncryptionMigration(false);
+    } else {
+      // Existing user without encryption - needs migration
+      authLog('login() user needs encryption migration');
+      setNeedsEncryptionMigration(true);
+    }
+
+    authLog('login() success', { userId: resp.user.id });
+  };
+
+  const signup = async (data: { email: string; password: string; name: string; invite_token?: string }) => {
+    authLog('signup() called', { hasInvite: !!data.invite_token });
+    const resp = await authApi.signup(data);
+    setUser(resp.user);
+    setNeedsReauth(false);
+    setNeedsEncryptionMigration(false);
+
+    // Initialize encryption key (new users always have salt)
+    if (resp.user.encryption_salt) {
+      authLog('signup() initializing encryption key');
+      await initializeKey(data.password, resp.user.encryption_salt);
+    }
+
+    authLog('signup() success', { userId: resp.user.id });
+  };
+
+  const logout = async () => {
+    authLog('logout() called');
+    try {
+      await authApi.logout();
+    } catch {
+      // Best effort - cookies may already be invalid
+    }
+    setUser(null);
+    setNeedsReauth(false);
+    setNeedsEncryptionMigration(false);
+    clearKey(); // Clear encryption key from memory
+    authLog('logout() complete');
+  };
+
+  const refresh = async (): Promise<boolean> => {
+    authLog('refresh() called');
+    try {
+      await authApi.refresh();
+      authLog('refresh() success');
+      return true;
+    } catch {
+      authLog('refresh() failed, soft-expire');
+      setNeedsReauth(true);
+      return false;
+    }
+  };
+
+  const clearReauthFlag = () => {
+    setNeedsReauth(false);
+  };
+
+  const updateActionbar = async (actionbar: string[]) => {
+    try {
+      const resp = await authApi.updateProfile({ actionbar });
+      setUser(resp.user);
+    } catch (err) {
+      console.error('Failed to update actionbar:', err);
+      throw err;
+    }
+  };
+
+  const value = useMemo(() => ({
+    user,
+    loading,
+    needsReauth,
+    needsEncryptionMigration,
+    isAuthenticated,
+    login,
+    signup,
+    logout,
+    refresh,
+    clearReauthFlag,
+    updateActionbar,
+    checkAuth,
+  }), [user, loading, needsReauth, needsEncryptionMigration, isAuthenticated, checkAuth]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}

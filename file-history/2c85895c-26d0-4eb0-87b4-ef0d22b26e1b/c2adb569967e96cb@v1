@@ -1,0 +1,80 @@
+'use client';
+
+import React, { useState } from 'react';
+import Modal from '@/components/modal/Modal';
+import NewTaskCard from '@/components/cards/NewTaskCard';
+import { useTask } from '@/contexts/TaskContext';
+
+interface TaskCreationModalProps {
+  isOpen: boolean;
+  targetColumn: number;
+  lastActiveColumn: number;
+  onClose: () => void;
+  onTaskCreated: (columnIndex: number) => void;
+}
+
+export const TaskCreationModal: React.FC<TaskCreationModalProps> = ({
+  isOpen,
+  targetColumn,
+  lastActiveColumn,
+  onClose,
+  onTaskCreated
+}) => {
+  const { tasks, loadTasks, moveTask, createTask } = useTask();
+  const [addMoreChecked, setAddMoreChecked] = useState(false);
+
+  const handleCreateTask = async (taskData: {
+    title: string;
+    project: string;
+    tags: string[];
+  }, addMore: boolean) => {
+    try {
+      // Create the task through TaskContext (handles encryption)
+      const newTask = await createTask(
+        taskData.title,
+        taskData.project,
+        taskData.tags,
+      );
+
+      // Move task to the target column (it starts in column 0 by default)
+      const finalColumnIndex = (typeof targetColumn === 'number' ? targetColumn : lastActiveColumn) ?? 0;
+      if (finalColumnIndex !== 0) {
+        // Get the number of tasks in the target column to place new task at bottom
+        const targetColumnTasks = tasks.filter(
+          task => task.column_index === finalColumnIndex && task.status === 'uncompleted'
+        );
+        const bottomPosition = targetColumnTasks.length;
+        await moveTask(newTask.id, finalColumnIndex, bottomPosition);
+      }
+      // Notify parent about which column was used
+      onTaskCreated(finalColumnIndex);
+
+      // Reload tasks to show the new task in the correct column
+      await loadTasks();
+
+      // Handle "add more" logic
+      if (!addMore) {
+        handleClose();
+      } else {
+        setAddMoreChecked(true);
+      }
+    } catch (error) {
+      console.error('Failed to create task:', error);
+    }
+  };
+
+  const handleClose = () => {
+    setAddMoreChecked(false);
+    onClose();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose}>
+      <NewTaskCard 
+        onCancel={handleClose}
+        onCreate={handleCreateTask}
+        initialAddMore={addMoreChecked}
+      />
+    </Modal>
+  );
+};

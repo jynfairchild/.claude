@@ -1,0 +1,124 @@
+# Plan: Fix Timer Bugs (Token Refresh + Double Time)
+
+## Bug 1: Token Refresh Failure After Sleep
+
+### Root Cause (Confirmed from logs)
+Backend logs show:
+```
+16:54:56 | POST /auth/refresh → 200 (from ::1)
+16:54:58 | POST /auth/refresh → 200 (from 127.0.0.1)
+16:55:38 | POST /auth/refresh → 401 (from 127.0.0.1)
+```
+
+**Race condition with token rotation:**
+1. First refresh at 16:54:56 succeeds and ROTATES the token (old token is now revoked)
+2. Second refresh at 16:54:58 from different IP also succeeds (caught new token in time)
+3. By 16:55:38, something still had the OLD revoked token and tried to use it → 401
+
+The issue: When computer wakes from sleep, multiple refresh attempts may occur (visibility handler + proactive timer + API retry). If one succeeds and rotates, the others fail because they're using the now-revoked token.
+
+### The Fix
+
+**1. Improve refreshGate.ts to handle cross-request coordination better:**
+- After a successful refresh, store the new token BEFORE returning
+- Ensure all concurrent callers get the new token, not the old one
+
+**2. Add retry logic with token re-read:**
+- On 401 from refresh, re-read token from localStorage (in case another request updated it)
+- Only show re-auth if the re-read token also fails
+
+**3. Backend: Consider a grace period for recently-rotated tokens**
+- When a token is rotated, don't immediately reject the old one
+- Allow old token to work for ~5 seconds to handle race conditions
+
+### Files to Modify
+- `frontend/src/services/refreshGate.ts` - Better coordination
+- `frontend/src/contexts/AuthContext.tsx` - Retry logic on 401
+- (Optional) `backend/internal/auth/refresh.go` - Grace period for rotated tokens
+
+---
+
+## Bug 2: Timer Double-Counting After Re-login
+
+### Root Cause (Confirmed)
+When recovering after re-login, the duration gets doubled:
+
+1. **Before logout**: localStorage saves `liveSeconds: 8346` (already = base + session elapsed)
+2. **After re-login**:
+   - Backend returns `activeTask.duration: 8330` + `session_duration: 16`
+   - Initialization logic calculates: `base (8330) + session_duration (16) = 8346` ✓
+   - BUT shared timer effect sets: `sharedTimerBaseDuration = activeTask.duration (8330)`
+   - Then adds elapsed seconds on top, OR localStorage recovery adds its value
+
+The issue: Multiple recovery paths don't coordinate, leading to double-counting.
+
+### The Fix
+
+**File: `frontend/src/hooks/useTaskTimer.ts`**
+
+The initialization effect needs to detect when we're recovering from a re-login scenario and NOT re-add session duration to an already-complete value.
+
+Key changes:
+1. When recovering from localStorage, mark that we've already recovered
+2. Skip the `base + session_duration` calculation if we already have a valid recovered value
+3. Use backend's session start time to calculate elapsed, not add backend durations together
+
+### Specific Code Changes
+
+**1. In the task initialization effect (lines 154-312):**
+
+When `activeTask.session_duration > 0`, instead of:
+```typescript
+const base = Math.max(0, activeTask.duration ?? 0);
+setLiveSeconds(base + activeTask.session_duration);
+```
+
+Should be:
+```typescript
+// Backend duration already INCLUDES completed sessions
+// session_duration is the CURRENT session's elapsed time
+// Total = duration (which may already include current session in some cases)
+// OR = previous_sessions_total + current_session_elapsed
+
+// If we have a valid session start time, calculate from that
+if (sessionStartTimeRef.current) {
+  const elapsed = Math.floor((Date.now() - sessionStartTimeRef.current) / 1000);
+  const base = Math.max(0, (activeTask.duration ?? 0) - (activeTask.session_duration ?? 0));
+  setLiveSeconds(base + elapsed);
+} else {
+  // Use backend values directly
+  setLiveSeconds(activeTask.duration ?? 0);
+}
+```
+
+**2. Coordinate recovery paths:**
+
+Add a flag to prevent double-recovery:
+- If localStorage recovery happened, skip backend-based recalculation
+- Trust the more recent/accurate source
+
+---
+
+## Files to Modify
+
+### Priority 1: Token Refresh Bug
+1. `frontend/src/services/refreshGate.ts` - Better token coordination after refresh
+2. `frontend/src/contexts/AuthContext.tsx` - Retry with re-read token on 401
+3. `backend/internal/auth/refresh.go` - (Optional) Grace period for rotated tokens
+
+### Priority 2: Double Time Bug
+4. `frontend/src/hooks/useTaskTimer.ts` - Fix double-counting in initialization
+
+## Testing Plan
+
+### Token Refresh
+1. Open app, start a timer
+2. Close laptop lid / sleep for 1+ hours
+3. Wake up - should NOT be logged out
+4. Timer should continue working
+
+### Double Time
+1. Start a timer, let it run for 1 minute
+2. Logout and immediately login
+3. Timer should show ~1 minute (not ~2 minutes)
+4. Stop timer and verify backend has correct duration

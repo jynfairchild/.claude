@@ -1,0 +1,33 @@
+## v0.8.1 – DNS Migration to Route 53 & Apex Domain Fix
+**Date:** December 27, 2025 6:30 PM PST
+
+### Changes Made:
+- Migrated DNS from Namecheap to AWS Route 53
+- Transferred domain registration from Namecheap to AWS
+- Created Route 53 hosted zone with all DNS records:
+  - A records (alias to ALB) for apex and www
+  - MX records for Google Workspace email
+  - TXT records for SPF, DKIM, domain verification
+  - CNAME records for Resend email sending
+- Set up ALB redirect rule: www.astrotask.io → astrotask.io
+- Apex domain (astrotask.io) now works with HTTPS
+- Users no longer need to type "www" to access the site
+
+### Current Status:
+- Production site live at https://astrotask.io (apex domain works!)
+- www.astrotask.io redirects to apex domain
+- Email (Google Workspace) working
+- Resend email sending working
+- All DNS records propagated
+
+### Unresolved Issues:
+- Should rotate compromised credentials from old .env files
+
+### Commit Message:
+Migrate DNS to Route 53 and fix apex domain HTTPS
+
+- Transferred domain from Namecheap to AWS Route 53
+- Created hosted zone with MX, TXT, CNAME, and A records
+- Set up ALB redirect from www to apex domain
+- Apex domain (astrotask.io) now works with HTTPS
+- Users can access site without typing "www"
