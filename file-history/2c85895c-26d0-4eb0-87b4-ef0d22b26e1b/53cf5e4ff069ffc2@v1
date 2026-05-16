@@ -1,7 +1,0 @@
-DATABASE_URL="postgresql://postgres:srUzHR9FFq3r_CyvG*mqwRNgupRa8v-RmxtX7p@localhost:5432/astrotask_db?sslmode=disable"
-ADMIN_EMAIL="jyn@astrotask.io"
-RESEND_API_KEY="re_MxBbJNyE_3W5Ua2ZPq7PJxJDwQQ2c7c2e"
-POSTGRES_PASSWORD="srUzHR9FFq3r_CyvG*mqwRNgupRa8v-RmxtX7p"
-JWT_SECRET=".vYrQqX6K3QV77NXFb7mxdjkj_gnmnzf69VX.hM!*!YYX8j9Qm62XVb9ex4U7r8L3y3PBri72HDT7pQ6f!_QCD!!2zKHVM!CMd83"
-EMAIL_FROM="noreply@astrotask.io"
-REQUIRE_INVITE="true"
