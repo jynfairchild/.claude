@@ -3,15 +3,40 @@ __store.db
 CLAUDE.md
 diary.md
 settings.json
+settings.local.json
+.credentials.json
+.last-cleanup
 
-# Project-specific conversation logs
+# Conversation / prompt history and pasted content
+history.jsonl
+paste-cache/
 projects/
+
+# Session state
+sessions/
+session-env/
+plans/
+tasks/
+todos/
+
+# File snapshots and debug dumps written by the harness
+debug/
+file-history/
+shell-snapshots/
+
+# Caches and local state
+cache/
+backups/
+stats-cache.json
+mcp-needs-auth-cache.json
+mcp-auth.json
+
+# Plugins (local install state, not source)
+plugins/
 
 # Analytics and telemetry
 statsig/
-
-# Todo lists from sessions
-todos/
+telemetry/
 
 # SSH configurations (if any)
 .ssh/
